@@ -151,7 +151,7 @@
     <string name="InuAppIconDescBlush">Rosa tenue che sfuma nel giallo</string>
     <string name="InuAppIconDescConstellation">Stelle collegate dal segnale</string>
     <string name="InuAppIconDescCrimson">Una luna di sangue su un crepuscolo di sakura</string>
-    <string name="InuAppIconDescDefault">Il classico piatto di entinyGram</string>
+    <string name="InuAppIconDescDefault">Il classico piatto di Softgram</string>
     <string name="InuAppIconDescDish">Solo il piatto, nient\'altro</string>
     <string name="InuAppIconDescGold">Placcatura in oro massiccio</string>
     <string name="InuAppIconDescGoogle26">Blu lucido su bianco tenue</string>
@@ -174,7 +174,7 @@
     <string name="InuAppIconInuTribute">Omaggio a Inu</string>
     <string name="InuAppIconInverse">Inverso</string>
     <string name="InuAppIconJungle">Giungla</string>
-    <string name="InuAppIconLicenseConcept">Icona concettuale di **entinyGram**</string>
+    <string name="InuAppIconLicenseConcept">Icona concettuale di **Softgram**</string>
     <string name="InuAppIconLicenseInugram">Icona segnaposto, sentiti libero di proporne una migliore</string>
     <string name="InuAppIconLicenseTelegram">Icona di **Telegram**. Tutti i diritti riservati.</string>
     <string name="InuAppIconLunar">Lunare</string>
@@ -182,7 +182,7 @@
     <string name="InuAppIconMono">Mono</string>
     <string name="InuAppIconNothing">Nothing</string>
     <string name="InuAppIconNoxSky">Nox Sky</string>
-    <string name="InuAppIconOldEntinygram">entinyGram vecchio</string>
+    <string name="InuAppIconOldEntinygram">Softgram vecchio</string>
     <string name="InuAppIconOrbit">Orbita</string>
     <string name="InuAppIconOsu">osu!</string>
     <string name="InuAppIconRadar">Radar</string>
@@ -238,7 +238,7 @@
     <string name="InuAutoTranslateAll">Traduci automaticamente ogni chat</string>
     <string name="InuAutoTranslateAllInfo">Attiva la traduzione delle chat ovunque per impostazione predefinita; la disattivazione per singola chat viene ricordata.</string>
     <string name="InuAutoUpdateCheck">Controlla aggiornamenti</string>
-    <string name="InuAutoUpdateCheckInfo">Controlla periodicamente il canale CI di entinyGram per nuove versioni e propone di scaricarle.</string>
+    <string name="InuAutoUpdateCheckInfo">Controlla periodicamente il canale CI di Softgram per nuove versioni e propone di scaricarle.</string>
     <string name="InuAvailableFonts">Font disponibili</string>
     <string name="InuAvatarCorners">Angoli degli avatar</string>
     <string name="InuAvatarCornersLeft">Netti</string>
@@ -264,7 +264,7 @@
     <string name="InuBackupImportSheetTitle">Sei sicuro di voler applicare queste impostazioni?</string>
     <string name="InuBackupImportSuccess">Importate %1$d impostazioni</string>
     <string name="InuBackupReset">Reimposta impostazioni</string>
-    <string name="InuBackupResetConfirm">Tutte le impostazioni di entinyGram torneranno ai valori predefiniti. Le tue chat, gli account e le impostazioni di Telegram restano invariati.
+    <string name="InuBackupResetConfirm">Tutte le impostazioni di Softgram torneranno ai valori predefiniti. Le tue chat, gli account e le impostazioni di Telegram restano invariati.
 
 Questa azione non può essere annullata.</string>
     <string name="InuBackupResetNoChanges">Le impostazioni sono già ai valori predefiniti</string>
@@ -462,7 +462,7 @@ Questa azione non può essere annullata.</string>
     <string name="InuCloudSync">Sincronizza impostazioni</string>
     <string name="InuCloudSyncAccountInactive">L\'account non è più connesso. Scegline un altro per riprendere la sincronizzazione.</string>
     <string name="InuCloudSyncAuto">Caricamento automatico</string>
-    <string name="InuCloudSyncDesc">Salva una copia delle tue impostazioni di entinyGram nel cloud di Telegram tramite la [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage): i tuoi dati non passano mai dai nostri server.</string>
+    <string name="InuCloudSyncDesc">Salva una copia delle tue impostazioni di Softgram nel cloud di Telegram tramite la [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage): i tuoi dati non passano mai dai nostri server.</string>
     <string name="InuCloudSyncedAt">ultimo backup: %1$s</string>
     <string name="InuCloudSyncFailed">Sincronizzazione non riuscita</string>
     <string name="InuCloudSyncing">Sincronizzazione…</string>
@@ -526,13 +526,13 @@ Questa azione non può essere annullata.</string>
     <string name="InuCrashDescOom">Ci dispiace. I log dei crash non sono molto utili per i problemi di memoria esaurita: serve un heap dump.</string>
     <string name="InuCrashDiscard">Scarta</string>
     <string name="InuCrashNotifText">Tocca per riavviare</string>
-    <string name="InuCrashNotifTitle">entinyGram si è chiuso</string>
-    <string name="InuCrashOomEnableLogs">Attiva la modalità debug in Impostazioni entinyGram &gt; Info per creare un heap dump a ogni futuro OOM.</string>
+    <string name="InuCrashNotifTitle">Softgram si è chiuso</string>
+    <string name="InuCrashOomEnableLogs">Attiva la modalità debug in Impostazioni Softgram &gt; Info per creare un heap dump a ogni futuro OOM.</string>
     <string name="InuCrashPluginHooks">Gli hook dei plugin erano attivi attorno al crash, la causa può essere uno di questi plugin:</string>
     <string name="InuCrashShare">Condividi il log del crash</string>
     <string name="InuCrashShareHeapDump">Salva heap dump</string>
-    <string name="InuCrashTitle">entinyGram si è chiuso l\'ultima volta</string>
-    <string name="InuCrashTitleOom">entinyGram ha esaurito la memoria</string>
+    <string name="InuCrashTitle">Softgram si è chiuso l\'ultima volta</string>
+    <string name="InuCrashTitleOom">Softgram ha esaurito la memoria</string>
     <string name="InuCreateAsSupergroup">Crea come supergruppo</string>
     <string name="InuCreatedDate">Creato: %s</string>
     <string name="InuCustomizeMessages">Messaggi</string>
@@ -575,8 +575,8 @@ Questa azione non può essere annullata.</string>
     <string name="InuDeleteSelectedProfilePhotosConfirm">Sei sicuro di voler eliminare le %1$d foto del profilo selezionate?</string>
     <string name="InuDeselectAll">Deseleziona tutto</string>
     <string name="InuDesignStyle">Stile di design</string>
-    <string name="InuDevBadge">Team di entinyGram</string>
-    <string name="InuDevBadgeInfo">Questo account è riconosciuto dal team di entinyGram.</string>
+    <string name="InuDevBadge">Team di Softgram</string>
+    <string name="InuDevBadgeInfo">Questo account è riconosciuto dal team di Softgram.</string>
     <string name="InuDeviceSection">Dispositivo</string>
     <string name="InuDeviceSpoof">Spoofing del dispositivo</string>
     <string name="InuDeviceSpoofApp">Versione dell\'app</string>
@@ -702,7 +702,7 @@ Sistema: %6$s
     <string name="InuDonateSectionCrypto">Cripto</string>
     <string name="InuDonateSectionOther">Altro</string>
     <string name="InuDonateSheetInfo">Tocca per copiare o aprire. Completamente facoltativo.</string>
-    <string name="InuDonateSheetTitle">Sostieni entinyGram</string>
+    <string name="InuDonateSheetTitle">Sostieni Softgram</string>
     <string name="InuDonateThanks">Grazie per essere qui ❤️</string>
     <string name="InuDonateWebsite">Tutti i metodi sul sito web</string>
     <string name="InuDontAutoplayWidgets">Non riprodurre automaticamente i widget</string>
@@ -967,7 +967,7 @@ Tocca per personalizzare…</string>
     <string name="InuHideCollectibleStatus">Nascondi lo stato da collezione</string>
     <string name="InuHideCustomTheme">Nascondi il tema personalizzato</string>
     <string name="InuHideCustomWallpaper">Nascondi lo sfondo personalizzato</string>
-    <string name="InuHideDevBadges">Disattiva i badge di entinyGram</string>
+    <string name="InuHideDevBadges">Disattiva i badge di Softgram</string>
     <string name="InuHideDevBadgesInfo">Non significano nulla e non danno alcun vantaggio: sono solo un ringraziamento dallo sviluppatore</string>
     <string name="InuHideDialogPreview">Nascondi l\'anteprima dell\'ultimo messaggio</string>
     <string name="InuHideDialogPreviewInfo">Mostra l\'ultimo messaggio nell\'elenco chat sotto uno spoiler</string>
@@ -984,7 +984,7 @@ Tocca per personalizzare…</string>
     <string name="InuHideGiveaways">Nascondi i giveaway</string>
     <string name="InuHideGroupStickerPack">Nascondi il suggerimento del pacchetto emoji del gruppo</string>
     <string name="InuHideHashtagSuggestions">Nascondi i suggerimenti di hashtag</string>
-    <string name="InuHideInugramSettings">Nascondi le impostazioni di entinyGram</string>
+    <string name="InuHideInugramSettings">Nascondi le impostazioni di Softgram</string>
     <string name="InuHideIvSummary">Riassunto di Instant View</string>
     <string name="InuHideJoinBar">Nascondi la barra Iscriviti nei canali</string>
     <string name="InuHideJoinBarInfo">Puoi comunque iscriverti dal profilo del canale</string>
@@ -1209,10 +1209,10 @@ Tocca per personalizzare…</string>
     <string name="InuMarketEmpty">Ancora niente qui</string>
     <string name="InuMarketEmptySearch">Nessun plugin corrispondente</string>
     <string name="InuMarketFailed">Impossibile caricare il catalogo</string>
-    <string name="InuMarketFeaturedTitle">Da entinyGram</string>
+    <string name="InuMarketFeaturedTitle">Da Softgram</string>
     <string name="InuMarketFilters">Filtri</string>
     <string name="InuMarketGroupCommunity">Comunità</string>
-    <string name="InuMarketGroupOfficial">entinyGram</string>
+    <string name="InuMarketGroupOfficial">Softgram</string>
     <string name="InuMarketInstalled">Installato</string>
     <string name="InuMarketLoading">Caricamento del catalogo…</string>
     <string name="InuMarketNoInstalled">Nessun plugin installato</string>
@@ -1225,7 +1225,7 @@ Tocca per personalizzare…</string>
     <string name="InuMarketShow">Mostra</string>
     <string name="InuMarketSortDefault">Predefinito</string>
     <string name="InuMarketSortInstalled">Installati prima</string>
-    <string name="InuMarketSourceOfficial">entinyGram</string>
+    <string name="InuMarketSourceOfficial">Softgram</string>
     <string name="InuMarketTagAi">Lingua e IA</string>
     <string name="InuMarketTagAiAbout">traduzione e assistenti basati su modelli linguistici</string>
     <string name="InuMarketTagCalls">Chiamate</string>
@@ -1253,7 +1253,7 @@ Tocca per personalizzare…</string>
     <string name="InuMarketWhatsNew">Novità della versione v%1$s</string>
     <string name="InuMarketWhatsNewTitle">Note di rilascio</string>
     <string name="InuMaskServerAppName">Nascondi il nome dell\'app sul server</string>
-    <string name="InuMaskServerAppNameInfo">Nasconde il nome entinyGram nell\'elenco delle sessioni e mostra quello del client ufficiale</string>
+    <string name="InuMaskServerAppNameInfo">Nasconde il nome Softgram nell\'elenco delle sessioni e mostra quello del client ufficiale</string>
     <string name="InuMaterial3">Material Design 3</string>
     <string name="InuMaterial3Avatars">Avatar</string>
     <string name="InuMaterial3BottomTabs">Schede in basso</string>
@@ -1343,7 +1343,7 @@ Tocca per personalizzare…</string>
     <string name="InuMinimize">Riduci a icona</string>
     <string name="InuMiscPreviewEditedMessage">sono entrambi i migliori, base canina 🐶⚡</string>
     <string name="InuMiscPreviewForwardedFrom">inu</string>
-    <string name="InuMiscPreviewForwardedMessage">bau! entinyGram o inuGram? 🐶</string>
+    <string name="InuMiscPreviewForwardedMessage">bau! Softgram o inuGram? 🐶</string>
     <string name="InuMonetStyle">Stile Monet</string>
     <string name="InuMonetStyleClassic">Classico</string>
     <string name="InuMonetStyleMaterial3">Material 3</string>
@@ -1449,8 +1449,8 @@ Probabilmente ci sono diversi difetti grafici, quindi tienilo presente.</string>
     <string name="InuNoProfilePhotos">Nessuna foto del profilo trovata</string>
     <string name="InuNothingToTranslate">Nessun messaggio traducibile selezionato.</string>
     <string name="InuNotificationIcon">Icona di notifica</string>
-    <string name="InuNotificationIconInugram">entinyGram</string>
-    <string name="InuNotificationIconOldEntinygram">entinyGram vecchio</string>
+    <string name="InuNotificationIconInugram">Softgram</string>
+    <string name="InuNotificationIconOldEntinygram">Softgram vecchio</string>
     <string name="InuNotificationIconTelegram">Telegram</string>
     <string name="InuNotifyBellInMenu">Sposta la campanella nel menu della chat</string>
     <string name="InuNotifyBellInMenuInfo">Rimuove la campanella dell\'invio silenzioso dal campo di input dei canali in cui pubblichi. Attivala dal menu della chat</string>
@@ -1472,7 +1472,7 @@ Probabilmente ci sono diversi difetti grafici, quindi tienilo presente.</string>
     <string name="InuParanoiaCount">%1$d chat</string>
     <string name="InuParanoiaDisableNotifications">Disattiva le notifiche</string>
     <string name="InuParanoiaDisguise">Camuffa come Telegram</string>
-    <string name="InuParanoiaDisguiseInfo">Cambiano solo l\'icona e il nome nel launcher; le notifiche dicono ancora «entinyGram».</string>
+    <string name="InuParanoiaDisguiseInfo">Cambiano solo l\'icona e il nome nel launcher; le notifiche dicono ancora «Softgram».</string>
     <string name="InuParanoiaEnable">Entra in modalità paranoia</string>
     <string name="InuParanoiaEnableConfirm">Entrare in modalità paranoia e riavviare? Questa voce scomparirà: l\'unico modo per tornare indietro è digitare il codice di uscita nella ricerca delle chat o reinstallare l\'app!</string>
     <string name="InuParanoiaExit">Esci dalla modalità paranoia</string>
@@ -1515,7 +1515,7 @@ Probabilmente ci sono diversi difetti grafici, quindi tienilo presente.</string>
     <string name="InuPasscodeRemove">Rimuovi codice</string>
     <string name="InuPasscodeRemoveConfirm">Rimuovere il codice di blocco di questo account?</string>
     <string name="InuPasscodeSet">Imposta codice</string>
-    <string name="InuPasscodeShowInSettings">Mostra nelle impostazioni di entinyGram</string>
+    <string name="InuPasscodeShowInSettings">Mostra nelle impostazioni di Softgram</string>
     <string name="InuPasscodeShowInSettingsInfo">Se disattivato, questa pagina si apre solo tramite il link qui sotto: salvalo ora.</string>
     <string name="InuPasscodeStateHidden">Nascosto</string>
     <string name="InuPasscodeStateNone">Non configurato</string>
@@ -1720,7 +1720,7 @@ Mentre è attivo:</string>
     <string name="InuPluginsEngineDisabled">I plugin sono attualmente disattivati
 
 Attivali nelle impostazioni per installare questo plugin</string>
-    <string name="InuPluginsErrorApiVersion">Richiede una versione più recente di entinyGram (plugin API %1$d, questa app ha %2$d)</string>
+    <string name="InuPluginsErrorApiVersion">Richiede una versione più recente di Softgram (plugin API %1$d, questa app ha %2$d)</string>
     <string name="InuPluginsErrorBadAssets">Risorse incluse non valide (%1$s)</string>
     <string name="InuPluginsErrorBadGrant">Richiesti permessi non validi (%1$s)</string>
     <string name="InuPluginsErrorNoManifest">Non è un plugin valido (manca l\'intestazione dei metadati)</string>
@@ -2091,9 +2091,9 @@ Anche concedendoli, un plugin può comunque:</string>
     <string name="InuSendWithoutViaConfirm">Inviare questo risultato come messaggio normale (senza «via»)?</string>
     <string name="InuSendWithoutViaRestrictedConfirm">I bot inline sono limitati in questa chat. Vuoi inviare il risultato come messaggio normale?</string>
     <string name="InuSetReminder">Imposta promemoria</string>
-    <string name="InuSettingNotFound">Questa impostazione non è disponibile in questa versione di entinyGram</string>
-    <string name="InuSettings">Impostazioni di entinyGram</string>
-    <string name="InuSettingsInfo">Attraverso la terra e il vento ti seguo</string>
+    <string name="InuSettingNotFound">Questa impostazione non è disponibile in questa versione di Softgram</string>
+    <string name="InuSettings">Impostazioni di Softgram</string>
+    <string name="InuSettingsInfo">Yours. By design Softgram</string>
     <string name="InuSettingsShowAccounts">Mostra gli account nelle impostazioni</string>
     <string name="InuShorterSwipeGestures">Gesti di scorrimento più brevi</string>
     <string name="InuShorterSwipeGesturesInfo">Riconosce il gesto a metà distanza: indietro, risposta, cartelle chat, pagine multimediali e scorrimento verso il basso nel visualizzatore.</string>
@@ -2314,7 +2314,7 @@ Anche concedendoli, un plugin può comunque:</string>
     <string name="InuUserProfile">Profilo utente</string>
     <string name="InuUseSystemEmoji">Usa le emoji di sistema</string>
     <string name="InuUseSystemEmojiInfo">Disegna le emoji con il font di sistema invece del set di Telegram. Riavvia l\'app per applicarlo ovunque.</string>
-    <string name="InuVersion">entinyGram %1$s (%2$s)</string>
+    <string name="InuVersion">Softgram %1$s (%2$s)</string>
     <string name="InuVersionBetaSuffix">(Beta)</string>
     <string name="InuViewOnceShowNormal">Mostra come foto normale invece di limitarla dietro la rivelazione singola</string>
     <string name="InuVoiceMessages">Messaggi vocali</string>

@@ -18,7 +18,7 @@ export const TAG = { beta: '#prerelease', release: '#release' } as const
 
 const DONATE = html`Підтримати / Donate: <a href="https://boosty.to/entaytion/donate">Boosty</a> · <a href="https://t.me/sendgrams?to=entaytion&amp;amount=0.1&amp;text=thx+for+entiny">Telegram</a> · <a href="https://send.monobank.ua/jar/RGYa8zo8y">monobank</a> · <a href="https://entaytion.is-a.dev/donate">Website</a>`
 const BETA_WARNING = html`<i>Pre-release build for testing. It is unstable and may crash or misbehave.</i>`
-const SITE_URL = process.env.SITE_CHANGELOG_URL ?? 'https://entaytion.is-a.dev/entinygram/changelog'
+const SITE_URL = process.env.SITE_CHANGELOG_URL ?? 'https://entaytion.is-a.dev/Softgram/changelog'
 
 const join = (parts: (Rich | null)[], sep: string) => joinTextWithEntities(parts.filter((p): p is Rich => p !== null), sep)
 
@@ -46,13 +46,13 @@ export function noteLines(s: Sections[Lang], lang: Lang, links: boolean): string
   return used.flatMap(g => [`**${GROUP_TITLE[lang][g]}**`, ...s[g].map(text)])
 }
 
-const title = (info: PostInfo) => html`<b>entinyGram ${info.base} · ${info.label}</b>`
+const title = (info: PostInfo) => html`<b>Softgram ${info.base} · ${info.label}</b>`
 
 function footer(info: PostInfo): Rich {
   const diff = info.tag && info.prevTag && info.tag !== info.prevTag
     ? html`<a href="https://github.com/${info.repo}/compare/${info.prevTag}...${info.tag}">Full diff on GitHub</a>`
     : null
-  return join([diff, html`${TAG[info.track]} · @entinyGram · @entinyGramChat`, DONATE], '\n')
+  return join([diff, html`${TAG[info.track]} · @Softgram_org · @Softgram_org`, DONATE], '\n')
 }
 
 /** Caption under the APK. The notes sit in the first blockquote, which is what the updater shows. */
@@ -84,9 +84,9 @@ export interface MainPost {
 
 /** Release post in the main channel: ukrainian text, english in a collapsed quote, one reply when it gets too long. */
 export function mainPost(info: PostInfo, notes: Sections, downloadUrl: string, extra: string, maxChars = 3800): MainPost {
-  const head = html`<b>entinyGram ${info.base} · ${info.label}</b> — <a href="${downloadUrl}">Завантажити / Download</a>`
+  const head = html`<b>Softgram ${info.base} · ${info.label}</b> — <a href="${downloadUrl}">Завантажити / Download</a>`
   const site = html`<a href="${SITE_URL}">Усі нові функції на сайті / All new features on the website</a>`
-  const tags = html`${TAG.release} · @entinyGram · @entinyGramChat`
+  const tags = html`${TAG.release} · @Softgram_org · @Softgram_org`
   const uk = rich(noteLines(notes.uk, 'uk', true).join('\n'))
   const en = rich(noteLines(notes.en, 'en', false).join('\n'))
   const note = extra ? html`${esc(extra)}` : null
@@ -95,7 +95,7 @@ export function mainPost(info: PostInfo, notes: Sections, downloadUrl: string, e
   if (whole.text.length <= maxChars) return { first: whole, reply: null }
   return {
     first: join([head, note, uk, site, tags, DONATE], '\n\n'),
-    reply: join([html`<b>entinyGram ${info.base} · ${info.label}</b> · English\n\n<blockquote expandable>${en}</blockquote>`, tags], '\n\n'),
+    reply: join([html`<b>Softgram ${info.base} · ${info.label}</b> · English\n\n<blockquote expandable>${en}</blockquote>`, tags], '\n\n'),
   }
 }
 
@@ -142,8 +142,8 @@ function fitRich(render: (cut: (s: RichSection[]) => RichSection[]) => string, l
   return render(s => s.map(x => ({ ...x, lines: ['...'] })))
 }
 
-const richTitle = (info: PostInfo) => `## entinyGram ${info.base} · ${info.label}`
-const richTags = (tag: string) => `<footer>${tag} · @entinyGram · @entinyGramChat</footer>`
+const richTitle = (info: PostInfo) => `## Softgram ${info.base} · ${info.label}`
+const richTags = (tag: string) => `<footer>${tag} · @Softgram_org · @Softgram_org</footer>`
 const richFiles = (apks: RichApk[]) => apks.map(a => `![](tg://document?id=${a.id} "${a.variant}")`).join('\n')
 const richDiff = (info: PostInfo) => info.tag && info.prevTag && info.tag !== info.prevTag
   ? `[Full diff on GitHub](https://github.com/${info.repo}/compare/${info.prevTag}...${info.tag})`

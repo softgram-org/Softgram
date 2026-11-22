@@ -38,8 +38,8 @@ for (const { file } of [...info.apkFiles, info.pluginsApk, info.pluginsArm7Apk].
 const apiId = Number(process.env.TELEGRAM_API_ID)
 const apiHash = process.env.TELEGRAM_API_HASH
 const botToken = process.env.TELEGRAM_BOT_TOKEN
-const channelCI = process.env.TELEGRAM_CI_CHANNEL ?? process.env.TELEGRAM_CHANNEL ?? 'entinyGramCI'
-const channelMain = process.env.TELEGRAM_MAIN_CHANNEL ?? 'entinyGram'
+const channelCI = process.env.TELEGRAM_CI_CHANNEL ?? process.env.TELEGRAM_CHANNEL ?? 'Softgram_org'
+const channelMain = process.env.TELEGRAM_MAIN_CHANNEL ?? 'Softgram'
 if (!apiId || !apiHash || !botToken) throw new Error('TELEGRAM_API_ID, TELEGRAM_API_HASH and TELEGRAM_BOT_TOKEN must be set')
 
 const cachedSession = process.env.MTPROTO_SESSION || undefined

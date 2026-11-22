@@ -22,7 +22,7 @@ class MarketEntry(
     val official: Boolean get() = source == MarketSource.OFFICIAL || id.startsWith(OFFICIAL_PREFIX)
 
     companion object {
-        const val OFFICIAL_PREFIX = "entinygram."
+        const val OFFICIAL_PREFIX = "Softgram."
     }
 }
 

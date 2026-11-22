@@ -150,7 +150,7 @@
     <string name="InuAppIconDescBlush">М’який рожевий, що переходить у жовтий</string>
     <string name="InuAppIconDescConstellation">Зірки, з’єднані сигналом</string>
     <string name="InuAppIconDescCrimson">Криваво-червоний місяць над сутінками сакури</string>
-    <string name="InuAppIconDescDefault">Класична тарілка entinyGram</string>
+    <string name="InuAppIconDescDefault">Класична тарілка Softgram</string>
     <string name="InuAppIconDescDish">Лише тарілка, нічого зайвого</string>
     <string name="InuAppIconDescGold">Суцільне золоте покриття</string>
     <string name="InuAppIconDescGoogle26">Глянцевий синій на м’якому білому</string>
@@ -173,7 +173,7 @@
     <string name="InuAppIconInuTribute">Шана Inu</string>
     <string name="InuAppIconInverse">Інверсія</string>
     <string name="InuAppIconJungle">Джунглі</string>
-    <string name="InuAppIconLicenseConcept">Концепт іконки від **entinyGram**</string>
+    <string name="InuAppIconLicenseConcept">Концепт іконки від **Softgram**</string>
     <string name="InuAppIconLicenseInugram">Тимчасова іконка, можете запропонувати кращу</string>
     <string name="InuAppIconLicenseTelegram">Іконка від **Telegram**. Усі права захищено.</string>
     <string name="InuAppIconLunar">Місячна</string>
@@ -181,7 +181,7 @@
     <string name="InuAppIconMono">Моно</string>
     <string name="InuAppIconNothing">Nothing</string>
     <string name="InuAppIconNoxSky">Nox Sky</string>
-    <string name="InuAppIconOldEntinygram">Старий entinyGram</string>
+    <string name="InuAppIconOldEntinygram">Старий Softgram</string>
     <string name="InuAppIconOrbit">Орбіта</string>
     <string name="InuAppIconOsu">osu!</string>
     <string name="InuAppIconRadar">Радар</string>
@@ -242,7 +242,7 @@
     <string name="InuAutoTranslateAll">Автоперекладати всі чати</string>
     <string name="InuAutoTranslateAllInfo">Вмикає переклад чатів усюди за замовчуванням; вимкнення в конкретному чаті запам’ятається.</string>
     <string name="InuAutoUpdateCheck">Перевіряти оновлення</string>
-    <string name="InuAutoUpdateCheckInfo">Періодично перевіряти канал entinyGram CI на наявність нових релізів і пропонувати їх завантаження.</string>
+    <string name="InuAutoUpdateCheckInfo">Періодично перевіряти канал Softgram CI на наявність нових релізів і пропонувати їх завантаження.</string>
     <string name="InuAvailableFonts">Доступні шрифти</string>
     <string name="InuAvatarCorners">Скруглення аватарок</string>
     <string name="InuAvatarCornersLeft">Прямі</string>
@@ -268,7 +268,7 @@
     <string name="InuBackupImportSheetTitle">Застосувати ці налаштування?</string>
     <string name="InuBackupImportSuccess">Імпортовано %1$d налаштувань</string>
     <string name="InuBackupReset">Скинути налаштування</string>
-    <string name="InuBackupResetConfirm">Усі налаштування entinyGram буде скинуто до значень за замовчуванням. Ваші чати, акаунти та власні налаштування Telegram залишаться незмінними.\n\nЦю дію не можна скасувати.</string>
+    <string name="InuBackupResetConfirm">Усі налаштування Softgram буде скинуто до значень за замовчуванням. Ваші чати, акаунти та власні налаштування Telegram залишаться незмінними.\n\nЦю дію не можна скасувати.</string>
     <string name="InuBackupResetNoChanges">Налаштування вже мають значення за замовчуванням</string>
     <string name="InuBackupResetSuccess">Скинуто %1$d налаштувань</string>
     <string name="InuBackupSettings">Резервне копіювання та скидання</string>
@@ -464,7 +464,7 @@
     <string name="InuCloudSync">Синхронізація налаштувань</string>
     <string name="InuCloudSyncAccountInactive">Акаунт більше не активний. Оберіть інший для відновлення синхронізації.</string>
     <string name="InuCloudSyncAuto">Автозавантаження</string>
-    <string name="InuCloudSyncDesc">Зберігає налаштування entinyGram у хмарі Telegram через [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) — ваші дані не потрапляють на наші сервери.</string>
+    <string name="InuCloudSyncDesc">Зберігає налаштування Softgram у хмарі Telegram через [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) — ваші дані не потрапляють на наші сервери.</string>
     <string name="InuCloudSyncedAt">остання копія %1$s</string>
     <string name="InuCloudSyncFailed">Помилка синхронізації</string>
     <string name="InuCloudSyncing">Синхронізація…</string>
@@ -528,13 +528,13 @@
     <string name="InuCrashDescOom">Краш-логи мало корисні при OOM — допомагає хіпдамп.</string>
     <string name="InuCrashDiscard">Скасувати</string>
     <string name="InuCrashNotifText">Натисніть для перезапуску</string>
-    <string name="InuCrashNotifTitle">entinyGram упав</string>
-    <string name="InuCrashOomEnableLogs">Увімкніть режим відладки в Налаштуваннях entinyGram > Про додаток.</string>
+    <string name="InuCrashNotifTitle">Softgram упав</string>
+    <string name="InuCrashOomEnableLogs">Увімкніть режим відладки в Налаштуваннях Softgram > Про додаток.</string>
     <string name="InuCrashPluginHooks">Під час збою працювали хуки плагінів, причиною може бути один із них:</string>
     <string name="InuCrashShare">Поділитися краш-логом</string>
     <string name="InuCrashShareHeapDump">Зберегти хіпдамп</string>
-    <string name="InuCrashTitle">entinyGram упав минулого разу</string>
-    <string name="InuCrashTitleOom">entinyGram вичерпав пам\'ять</string>
+    <string name="InuCrashTitle">Softgram упав минулого разу</string>
+    <string name="InuCrashTitleOom">Softgram вичерпав пам\'ять</string>
     <string name="InuCreateAsSupergroup">Створити як супергрупу</string>
     <string name="InuCreatedDate">Створено: %s</string>
     <string name="InuCustomizeMessages">Сховати у повідомленнях</string>
@@ -577,8 +577,8 @@
     <string name="InuDeleteSelectedProfilePhotosConfirm">Ви впевнені, що хочете видалити %1$d вибраних фото?</string>
     <string name="InuDeselectAll">Зняти виділення</string>
     <string name="InuDesignStyle">Стиль оформлення</string>
-    <string name="InuDevBadge">Команда entinyGram</string>
-    <string name="InuDevBadgeInfo">Цей акаунт визнаний командою entinyGram.</string>
+    <string name="InuDevBadge">Команда Softgram</string>
+    <string name="InuDevBadgeInfo">Цей акаунт визнаний командою Softgram.</string>
     <string name="InuDeviceSection">Пристрій</string>
     <string name="InuDeviceSpoof">Підміна пристрою</string>
     <string name="InuDeviceSpoofApp">Версія застосунку</string>
@@ -694,7 +694,7 @@
     <string name="InuDonateSectionCrypto">Крипто</string>
     <string name="InuDonateSectionOther">Інше</string>
     <string name="InuDonateSheetInfo">Натисни, щоб скопіювати або відкрити. Суто за бажанням.</string>
-    <string name="InuDonateSheetTitle">Підтримати entinyGram</string>
+    <string name="InuDonateSheetTitle">Підтримати Softgram</string>
     <string name="InuDonateThanks">Дякую, що ти тут ❤️</string>
     <string name="InuDonateWebsite">Усі способи на сайті</string>
     <string name="InuDontAutoplayWidgets">Не запускати віджети автоматично</string>
@@ -958,7 +958,7 @@
     <string name="InuHideCollectibleStatus">Колекційний статус</string>
     <string name="InuHideCustomTheme">Приховати власні теми</string>
     <string name="InuHideCustomWallpaper">Приховати власні шпалери</string>
-    <string name="InuHideDevBadges">Вимкнути бейджі entinyGram</string>
+    <string name="InuHideDevBadges">Вимкнути бейджі Softgram</string>
     <string name="InuHideDevBadgesInfo">Вони нічого не означають і не дають жодних переваг — просто подяка від розробника</string>
     <string name="InuHideDialogPreview">Ховати прев’ю останнього повідомлення</string>
     <string name="InuHideDialogPreviewInfo">Показувати останнє повідомлення в списку чатів під спойлером</string>
@@ -975,7 +975,7 @@
     <string name="InuHideGiveaways">Розіграші</string>
     <string name="InuHideGroupStickerPack">Підказка про емодзі-пак групи</string>
     <string name="InuHideHashtagSuggestions">Підказки хештегів</string>
-    <string name="InuHideInugramSettings">Приховати налаштування entinyGram</string>
+    <string name="InuHideInugramSettings">Приховати налаштування Softgram</string>
     <string name="InuHideIvSummary">Резюме Instant View</string>
     <string name="InuHideJoinBar">«Приєднатися» в каналах</string>
     <string name="InuHideJoinBarInfo">Підписатися можна в профілі каналу</string>
@@ -1202,10 +1202,10 @@
     <string name="InuMarketEmpty">Тут поки порожньо</string>
     <string name="InuMarketEmptySearch">Нічого не знайдено</string>
     <string name="InuMarketFailed">Не вдалося завантажити каталог</string>
-    <string name="InuMarketFeaturedTitle">Від entinyGram</string>
+    <string name="InuMarketFeaturedTitle">Від Softgram</string>
     <string name="InuMarketFilters">Фільтри</string>
     <string name="InuMarketGroupCommunity">Спільнота</string>
-    <string name="InuMarketGroupOfficial">entinyGram</string>
+    <string name="InuMarketGroupOfficial">Softgram</string>
     <string name="InuMarketInstalled">Встановлені</string>
     <string name="InuMarketLoading">Завантажую каталог…</string>
     <string name="InuMarketNoInstalled">Ще немає встановлених плагінів</string>
@@ -1218,7 +1218,7 @@
     <string name="InuMarketShow">Показати</string>
     <string name="InuMarketSortDefault">За замовчуванням</string>
     <string name="InuMarketSortInstalled">Спочатку встановлені</string>
-    <string name="InuMarketSourceOfficial">entinyGram</string>
+    <string name="InuMarketSourceOfficial">Softgram</string>
     <string name="InuMarketTagAi">Переклад і ШІ</string>
     <string name="InuMarketTagAiAbout">переклад і LLM-помічники</string>
     <string name="InuMarketTagCalls">Дзвінки</string>
@@ -1246,7 +1246,7 @@
     <string name="InuMarketWhatsNew">Що нового у v%1$s</string>
     <string name="InuMarketWhatsNewTitle">Нотатки до релізу</string>
     <string name="InuMaskServerAppName">Маскувати назву застосунку на сервері</string>
-    <string name="InuMaskServerAppNameInfo">Ховає назву entinyGram у списку сеансів і показує стандартну назву клієнта</string>
+    <string name="InuMaskServerAppNameInfo">Ховає назву Softgram у списку сеансів і показує стандартну назву клієнта</string>
     <string name="InuMaterial3">Material Design 3</string>
     <string name="InuMaterial3Avatars">Аватари</string>
     <string name="InuMaterial3BottomTabs">Нижні вкладки</string>
@@ -1336,7 +1336,7 @@
     <string name="InuMinimize">Згорнути</string>
     <string name="InuMiscPreviewEditedMessage">обидва найкращі, собача база 🐶⚡</string>
     <string name="InuMiscPreviewForwardedFrom">inu</string>
-    <string name="InuMiscPreviewForwardedMessage">гав! entinyGram чи inuGram? 🐶</string>
+    <string name="InuMiscPreviewForwardedMessage">гав! Softgram чи inuGram? 🐶</string>
     <string name="InuMonetStyle">Стиль Monet</string>
     <string name="InuMonetStyleClassic">Класичний</string>
     <string name="InuMonetStyleMaterial3">Material 3</string>
@@ -1441,8 +1441,8 @@
     <string name="InuNoProfilePhotos">Фотографій профілю не знайдено</string>
     <string name="InuNothingToTranslate">Не обрано повідомлень для перекладу.</string>
     <string name="InuNotificationIcon">Іконка сповіщень</string>
-    <string name="InuNotificationIconInugram">entinyGram</string>
-    <string name="InuNotificationIconOldEntinygram">Старий entinyGram</string>
+    <string name="InuNotificationIconInugram">Softgram</string>
+    <string name="InuNotificationIconOldEntinygram">Старий Softgram</string>
     <string name="InuNotificationIconTelegram">Telegram</string>
     <string name="InuNotifyBellInMenu">Перенести дзвіночок у меню чату</string>
     <string name="InuNotifyBellInMenuInfo">Прибирає дзвіночок тихої розсилки з поля вводу каналів, де ви публікуєте. Натомість його можна перемикати з меню чату</string>
@@ -1464,7 +1464,7 @@
     <string name="InuParanoiaCount">%1$d чатів</string>
     <string name="InuParanoiaDisableNotifications">Вимкнути сповіщення</string>
     <string name="InuParanoiaDisguise">Маскування під Telegram</string>
-    <string name="InuParanoiaDisguiseInfo">Змінюються лише іконка та назва в лаунчері; у сповіщеннях досі «entinyGram».</string>
+    <string name="InuParanoiaDisguiseInfo">Змінюються лише іконка та назва в лаунчері; у сповіщеннях досі «Softgram».</string>
     <string name="InuParanoiaEnable">Увімкнути режим параної</string>
     <string name="InuParanoiaEnableConfirm">Увімкнути режим параної та перезапустити? Повернутися можна лише введенням коду виходу в пошуку чатів!</string>
     <string name="InuParanoiaExit">Вийти з режиму параної</string>
@@ -1507,7 +1507,7 @@
     <string name="InuPasscodeRemove">Видалити код-пароль</string>
     <string name="InuPasscodeRemoveConfirm">Видалити код-пароль для цього акаунта?</string>
     <string name="InuPasscodeSet">Встановити код-пароль</string>
-    <string name="InuPasscodeShowInSettings">Показувати в налаштуваннях entinyGram</string>
+    <string name="InuPasscodeShowInSettings">Показувати в налаштуваннях Softgram</string>
     <string name="InuPasscodeShowInSettingsInfo">Якщо вимкнено, ця сторінка відкриватиметься лише за посиланням нижче — збережіть його зараз.</string>
     <string name="InuPasscodeStateHidden">Приховано</string>
     <string name="InuPasscodeStateNone">Не налаштовано</string>
@@ -1713,7 +1713,7 @@
     <string name="InuPluginsEnableEngine">Увімкнути плагіни</string>
     <string name="InuPluginsEnableEngineInfo">Запускати встановлені плагіни під час запуску додатка</string>
     <string name="InuPluginsEngineDisabled">Плагіни зараз вимкнено\n\nУвімкніть їх у налаштуваннях, щоб встановити цей плагін</string>
-    <string name="InuPluginsErrorApiVersion">Потрібна новіша entinyGram (API плагінів %1$d, у цьому застосунку %2$d)</string>
+    <string name="InuPluginsErrorApiVersion">Потрібна новіша Softgram (API плагінів %1$d, у цьому застосунку %2$d)</string>
     <string name="InuPluginsErrorBadAssets">Недійсні вбудовані файли (%1$s)</string>
     <string name="InuPluginsErrorBadGrant">Запитано недопустимі дозволи (%1$s)</string>
     <string name="InuPluginsErrorNoManifest">Не плагін (немає заголовка з метаданими)</string>
@@ -2079,9 +2079,9 @@
     <string name="InuSendWithoutViaConfirm">Надіслати цей результат як звичайне повідомлення (без «via»)?</string>
     <string name="InuSendWithoutViaRestrictedConfirm">Інлайн-боти в цьому чаті обмежені. Надіслати результат як звичайне повідомлення?</string>
     <string name="InuSetReminder">Створити нагадування</string>
-    <string name="InuSettingNotFound">Це налаштування недоступне в цій версії entinyGram</string>
-    <string name="InuSettings">Налаштування entinyGram</string>
-    <string name="InuSettingsInfo">крізь землю та вітер я йду за тобою</string>
+    <string name="InuSettingNotFound">Це налаштування недоступне в цій версії Softgram</string>
+    <string name="InuSettings">Налаштування Softgram</string>
+    <string name="InuSettingsInfo">Yours. By design Softgram</string>
     <string name="InuSettingsShowAccounts">Показувати акаунти в налаштуваннях</string>
     <string name="InuShorterSwipeGestures">Короткі свайпи</string>
     <string name="InuShorterSwipeGesturesInfo">Зараховувати свайп на половині шляху: назад, відповідь, папки, сторінки медіа та свайп вниз у переглядачі.</string>
@@ -2315,7 +2315,7 @@
     <string name="InuUserProfile">Профіль користувача</string>
     <string name="InuUseSystemEmoji">Системні емодзі</string>
     <string name="InuUseSystemEmojiInfo">Малює емодзі системним шрифтом замість набору Telegram. Щоб застосувалось усюди, перезапустіть застосунок.</string>
-    <string name="InuVersion">entinyGram %1$s (%2$s)</string>
+    <string name="InuVersion">Softgram %1$s (%2$s)</string>
     <string name="InuVersionBetaSuffix">(Бета)</string>
     <string name="InuViewOnceShowNormal">Показувати як звичайне фото</string>
     <string name="InuVoiceMessages">Голосові повідомлення</string>

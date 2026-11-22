@@ -30,6 +30,6 @@ const log = execFileSync('git', args, { encoding: 'utf8', maxBuffer: 64 * 1024 *
 const commits = log.split('\0\0').filter(Boolean).map((c) => {
   const [sha, email, ...body] = c.split('\0')
   return { sha: (sha ?? '').trim(), email: (email ?? '').trim(), message: body.join('\0').trim() }
-}).filter(c => c.sha && c.email !== 'ci@entinygram')
+}).filter(c => c.sha && c.email !== 'ci@Softgram')
 
 console.log(JSON.stringify(commits))

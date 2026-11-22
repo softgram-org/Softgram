@@ -1,5 +1,5 @@
 {
-  "name": "entinygram",
+  "name": "Softgram",
   "type": "module",
   "private": true,
   "packageManager": "bun@1.4.2",
@@ -17,7 +17,7 @@
     "check-translations": "bun assets/scripts/check-translations.ts",
     "gradle": "bun assets/scripts/gradle.ts",
     "build-debug": "bun assets/scripts/generate-grants.ts && bun assets/scripts/gradle.ts TMessagesProj_App:assembleDebug",
-    "run-debug": "bun assets/scripts/gradle.ts TMessagesProj_App:installDebug && adb shell am start ua.entaytion.entinygram/org.telegram.ui.LaunchActivity",
+    "run-debug": "bun assets/scripts/gradle.ts TMessagesProj_App:installDebug && adb shell am start org.softgram.messenger/org.telegram.ui.LaunchActivity",
     "check-plugin-syntax": "for f in src/test/plugins/*.js $(find src/native/src -name '*.js'); do node --check \"$f\" || exit 1; done",
     "typecheck-plugins": "bun run check-plugin-syntax && bun assets/scripts/generate-tl.ts && bun assets/scripts/generate-grants.ts && tsc -p sdk/types/tsconfig.self.json --noEmit && tsc -p src/test/plugins --noEmit",
     "prepare": "husky",

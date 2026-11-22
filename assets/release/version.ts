@@ -32,7 +32,7 @@ const verCode = Number(date) * 100 + dayCounter * 10
 const verName = `${base}-${shortSha}`
 const label = `${track} ${n}`
 const infix = track === 'beta' ? '-beta' : ''
-const apk = (abi: string, plugins = false) => `entinygram${infix}${plugins ? '-plugins' : ''}-${abi}-${base}-${verCode}.apk`
+const apk = (abi: string, plugins = false) => `Softgram${infix}${plugins ? '-plugins' : ''}-${abi}-${base}-${verCode}.apk`
 
 const out = {
   'app-ver-name': base,

@@ -105,7 +105,7 @@ object Schemas {
         "profile-accounts" to listOf("user-profile"),
     )
 
-    private val DOWNLOAD_DIRECTORIES = listOf("entinyGram", "Telegram")
+    private val DOWNLOAD_DIRECTORIES = listOf("Softgram", "Telegram")
 
     val CHATS = schema("chats-messages", R.string.InuChatsAndMessages, R.drawable.entiny_message_menu) {
         section(R.string.InuMessageInput) {

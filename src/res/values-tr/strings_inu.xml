@@ -150,7 +150,7 @@
     <string name="InuAppIconDescBlush">Sarıya dönüşen yumuşak pembe</string>
     <string name="InuAppIconDescConstellation">Sinyalle bağlanan yıldızlar</string>
     <string name="InuAppIconDescCrimson">Sakura alacakaranlığında kanlı bir ay</string>
-    <string name="InuAppIconDescDefault">Klasik entinyGram çanağı</string>
+    <string name="InuAppIconDescDefault">Klasik Softgram çanağı</string>
     <string name="InuAppIconDescDish">Sadece çanak, başka bir şey yok</string>
     <string name="InuAppIconDescGold">Saf altın kaplama</string>
     <string name="InuAppIconDescGoogle26">Yumuşak beyaz üzerinde parlak mavi</string>
@@ -173,7 +173,7 @@
     <string name="InuAppIconInuTribute">Inu saygı duruşu</string>
     <string name="InuAppIconInverse">Ters</string>
     <string name="InuAppIconJungle">Orman</string>
-    <string name="InuAppIconLicenseConcept">**entinyGram** tarafından konsept simge</string>
+    <string name="InuAppIconLicenseConcept">**Softgram** tarafından konsept simge</string>
     <string name="InuAppIconLicenseInugram">Yer tutucu simge, daha iyisini katkıda bulunmaktan çekinmeyin</string>
     <string name="InuAppIconLicenseTelegram">Simge **Telegram** tarafından yapılmıştır. Tüm hakları saklıdır.</string>
     <string name="InuAppIconLunar">Ay</string>
@@ -181,7 +181,7 @@
     <string name="InuAppIconMono">Mono</string>
     <string name="InuAppIconNothing">Nothing</string>
     <string name="InuAppIconNoxSky">Nox Sky</string>
-    <string name="InuAppIconOldEntinygram">Eski entinyGram</string>
+    <string name="InuAppIconOldEntinygram">Eski Softgram</string>
     <string name="InuAppIconOrbit">Yörünge</string>
     <string name="InuAppIconOsu">osu!</string>
     <string name="InuAppIconRadar">Radar</string>
@@ -237,7 +237,7 @@
     <string name="InuAutoTranslateAll">Tüm sohbetleri otomatik çevir</string>
     <string name="InuAutoTranslateAllInfo">Sohbet çevirisini varsayılan olarak her yerde açar; sohbete özel kapatmalar hatırlanır.</string>
     <string name="InuAutoUpdateCheck">Güncellemeleri kontrol et</string>
-    <string name="InuAutoUpdateCheckInfo">Yeni sürümler için periyodik olarak entinyGram CI kanalını kontrol edin ve indirme teklifi alın.</string>
+    <string name="InuAutoUpdateCheckInfo">Yeni sürümler için periyodik olarak Softgram CI kanalını kontrol edin ve indirme teklifi alın.</string>
     <string name="InuAvailableFonts">Kullanılabilir yazı tipleri</string>
     <string name="InuAvatarCorners">Profil fotoğrafı köşeleri</string>
     <string name="InuAvatarCornersLeft">Keskin</string>
@@ -263,7 +263,7 @@
     <string name="InuBackupImportSheetTitle">Bu ayarları uygulamak istediğinizden emin misiniz?</string>
     <string name="InuBackupImportSuccess">%1$d ayar içe aktarıldı</string>
     <string name="InuBackupReset">Ayarları sıfırla</string>
-    <string name="InuBackupResetConfirm">Tüm entinyGram ayarları varsayılan değerlerine sıfırlanacaktır. Sohbetleriniz, hesaplarınız ve Telegram\'ın kendi ayarları aynı kalır.\n\nBu işlem geri alınamaz.</string>
+    <string name="InuBackupResetConfirm">Tüm Softgram ayarları varsayılan değerlerine sıfırlanacaktır. Sohbetleriniz, hesaplarınız ve Telegram\'ın kendi ayarları aynı kalır.\n\nBu işlem geri alınamaz.</string>
     <string name="InuBackupResetNoChanges">Ayarlar zaten varsayılan durumunda</string>
     <string name="InuBackupResetSuccess">%1$d ayar sıfırlandı</string>
     <string name="InuBackupSettings">Yedekle ve sıfırla</string>
@@ -459,7 +459,7 @@
     <string name="InuCloudSync">Ayarları senkronize et</string>
     <string name="InuCloudSyncAccountInactive">Hesap oturumu kapatılmış. Senkronizasyonu sürdürmek için başka bir hesap seçin.</string>
     <string name="InuCloudSyncAuto">Otomatik yükle</string>
-    <string name="InuCloudSyncDesc">entinyGram ayarlarınızı [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) üzerinden Telegram bulutuna yedekler — verileriniz sunucularımıza asla ulaşmaz.</string>
+    <string name="InuCloudSyncDesc">Softgram ayarlarınızı [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) üzerinden Telegram bulutuna yedekler — verileriniz sunucularımıza asla ulaşmaz.</string>
     <string name="InuCloudSyncedAt">son yedekleme %1$s</string>
     <string name="InuCloudSyncFailed">Senkronizasyon başarısız</string>
     <string name="InuCloudSyncing">Senkronize ediliyor…</string>
@@ -523,13 +523,13 @@
     <string name="InuCrashDescOom">Bunun için üzgünüz. Çökme günlükleri bellek yetersizliği sorunları için pek yararlı değildir — bellek dökümü (heap dump) daha çok yardımcı olur.</string>
     <string name="InuCrashDiscard">Vazgeç</string>
     <string name="InuCrashNotifText">Yeniden başlatmak için dokunun</string>
-    <string name="InuCrashNotifTitle">entinyGram çöktü</string>
-    <string name="InuCrashOomEnableLogs">Gelecekteki her OOM durumunda bellek dökümü oluşturmak için entinyGram Ayarları > Hakkında bölümünden hata ayıklama modunu etkinleştirin.</string>
+    <string name="InuCrashNotifTitle">Softgram çöktü</string>
+    <string name="InuCrashOomEnableLogs">Gelecekteki her OOM durumunda bellek dökümü oluşturmak için Softgram Ayarları > Hakkında bölümünden hata ayıklama modunu etkinleştirin.</string>
     <string name="InuCrashPluginHooks">Çökme sırasında eklenti kancaları çalışıyordu, sebep bu eklentilerden biri olabilir:</string>
     <string name="InuCrashShare">Çökme günlüğünü paylaş</string>
     <string name="InuCrashShareHeapDump">Bellek dökümünü kaydet</string>
-    <string name="InuCrashTitle">entinyGram geçen sefer çöktü</string>
-    <string name="InuCrashTitleOom">entinyGram bellek yetersizliği yaşadı</string>
+    <string name="InuCrashTitle">Softgram geçen sefer çöktü</string>
+    <string name="InuCrashTitleOom">Softgram bellek yetersizliği yaşadı</string>
     <string name="InuCreateAsSupergroup">Süper grup olarak oluştur</string>
     <string name="InuCreatedDate">Oluşturulma tarihi: %s</string>
     <string name="InuCustomizeMessages">Mesajlar</string>
@@ -572,8 +572,8 @@
     <string name="InuDeleteSelectedProfilePhotosConfirm">Seçilen %1$d profil fotoğrafını silmek istediğinizden emin misiniz?</string>
     <string name="InuDeselectAll">Tüm seçimleri kaldır</string>
     <string name="InuDesignStyle">Tasarım stili</string>
-    <string name="InuDevBadge">entinyGram ekibi</string>
-    <string name="InuDevBadgeInfo">Bu hesap entinyGram ekibi tarafından tanınmaktadır.</string>
+    <string name="InuDevBadge">Softgram ekibi</string>
+    <string name="InuDevBadgeInfo">Bu hesap Softgram ekibi tarafından tanınmaktadır.</string>
     <string name="InuDeviceSection">Cihaz</string>
     <string name="InuDeviceSpoof">Cihaz taklidi</string>
     <string name="InuDeviceSpoofApp">Uygulama sürümü</string>
@@ -690,7 +690,7 @@
     <string name="InuDonateSectionCrypto">Kripto</string>
     <string name="InuDonateSectionOther">Diğer</string>
     <string name="InuDonateSheetInfo">Kopyalamak veya açmak için dokun. Tamamen isteğe bağlı.</string>
-    <string name="InuDonateSheetTitle">entinyGram\'a destek ol</string>
+    <string name="InuDonateSheetTitle">Softgram\'a destek ol</string>
     <string name="InuDonateThanks">Burada olduğun için teşekkürler ❤️</string>
     <string name="InuDonateWebsite">Tüm yöntemler web sitesinde</string>
     <string name="InuDontAutoplayWidgets">Widget\'ları otomatik oynatma</string>
@@ -954,7 +954,7 @@
     <string name="InuHideCollectibleStatus">Koleksiyonluk emoji durumunu gizle</string>
     <string name="InuHideCustomTheme">Özel temayı gizle</string>
     <string name="InuHideCustomWallpaper">Özel duvar kağıdını gizle</string>
-    <string name="InuHideDevBadges">entinyGram rozetlerini devre dışı bırak</string>
+    <string name="InuHideDevBadges">Softgram rozetlerini devre dışı bırak</string>
     <string name="InuHideDevBadgesInfo">Hiçbir anlamı yoktur, herhangi bir ayrıcalık sağlamaz — sadece geliştiriciden bir teşekkürdür</string>
     <string name="InuHideDialogPreview">Son mesaj önizlemesini gizle</string>
     <string name="InuHideDialogPreviewInfo">Sohbet listesinde son mesajı spoiler altında göster</string>
@@ -971,7 +971,7 @@
     <string name="InuHideGiveaways">Çekilişleri gizle</string>
     <string name="InuHideGroupStickerPack">Grup emoji paketi ipucunu gizle</string>
     <string name="InuHideHashtagSuggestions">Konu etiketi (hashtag) önerilerini gizle</string>
-    <string name="InuHideInugramSettings">entinyGram ayarlarını gizle</string>
+    <string name="InuHideInugramSettings">Softgram ayarlarını gizle</string>
     <string name="InuHideIvSummary">Anında Görünüm özeti</string>
     <string name="InuHideJoinBar">Kanallarda Katıl çubuğunu gizle</string>
     <string name="InuHideJoinBarInfo">Yine de kanal profilinden katılabilirsin</string>
@@ -1196,10 +1196,10 @@
     <string name="InuMarketEmpty">Henüz boş</string>
     <string name="InuMarketEmptySearch">Eşleşen eklenti yok</string>
     <string name="InuMarketFailed">Katalog yüklenemedi</string>
-    <string name="InuMarketFeaturedTitle">entinyGram’dan</string>
+    <string name="InuMarketFeaturedTitle">Softgram’dan</string>
     <string name="InuMarketFilters">Filtreler</string>
     <string name="InuMarketGroupCommunity">Topluluk</string>
-    <string name="InuMarketGroupOfficial">entinyGram</string>
+    <string name="InuMarketGroupOfficial">Softgram</string>
     <string name="InuMarketInstalled">Yüklü</string>
     <string name="InuMarketLoading">Katalog yükleniyor…</string>
     <string name="InuMarketNoInstalled">Henüz eklenti yüklenmedi</string>
@@ -1212,7 +1212,7 @@
     <string name="InuMarketShow">Göster</string>
     <string name="InuMarketSortDefault">Varsayılan</string>
     <string name="InuMarketSortInstalled">Önce yüklü olanlar</string>
-    <string name="InuMarketSourceOfficial">entinyGram</string>
+    <string name="InuMarketSourceOfficial">Softgram</string>
     <string name="InuMarketTagAi">Dil ve yapay zekâ</string>
     <string name="InuMarketTagAiAbout">çeviri ve dil modeli asistanları</string>
     <string name="InuMarketTagCalls">Aramalar</string>
@@ -1240,7 +1240,7 @@
     <string name="InuMarketWhatsNew">v%1$s yenilikleri</string>
     <string name="InuMarketWhatsNewTitle">Sürüm notları</string>
     <string name="InuMaskServerAppName">Uygulama adını sunucuda gizle</string>
-    <string name="InuMaskServerAppNameInfo">Oturum listesinde entinyGram adını gizler ve resmi istemcinin adını gösterir</string>
+    <string name="InuMaskServerAppNameInfo">Oturum listesinde Softgram adını gizler ve resmi istemcinin adını gösterir</string>
     <string name="InuMaterial3">Material Design 3</string>
     <string name="InuMaterial3Avatars">Profil resimleri</string>
     <string name="InuMaterial3BottomTabs">Alt sekmeler</string>
@@ -1435,8 +1435,8 @@
     <string name="InuNoProfilePhotos">Profil fotoğrafı bulunamadı</string>
     <string name="InuNothingToTranslate">Çevrilebilir mesaj seçilmedi.</string>
     <string name="InuNotificationIcon">Bildirim simgesi</string>
-    <string name="InuNotificationIconInugram">entinyGram</string>
-    <string name="InuNotificationIconOldEntinygram">Eski entinyGram</string>
+    <string name="InuNotificationIconInugram">Softgram</string>
+    <string name="InuNotificationIconOldEntinygram">Eski Softgram</string>
     <string name="InuNotificationIconTelegram">Telegram</string>
     <string name="InuNotifyBellInMenu">Zili sohbet menüsüne taşı</string>
     <string name="InuNotifyBellInMenuInfo">Yayın yaptığınız kanallarda yazı alanındaki sessiz yayın zilini kaldırır. Bunun yerine sohbet menüsünden değiştirin</string>
@@ -1458,7 +1458,7 @@
     <string name="InuParanoiaCount">%1$d sohbet</string>
     <string name="InuParanoiaDisableNotifications">Bildirimleri devre dışı bırak</string>
     <string name="InuParanoiaDisguise">Telegram olarak gizle</string>
-    <string name="InuParanoiaDisguiseInfo">Yalnızca başlatıcı simgesi ve adı değişir; bildirimlerde hâlâ \"entinyGram\" görünür.</string>
+    <string name="InuParanoiaDisguiseInfo">Yalnızca başlatıcı simgesi ve adı değişir; bildirimlerde hâlâ \"Softgram\" görünür.</string>
     <string name="InuParanoiaEnable">Paranoia moduna gir</string>
     <string name="InuParanoiaEnableConfirm">Paranoia moduna girilip yeniden başlatılsın mı? Bu giriş kaybolacaktır — geri dönmenin tek yolu sohbet aramasında çıkış kodunu yazmak veya uygulamayı yeniden yüklemektir!</string>
     <string name="InuParanoiaExit">Paranoia modundan çık</string>
@@ -1501,7 +1501,7 @@
     <string name="InuPasscodeRemove">Parolayı kaldır</string>
     <string name="InuPasscodeRemoveConfirm">Bu hesap için parola kaldırılsın mı?</string>
     <string name="InuPasscodeSet">Parola koy</string>
-    <string name="InuPasscodeShowInSettings">entinyGram ayarlarında göster</string>
+    <string name="InuPasscodeShowInSettings">Softgram ayarlarında göster</string>
     <string name="InuPasscodeShowInSettingsInfo">Kapalı olduğunda, bu sayfa **yalnızca** aşağıdaki bağlantı üzerinden açılabilir. Şimdi kaydedin — bir kez oluşturulduktan sonra değişmez.</string>
     <string name="InuPasscodeStateHidden">Gizli</string>
     <string name="InuPasscodeStateNone">Yapılandırılmadı</string>
@@ -1703,7 +1703,7 @@
     <string name="InuPluginsEnableEngine">Eklentileri etkinleştir</string>
     <string name="InuPluginsEnableEngineInfo">Yüklü eklentileri başlangıçta çalıştır</string>
     <string name="InuPluginsEngineDisabled">Eklentiler şu anda devre dışı\n\nBu eklentiyi yüklemek için ayarlardan etkinleştirin</string>
-    <string name="InuPluginsErrorApiVersion">Daha yeni bir entinyGram gerekiyor (eklenti API\'si %1$d, bu uygulamada %2$d)</string>
+    <string name="InuPluginsErrorApiVersion">Daha yeni bir Softgram gerekiyor (eklenti API\'si %1$d, bu uygulamada %2$d)</string>
     <string name="InuPluginsErrorBadAssets">Geçersiz paketlenmiş dosyalar (%1$s)</string>
     <string name="InuPluginsErrorBadGrant">Geçersiz izinler istendi (%1$s)</string>
     <string name="InuPluginsErrorNoManifest">Geçerli bir eklenti değil (meta veri başlığı eksik)</string>
@@ -2069,9 +2069,9 @@
     <string name="InuSendWithoutViaConfirm">Bu sonuç normal bir mesaj olarak (\"via\" olmadan) gönderilsin mi?</string>
     <string name="InuSendWithoutViaRestrictedConfirm">Bu sohbette satır içi botlar kısıtlanmış. Bu sonuç normal bir mesaj olarak gönderilsin mi?</string>
     <string name="InuSetReminder">Hatırlatıcı ayarla</string>
-    <string name="InuSettingNotFound">Bu ayar entinyGram\'ın bu sürümünde mevcut değil</string>
-    <string name="InuSettings">entinyGram Ayarları</string>
-    <string name="InuSettingsInfo">ne yapıyor bu köpek?</string>
+    <string name="InuSettingNotFound">Bu ayar Softgram\'ın bu sürümünde mevcut değil</string>
+    <string name="InuSettings">Softgram Ayarları</string>
+    <string name="InuSettingsInfo">Yours. By design Softgram</string>
     <string name="InuSettingsShowAccounts">Ayarlarda hesapları göster</string>
     <string name="InuShorterSwipeGestures">Daha kısa kaydırma hareketleri</string>
     <string name="InuShorterSwipeGesturesInfo">Geri, yanıt, sohbet klasörleri, medya sayfaları ve görüntüleyicide aşağı kaydırma için hareketi yarı mesafede algılar.</string>
@@ -2292,7 +2292,7 @@
     <string name="InuUserProfile">Kullanıcı profili</string>
     <string name="InuUseSystemEmoji">Sistem emojilerini kullan</string>
     <string name="InuUseSystemEmojiInfo">Emojileri Telegram setiyle değil sistem yazı tipiyle çizer. Her yerde uygulanması için uygulamayı yeniden başlatın.</string>
-    <string name="InuVersion">entinyGram v%1$s (derleme %2$s)</string>
+    <string name="InuVersion">Softgram v%1$s (derleme %2$s)</string>
     <string name="InuVersionBetaSuffix">(Beta)</string>
     <string name="InuViewOnceShowNormal">Tek seferlik açılmanın ardına gizlemek yerine normal bir fotoğraf olarak göster</string>
     <string name="InuVoiceMessages">Sesli mesajlar</string>

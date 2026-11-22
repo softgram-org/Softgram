@@ -29,7 +29,7 @@ object BadgeRegistry {
         val emojiId: Long,
     )
 
-    private const val ENDPOINT = "https://entaytion.is-a.dev/api/entinygram/badges"
+    private const val ENDPOINT = "https://entaytion.is-a.dev/api/Softgram/badges"
     private const val TTL_MS = 60L * 60 * 1000 // 1 hour, matches Vercel edge max-age=3600
 
     private const val KV_MANIFEST = "badges:manifest"
@@ -210,6 +210,7 @@ object BadgeRegistry {
     }
 
     private fun fetch(etag: String?): Triple<Int, String?, String?> {
+        if (ENDPOINT.isEmpty()) return Triple(404, null, null)
         val connection = URL(ENDPOINT).openConnection() as HttpURLConnection
         try {
             connection.requestMethod = "GET"

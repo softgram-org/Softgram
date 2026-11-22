@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 
 /**
- * Publishes the changelog card and the full notes to the entinyGram site. Best effort: a missing token or an
+ * Publishes the changelog card and the full notes to the Softgram site. Best effort: a missing token or an
  * unreachable site must never fail a release.
  *
  *   CHANGELOG_TOKEN - shared bearer secret, also set on the site
@@ -23,7 +23,7 @@ try {
   const info = JSON.parse(await fs.readFile(join(outDir, 'build-info.json'), 'utf8'))
   const notes = JSON.parse(await fs.readFile(join(outDir, 'release-notes.json'), 'utf8'))
   const tag = process.env.RELEASE_TAG ?? ''
-  const res = await fetch(process.env.SITE_API_URL ?? 'https://entaytion.is-a.dev/api/entinygram/changelog', {
+  const res = await fetch(process.env.SITE_API_URL ?? 'https://entaytion.is-a.dev/api/Softgram/changelog', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({

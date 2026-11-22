@@ -150,7 +150,7 @@
     <string name="InuAppIconDescBlush">柔和的粉色渐变为黄色</string>
     <string name="InuAppIconDescConstellation">由信号连接的星星</string>
     <string name="InuAppIconDescCrimson">樱花黄昏中的血月</string>
-    <string name="InuAppIconDescDefault">经典的 entinyGram 碟形天线</string>
+    <string name="InuAppIconDescDefault">经典的 Softgram 碟形天线</string>
     <string name="InuAppIconDescDish">只有碟形天线，别无其他</string>
     <string name="InuAppIconDescGold">纯金镀层</string>
     <string name="InuAppIconDescGoogle26">柔和白底上的亮蓝色</string>
@@ -173,7 +173,7 @@
     <string name="InuAppIconInuTribute">致敬 Inu</string>
     <string name="InuAppIconInverse">反色</string>
     <string name="InuAppIconJungle">丛林</string>
-    <string name="InuAppIconLicenseConcept">**entinyGram** 设计的概念图标</string>
+    <string name="InuAppIconLicenseConcept">**Softgram** 设计的概念图标</string>
     <string name="InuAppIconLicenseInugram">占位图标，欢迎提供更好的</string>
     <string name="InuAppIconLicenseTelegram">图标版权归 **Telegram** 所有。保留所有权利。</string>
     <string name="InuAppIconLunar">月亮</string>
@@ -181,7 +181,7 @@
     <string name="InuAppIconMono">单色</string>
     <string name="InuAppIconNothing">Nothing</string>
     <string name="InuAppIconNoxSky">Nox Sky</string>
-    <string name="InuAppIconOldEntinygram">旧版 entinyGram</string>
+    <string name="InuAppIconOldEntinygram">旧版 Softgram</string>
     <string name="InuAppIconOrbit">轨道</string>
     <string name="InuAppIconOsu">osu!</string>
     <string name="InuAppIconRadar">雷达</string>
@@ -237,7 +237,7 @@
     <string name="InuAutoTranslateAll">自动翻译所有对话</string>
     <string name="InuAutoTranslateAllInfo">默认在所有聊天开启翻译；单个聊天的关闭会被记住。</string>
     <string name="InuAutoUpdateCheck">检查更新</string>
-    <string name="InuAutoUpdateCheckInfo">定期检查 entinyGram CI 频道的新版本并提示下载。</string>
+    <string name="InuAutoUpdateCheckInfo">定期检查 Softgram CI 频道的新版本并提示下载。</string>
     <string name="InuAvailableFonts">可用字体</string>
     <string name="InuAvatarCorners">头像圆角</string>
     <string name="InuAvatarCornersLeft">直角</string>
@@ -263,7 +263,7 @@
     <string name="InuBackupImportSheetTitle">确定要应用这些设置吗？</string>
     <string name="InuBackupImportSuccess">已导入 %1$d 项设置</string>
     <string name="InuBackupReset">重置设置</string>
-    <string name="InuBackupResetConfirm">所有 entinyGram 设置将被重置为默认值。您的聊天、账号和 Telegram 自身设置将保持不变。\n\n此操作无法撤销。</string>
+    <string name="InuBackupResetConfirm">所有 Softgram 设置将被重置为默认值。您的聊天、账号和 Telegram 自身设置将保持不变。\n\n此操作无法撤销。</string>
     <string name="InuBackupResetNoChanges">设置已是默认值</string>
     <string name="InuBackupResetSuccess">已重置 %1$d 项设置</string>
     <string name="InuBackupSettings">备份与重置</string>
@@ -459,7 +459,7 @@
     <string name="InuCloudSync">同步设置</string>
     <string name="InuCloudSyncAccountInactive">账号已退出登录。请选择另一个账号以继续同步。</string>
     <string name="InuCloudSyncAuto">自动上传</string>
-    <string name="InuCloudSyncDesc">通过 [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) 将 entinyGram 设置备份到 Telegram 云端——数据不会发送到我们的服务器。</string>
+    <string name="InuCloudSyncDesc">通过 [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) 将 Softgram 设置备份到 Telegram 云端——数据不会发送到我们的服务器。</string>
     <string name="InuCloudSyncedAt">上次备份于 %1$s</string>
     <string name="InuCloudSyncFailed">同步失败</string>
     <string name="InuCloudSyncing">同步中…</string>
@@ -523,13 +523,13 @@
     <string name="InuCrashDescOom">抱歉。崩溃日志对内存不足问题帮助不大 —— 堆转储才有用。</string>
     <string name="InuCrashDiscard">丢弃</string>
     <string name="InuCrashNotifText">点击重启</string>
-    <string name="InuCrashNotifTitle">entinyGram 崩溃了</string>
-    <string name="InuCrashOomEnableLogs">在 entinyGram 设置 > 关于 中启用调试模式，以便在今后每次内存不足时生成堆转储。</string>
+    <string name="InuCrashNotifTitle">Softgram 崩溃了</string>
+    <string name="InuCrashOomEnableLogs">在 Softgram 设置 > 关于 中启用调试模式，以便在今后每次内存不足时生成堆转储。</string>
     <string name="InuCrashPluginHooks">崩溃前后有插件钩子在运行，可能是以下插件之一导致的：</string>
     <string name="InuCrashShare">分享崩溃日志</string>
     <string name="InuCrashShareHeapDump">保存堆转储</string>
-    <string name="InuCrashTitle">entinyGram 上次崩溃了</string>
-    <string name="InuCrashTitleOom">entinyGram 内存不足</string>
+    <string name="InuCrashTitle">Softgram 上次崩溃了</string>
+    <string name="InuCrashTitleOom">Softgram 内存不足</string>
     <string name="InuCreateAsSupergroup">创建为超级群</string>
     <string name="InuCreatedDate">创建于: %s</string>
     <string name="InuCustomizeMessages">消息</string>
@@ -572,8 +572,8 @@
     <string name="InuDeleteSelectedProfilePhotosConfirm">确定要删除选中的 %1$d 张头像吗？</string>
     <string name="InuDeselectAll">取消全选</string>
     <string name="InuDesignStyle">设计风格</string>
-    <string name="InuDevBadge">entinyGram 团队</string>
-    <string name="InuDevBadgeInfo">此账户已获 entinyGram 团队认证。</string>
+    <string name="InuDevBadge">Softgram 团队</string>
+    <string name="InuDevBadgeInfo">此账户已获 Softgram 团队认证。</string>
     <string name="InuDeviceSection">设备</string>
     <string name="InuDeviceSpoof">设备伪装</string>
     <string name="InuDeviceSpoofApp">应用版本</string>
@@ -689,7 +689,7 @@
     <string name="InuDonateSectionCrypto">加密货币</string>
     <string name="InuDonateSectionOther">其他</string>
     <string name="InuDonateSheetInfo">点击复制或打开。完全自愿。</string>
-    <string name="InuDonateSheetTitle">支持 entinyGram</string>
+    <string name="InuDonateSheetTitle">支持 Softgram</string>
     <string name="InuDonateThanks">感谢你在这里 ❤️</string>
     <string name="InuDonateWebsite">更多方式见网站</string>
     <string name="InuDontAutoplayWidgets">不自动播放小组件</string>
@@ -953,7 +953,7 @@
     <string name="InuHideCollectibleStatus">隐藏收藏品表情状态</string>
     <string name="InuHideCustomTheme">隐藏自定义主题</string>
     <string name="InuHideCustomWallpaper">隐藏自定义壁纸</string>
-    <string name="InuHideDevBadges">禁用 entinyGram 徽章</string>
+    <string name="InuHideDevBadges">禁用 Softgram 徽章</string>
     <string name="InuHideDevBadgesInfo">它们没有任何含义，也不提供任何优势——只是开发者的一份感谢</string>
     <string name="InuHideDialogPreview">隐藏最后一条消息预览</string>
     <string name="InuHideDialogPreviewInfo">在聊天列表中将最后一条消息显示在剧透下</string>
@@ -970,7 +970,7 @@
     <string name="InuHideGiveaways">隐藏抽奖活动</string>
     <string name="InuHideGroupStickerPack">隐藏群组表情包提示</string>
     <string name="InuHideHashtagSuggestions">隐藏话题标签建议</string>
-    <string name="InuHideInugramSettings">隐藏 entinyGram 设置</string>
+    <string name="InuHideInugramSettings">隐藏 Softgram 设置</string>
     <string name="InuHideIvSummary">Instant View 摘要</string>
     <string name="InuHideJoinBar">隐藏频道中的“加入”栏</string>
     <string name="InuHideJoinBarInfo">仍可在频道资料页中加入</string>
@@ -1194,10 +1194,10 @@
     <string name="InuMarketEmpty">暂无内容</string>
     <string name="InuMarketEmptySearch">没有匹配的插件</string>
     <string name="InuMarketFailed">无法加载目录</string>
-    <string name="InuMarketFeaturedTitle">来自 entinyGram</string>
+    <string name="InuMarketFeaturedTitle">来自 Softgram</string>
     <string name="InuMarketFilters">筛选</string>
     <string name="InuMarketGroupCommunity">社区</string>
-    <string name="InuMarketGroupOfficial">entinyGram</string>
+    <string name="InuMarketGroupOfficial">Softgram</string>
     <string name="InuMarketInstalled">已安装</string>
     <string name="InuMarketLoading">正在加载目录…</string>
     <string name="InuMarketNoInstalled">尚未安装插件</string>
@@ -1210,7 +1210,7 @@
     <string name="InuMarketShow">显示</string>
     <string name="InuMarketSortDefault">默认</string>
     <string name="InuMarketSortInstalled">已安装的排在前面</string>
-    <string name="InuMarketSourceOfficial">entinyGram</string>
+    <string name="InuMarketSourceOfficial">Softgram</string>
     <string name="InuMarketTagAi">语言与人工智能</string>
     <string name="InuMarketTagAiAbout">翻译与大语言模型助手</string>
     <string name="InuMarketTagCalls">通话</string>
@@ -1238,7 +1238,7 @@
     <string name="InuMarketWhatsNew">v%1$s 更新内容</string>
     <string name="InuMarketWhatsNewTitle">版本说明</string>
     <string name="InuMaskServerAppName">在服务器上隐藏应用名称</string>
-    <string name="InuMaskServerAppNameInfo">在会话列表中隐藏 entinyGram 名称，改为显示官方客户端名称</string>
+    <string name="InuMaskServerAppNameInfo">在会话列表中隐藏 Softgram 名称，改为显示官方客户端名称</string>
     <string name="InuMaterial3">Material Design 3</string>
     <string name="InuMaterial3Avatars">头像</string>
     <string name="InuMaterial3BottomTabs">底部标签</string>
@@ -1433,8 +1433,8 @@
     <string name="InuNoProfilePhotos">未找到个人头像</string>
     <string name="InuNothingToTranslate">没有可翻译的消息。</string>
     <string name="InuNotificationIcon">通知图标</string>
-    <string name="InuNotificationIconInugram">entinyGram</string>
-    <string name="InuNotificationIconOldEntinygram">旧版 entinyGram</string>
+    <string name="InuNotificationIconInugram">Softgram</string>
+    <string name="InuNotificationIconOldEntinygram">旧版 Softgram</string>
     <string name="InuNotificationIconTelegram">Telegram</string>
     <string name="InuNotifyBellInMenu">将铃铛移到聊天菜单</string>
     <string name="InuNotifyBellInMenuInfo">从你可发布内容的频道输入框中移除静音发送铃铛，改为在聊天菜单中切换</string>
@@ -1456,7 +1456,7 @@
     <string name="InuParanoiaCount">%1$d 个聊天</string>
     <string name="InuParanoiaDisableNotifications">禁用通知</string>
     <string name="InuParanoiaDisguise">伪装成 Telegram</string>
-    <string name="InuParanoiaDisguiseInfo">仅更改启动器图标和名称；通知中仍会显示「entinyGram」。</string>
+    <string name="InuParanoiaDisguiseInfo">仅更改启动器图标和名称；通知中仍会显示「Softgram」。</string>
     <string name="InuParanoiaEnable">进入偏执模式</string>
     <string name="InuParanoiaEnableConfirm">进入偏执模式并重启？此项将消失 —— 唯一的返回方式是在聊天搜索中输入退出码，或重新安装应用！</string>
     <string name="InuParanoiaExit">退出偏执模式</string>
@@ -1499,7 +1499,7 @@
     <string name="InuPasscodeRemove">移除密码</string>
     <string name="InuPasscodeRemoveConfirm">移除此账号的密码？</string>
     <string name="InuPasscodeSet">设置密码</string>
-    <string name="InuPasscodeShowInSettings">在 entinyGram 设置中显示</string>
+    <string name="InuPasscodeShowInSettings">在 Softgram 设置中显示</string>
     <string name="InuPasscodeShowInSettingsInfo">关闭时，本页**只能**通过下方链接打开。请立即保存 —— 一旦生成将不再更改。</string>
     <string name="InuPasscodeStateHidden">已隐藏</string>
     <string name="InuPasscodeStateNone">未设置</string>
@@ -1700,7 +1700,7 @@
     <string name="InuPluginsEnableEngine">启用插件</string>
     <string name="InuPluginsEnableEngineInfo">启动时运行已安装的插件</string>
     <string name="InuPluginsEngineDisabled">插件目前已禁用\n\n请在设置中启用插件以安装此插件</string>
-    <string name="InuPluginsErrorApiVersion">需要更新版本的 entinyGram（插件 API %1$d，此应用为 %2$d）</string>
+    <string name="InuPluginsErrorApiVersion">需要更新版本的 Softgram（插件 API %1$d，此应用为 %2$d）</string>
     <string name="InuPluginsErrorBadAssets">无效的附带文件（%1$s）</string>
     <string name="InuPluginsErrorBadGrant">请求了无效权限（%1$s）</string>
     <string name="InuPluginsErrorNoManifest">不是有效插件（缺少元数据头）</string>
@@ -2066,9 +2066,9 @@
     <string name="InuSendWithoutViaConfirm">将此结果作为普通消息发送（不带「via」）？</string>
     <string name="InuSendWithoutViaRestrictedConfirm">此聊天中内联机器人受到限制。改为作为普通消息发送此结果？</string>
     <string name="InuSetReminder">设置提醒</string>
-    <string name="InuSettingNotFound">此版本的 entinyGram 不支持该设置</string>
-    <string name="InuSettings">entinyGram 设置</string>
-    <string name="InuSettingsInfo">汪汪在干啥？</string>
+    <string name="InuSettingNotFound">此版本的 Softgram 不支持该设置</string>
+    <string name="InuSettings">Softgram 设置</string>
+    <string name="InuSettingsInfo">Yours. By design Softgram</string>
     <string name="InuSettingsShowAccounts">在设置中显示账号</string>
     <string name="InuShorterSwipeGestures">缩短滑动手势距离</string>
     <string name="InuShorterSwipeGesturesInfo">返回、回复、聊天文件夹、媒体页面及查看器下滑手势只需滑动原来一半的距离即可触发。</string>
@@ -2289,7 +2289,7 @@
     <string name="InuUserProfile">用户资料</string>
     <string name="InuUseSystemEmoji">使用系统表情</string>
     <string name="InuUseSystemEmojiInfo">用系统字体而非 Telegram 表情集绘制表情。重启应用后全局生效。</string>
-    <string name="InuVersion">entinyGram v%1$s (构建 %2$s)</string>
+    <string name="InuVersion">Softgram v%1$s (构建 %2$s)</string>
     <string name="InuVersionBetaSuffix">(测试版)</string>
     <string name="InuViewOnceShowNormal">显示为普通照片，而非限制在一览即焚之后</string>
     <string name="InuVoiceMessages">语音消息</string>

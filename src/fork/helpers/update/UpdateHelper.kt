@@ -29,17 +29,17 @@ import kotlin.math.max
 import kotlin.math.min
 
 object UpdateHelper {
-    const val USERNAME = "entinyGramCI"
-    private const val CHANGELOG_URL = "https://raw.githubusercontent.com/entaytion/entinyGram/main/changelogs/"
+    const val USERNAME = "Softgram_org"
+    private const val CHANGELOG_URL = ""
     private const val CHECK_INTERVAL_MS = 4L * 60 * 60 * 1000
     private const val INFLIGHT_TIMEOUT_MS = 60L * 1000
     private const val RESOLVE_BACKOFF_MS = 30L * 60 * 1000
 
     // pluginless is the default APK name; plugins builds are "-plugins-" so each variant only sees its own
     private val APK_RE = if (BuildConfig.INU_PLUGINLESS) {
-        Regex("^entinygram(?:-beta)?-arm64-(.+)-(\\d+)\\.apk$")
+        Regex("^Softgram(?:-beta)?-arm64-(.+)-(\\d+)\\.apk$")
     } else {
-        Regex("^entinygram(?:-beta)?-plugins-arm64-(.+)-(\\d+)\\.apk$")
+        Regex("^Softgram(?:-beta)?-plugins-arm64-(.+)-(\\d+)\\.apk$")
     }
 
     @Volatile
@@ -104,7 +104,7 @@ object UpdateHelper {
     @Volatile private var lastProgress: Float = 0f
 
     private const val SNOOZE_MS = 24L * 60 * 60 * 1000
-    private val LABEL_RE = Regex("""entinyGram\s+\S+\s+·\s+(beta|release)\s+(\d+)""", RegexOption.IGNORE_CASE)
+    private val LABEL_RE = Regex("""Softgram\s+\S+\s+·\s+(beta|release)\s+(\d+)""", RegexOption.IGNORE_CASE)
 
     val pendingLabel: String?
         get() = InuConfig.UPDATE_PENDING_LABEL.value.takeIf { it.isNotEmpty() }

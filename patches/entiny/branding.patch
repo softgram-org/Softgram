@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Oleksii Kulinich <entaytion@gmail.com>
 Date: Thu, 8 Oct 2026 15:32:21 +0300
-Subject: entinyGram branding
+Subject: Softgram branding
 
 ---
  TMessagesProj/build.gradle                    | 10 +++-
@@ -257,7 +257,7 @@ index 0000000..0000000 100644
              AccountManager am = AccountManager.get(ApplicationLoader.applicationContext);
              try {
 -                Account[] accounts = am.getAccountsByType("org.telegram.messenger");
-+                Account[] accounts = am.getAccountsByType("ua.entaytion.entinygram");
++                Account[] accounts = am.getAccountsByType("org.softgram.messenger");
                  for (int a = 0; a < accounts.length; a++) {
                      Account acc = accounts[a];
                      boolean found = false;
@@ -266,7 +266,7 @@ index 0000000..0000000 100644
                  if (systemAccount == null) {
                      try {
 -                        systemAccount = new Account("" + getUserConfig().getClientUserId(), "org.telegram.messenger");
-+                        systemAccount = new Account("" + getUserConfig().getClientUserId(), "ua.entaytion.entinygram");
++                        systemAccount = new Account("" + getUserConfig().getClientUserId(), "org.softgram.messenger");
                          am.addAccountExplicitly(systemAccount, "", null);
                      } catch (Exception ignore) {
  
@@ -275,7 +275,7 @@ index 0000000..0000000 100644
              systemAccount = null;
              AccountManager am = AccountManager.get(ApplicationLoader.applicationContext);
 -            Account[] accounts = am.getAccountsByType("org.telegram.messenger");
-+            Account[] accounts = am.getAccountsByType("ua.entaytion.entinygram");
++            Account[] accounts = am.getAccountsByType("org.softgram.messenger");
              for (int a = 0; a < accounts.length; a++) {
                  Account acc = accounts[a];
                  boolean found = false;
@@ -284,7 +284,7 @@ index 0000000..0000000 100644
                      AccountManager am = AccountManager.get(ApplicationLoader.applicationContext);
                      try {
 -                        Account[] accounts = am.getAccountsByType("org.telegram.messenger");
-+                        Account[] accounts = am.getAccountsByType("ua.entaytion.entinygram");
++                        Account[] accounts = am.getAccountsByType("org.softgram.messenger");
                          systemAccount = null;
                          for (int a = 0; a < accounts.length; a++) {
                              Account acc = accounts[a];
@@ -293,7 +293,7 @@ index 0000000..0000000 100644
                      }
                      try {
 -                        systemAccount = new Account("" + getUserConfig().getClientUserId(), "org.telegram.messenger");
-+                        systemAccount = new Account("" + getUserConfig().getClientUserId(), "ua.entaytion.entinygram");
++                        systemAccount = new Account("" + getUserConfig().getClientUserId(), "org.softgram.messenger");
                          am.addAccountExplicitly(systemAccount, "", null);
                      } catch (Exception ignore) {
  
@@ -618,7 +618,7 @@ index 0000000..0000000 100644
              loadTexture(v -> {
                  Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 -                paint.setColor(ThemeColors.TELEGRAM_COLOR); // It's logo color, it should not be colored by the theme
-+                paint.setColor(0xFFF20C3C); // entinyGram brand color, it should not be colored by the theme
++                paint.setColor(0xFF0A84F0); // Softgram brand color, it should not be colored by the theme
                  int size = dp(ICON_HEIGHT_DP);
                  Bitmap bm = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
                  Canvas c = new Canvas(bm);
@@ -837,8 +837,8 @@ index 0000000..0000000 100644
  <resources>
 -    <string name="AppName">Telegram</string>
 -    <string name="AppNameBeta">Telegram Beta</string>
-+    <string name="AppName">entinyGram</string>
-+    <string name="AppNameBeta">entinyGram Beta</string>
++    <string name="AppName">Softgram</string>
++    <string name="AppNameBeta">Softgram Beta</string>
      <string name="LanguageName">Deutsch</string>
      <string name="English">Englisch</string>
      <string name="LanguageNameInEnglish">German</string>
@@ -851,8 +851,8 @@ index 0000000..0000000 100644
  <resources>
 -    <string name="AppName">Telegram</string>
 -    <string name="AppNameBeta">Telegram Beta</string>
-+    <string name="AppName">entinyGram</string>
-+    <string name="AppNameBeta">entinyGram Beta</string>
++    <string name="AppName">Softgram</string>
++    <string name="AppNameBeta">Softgram Beta</string>
      <string name="LanguageName">Español</string>
      <string name="English">Inglés</string>
      <string name="LanguageNameInEnglish">Spanish</string>
@@ -861,7 +861,7 @@ index 0000000..0000000 100644
      <string name="PermissionDrawAboveOtherAppsGroupCallTitle">Superposición del videochat</string>
      <!--Intro view-->
 -    <string name="Page1Title">Telegram</string>
-+    <string name="Page1Title">entinyGram</string>
++    <string name="Page1Title">Softgram</string>
      <string name="Page2Title">Rápido</string>
      <string name="Page3Title">Gratuito</string>
      <string name="Page4Title">Seguro</string>
@@ -874,8 +874,8 @@ index 0000000..0000000 100644
  <resources>
 -    <string name="AppName">Telegram</string>
 -    <string name="AppNameBeta">Telegram Beta</string>
-+    <string name="AppName">entinyGram</string>
-+    <string name="AppNameBeta">entinyGram Beta</string>
++    <string name="AppName">Softgram</string>
++    <string name="AppNameBeta">Softgram Beta</string>
      <string name="LanguageName">Italiano</string>
      <string name="English">Inglese</string>
      <string name="LanguageNameInEnglish">Italian</string>
@@ -887,7 +887,7 @@ index 0000000..0000000 100644
  <?xml version="1.0" encoding="utf-8"?>
  <resources>
 -    <string name="AppName">Telegram</string>
-+    <string name="AppName">entinyGram</string>
++    <string name="AppName">Softgram</string>
      <string name="AppNameBeta">Telegram-bèta</string>
      <string name="LanguageName">Nederlands</string>
      <string name="English">Engels</string>
@@ -900,8 +900,8 @@ index 0000000..0000000 100644
  <resources>
 -    <string name="AppName">Telegram</string>
 -    <string name="AppNameBeta">Telegram Beta</string>
-+    <string name="AppName">entinyGram</string>
-+    <string name="AppNameBeta">entinyGram Beta</string>
++    <string name="AppName">Softgram</string>
++    <string name="AppNameBeta">Softgram Beta</string>
      <string name="LanguageName">Português (Brasil)</string>
      <string name="English">Inglês</string>
      <string name="LanguageNameInEnglish">Portuguese (Brazil)</string>
@@ -910,7 +910,7 @@ index 0000000..0000000 100644
      <string name="PermissionDrawAboveOtherAppsGroupCallTitle">Chat de vídeo flutuante</string>
      <!--Intro view-->
 -    <string name="Page1Title">Telegram</string>
-+    <string name="Page1Title">entinyGram</string>
++    <string name="Page1Title">Softgram</string>
      <string name="Page2Title">Rápido</string>
      <string name="Page3Title">Gratuito</string>
      <string name="Page4Title">Seguro</string>
@@ -923,8 +923,8 @@ index 0000000..0000000 100644
  <resources>
 -    <string name="AppName">Telegram</string>
 -    <string name="AppNameBeta">Telegram Beta</string>
-+    <string name="AppName">entinyGram</string>
-+    <string name="AppNameBeta">entinyGram Beta</string>
++    <string name="AppName">Softgram</string>
++    <string name="AppNameBeta">Softgram Beta</string>
      <string name="LanguageName">Русский</string>
      <string name="English">Английский</string>
      <string name="LanguageNameInEnglish">Russian</string>
@@ -933,7 +933,7 @@ index 0000000..0000000 100644
      <string name="LoginOrSingInWithGoogle">или</string>
      <!--Intro view-->
 -    <string name="Page1Title">Telegram</string>
-+    <string name="Page1Title">entinyGram</string>
++    <string name="Page1Title">Softgram</string>
      <string name="Page2Title">Быстрый</string>
      <string name="Page3Title">Бесплатный</string>
      <string name="Page4Title">Безопасный</string>
@@ -946,8 +946,8 @@ index 0000000..0000000 100644
  <resources>
 -    <string name="AppName">Telegram</string>
 -    <string name="AppNameBeta">Telegram Beta</string>
-+    <string name="AppName">entinyGram</string>
-+    <string name="AppNameBeta">entinyGram Beta</string>
++    <string name="AppName">Softgram</string>
++    <string name="AppNameBeta">Softgram Beta</string>
      <string name="LanguageName">Українська</string>
      <string name="English">Англійська</string>
      <string name="LanguageNameInEnglish">Ukrainian</string>
@@ -956,7 +956,7 @@ index 0000000..0000000 100644
      <string name="LoginOrSingInWithGoogle">або</string>
      <!--Intro view-->
 -    <string name="Page1Title">Telegram</string>
-+    <string name="Page1Title">entinyGram</string>
++    <string name="Page1Title">Softgram</string>
      <string name="Page2Title">Швидкий</string>
      <string name="Page3Title">Безплатний</string>
      <string name="Page4Title">Захищений</string>
@@ -982,8 +982,8 @@ index 0000000..0000000 100644
  <resources>
 -    <string name="AppName">Telegram</string>
 -    <string name="AppNameBeta">Telegram Beta</string>
-+    <string name="AppName">entinyGram</string>
-+    <string name="AppNameBeta">entinyGram Beta</string>
++    <string name="AppName">Softgram</string>
++    <string name="AppNameBeta">Softgram Beta</string>
      <string name="LanguageName">English</string>
      <string name="English">English</string>
      <string name="LanguageNameInEnglish">English</string>
@@ -993,8 +993,8 @@ index 0000000..0000000 100644
      <string name="SetProfilePhoto">Set Profile Photo</string>
 -    <string name="AppUpdate">Update Telegram</string>
 -    <string name="AppUpdateBeta">Update Telegram Beta</string>
-+    <string name="AppUpdate">Update entinyGram</string>
-+    <string name="AppUpdateBeta">Update entinyGram Beta</string>
++    <string name="AppUpdate">Update Softgram</string>
++    <string name="AppUpdateBeta">Update Softgram Beta</string>
      <string name="AppUpdateVersionAndSize">Version %1$s • %2$s</string>
      <string name="AppBetaUpdateVersion">Version %1$s (%2$s)</string>
      <string name="AppUpdateDownloading">Downloading %1$d%%...</string>
@@ -1003,7 +1003,7 @@ index 0000000..0000000 100644
      <string name="ViewMessage">Open Message</string>
      <!--Intro view-->
 -    <string name="Page1Title">Telegram</string>
-+    <string name="Page1Title">entinyGram</string>
++    <string name="Page1Title">Softgram</string>
      <string name="Page2Title">Fast</string>
      <string name="Page3Title">Free</string>
      <string name="Page4Title">Secure</string>
@@ -1016,7 +1016,7 @@ index 0000000..0000000 100644
  
  <account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
 -    android:accountType="org.telegram.messenger"
-+    android:accountType="ua.entaytion.entinygram"
++    android:accountType="org.softgram.messenger"
      android:icon="@drawable/ic_launcher_dr"
      android:smallIcon="@drawable/ic_launcher_dr"
      android:label="@string/AppName"
@@ -1029,7 +1029,7 @@ index 0000000..0000000 100644
      android:contentAuthority="com.android.contacts"
 -    android:accountType="org.telegram.messenger"/>
 \ No newline at end of file
-+    android:accountType="ua.entaytion.entinygram"/>
++    android:accountType="org.softgram.messenger"/>
 \ No newline at end of file
 diff --git a/TMessagesProj_App/build.gradle b/TMessagesProj_App/build.gradle
 index 0000000..0000000 100644
@@ -1040,7 +1040,7 @@ index 0000000..0000000 100644
      buildToolsVersion '36.0.0'
  
 -    defaultConfig.applicationId = "desu.inugram"
-+    defaultConfig.applicationId = "ua.entaytion.entinygram"
++    defaultConfig.applicationId = "org.softgram.messenger"
  
  
      packaging {

@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Oleksii Kulinich <entaytion@gmail.com>
 Date: Sun, 15 Nov 2026 21:51:40 +0200
-Subject: Accent-colored settings icons draw flat rounded plates in monet tones, compact settings rows hide descriptions, and the entinyGram row icon gets a gradient.
+Subject: Accent-colored settings icons draw flat rounded plates in monet tones, compact settings rows hide descriptions, and the Softgram row icon gets a gradient.
 
 ---
  .../src/main/java/org/telegram/ui/Cells/TextCell.java         | 4 ++--
@@ -32,8 +32,8 @@ index 0000000..0000000 100644
      CYAN(0xFF32C0CE, 0xFF1D9CC6),
      PURPLE(0xFFC46EF4, 0xFF9F55DF),
      GRAY(0xFF8699AA, 0xFF6E8397),
--    ENTINY(0xFFF20C3C, 0xFFF20C3C);
-+    ENTINY(0xFFFF4A66, 0xFFE80A38);
+-    ENTINY(0xFF0A84F0, 0xFF0A84F0);
++    ENTINY(0xFF2AA3FF, 0xFF0078EA);
  
      public final int top;
      public final int bottom;

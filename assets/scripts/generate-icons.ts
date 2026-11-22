@@ -24,8 +24,8 @@ const SETTINGS_SAFE = 80
 const NOTIFICATION_DP = 24
 const NOTIFICATION_VIEWPORT = 24
 const NOTIFICATION_SAFE = 24
-const BG_COLOR = '#FFF20C3C'
-const OLD_BG_TOP_COLOR = '#FFF20C3C'
+const BG_COLOR = '#FF0A84F0'
+const OLD_BG_TOP_COLOR = '#FF0A84F0'
 const OLD_BG_BOTTOM_COLOR = '#FFA00320'
 // debug badge: a small white square (only its top-left corner rounded) tucked
 // into the bottom-right corner, holding a β. the white fill is framed with a

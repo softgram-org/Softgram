@@ -16,12 +16,12 @@ import org.telegram.tgnet.TLRPC
 
 object ArchiveMediaHelper {
     private const val TAG = "ArchiveMediaHelper"
-    private const val FOLDER = "entinyGram/Saved Attachments"
+    private const val FOLDER = "Softgram/Saved Attachments"
 
     private val downloads: File
         get() = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
 
-    private fun privateRoot() = File(ApplicationLoader.applicationContext.filesDir, "entinyGram/media")
+    private fun privateRoot() = File(ApplicationLoader.applicationContext.filesDir, "Softgram/media")
 
     internal fun archiveRoots(): List<File> = listOf(File(downloads, FOLDER), privateRoot())
 
@@ -88,15 +88,15 @@ object ArchiveMediaHelper {
     }
 
     private fun dropOldMirror() {
-        val index = File(ApplicationLoader.applicationContext.filesDir, "entinyGram/mirror_index.tsv")
+        val index = File(ApplicationLoader.applicationContext.filesDir, "Softgram/mirror_index.tsv")
         if (!index.exists()) return
-        for (dir in setOf("entinyGram", InuConfig.DOWNLOAD_DIRECTORY.value)) File(downloads, "$dir/Ghosts").deleteRecursively()
+        for (dir in setOf("Softgram", InuConfig.DOWNLOAD_DIRECTORY.value)) File(downloads, "$dir/Ghosts").deleteRecursively()
         index.delete()
     }
 
     private fun migrateSavedMedia(account: Int, targetRoot: File, paths: List<String>) {
         val storage = MessagesStorage.getInstance(account)
-        val legacy = (listOf(privateRoot()) + setOf("entinyGram", InuConfig.DOWNLOAD_DIRECTORY.value).map { File(downloads, "$it/media") })
+        val legacy = (listOf(privateRoot()) + setOf("Softgram", InuConfig.DOWNLOAD_DIRECTORY.value).map { File(downloads, "$it/media") })
             .mapNotNull { runCatching { it.canonicalFile.path + File.separator }.getOrNull() }
         var moved = 0
         for (path in paths) {

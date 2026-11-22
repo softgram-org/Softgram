@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Oleksii Kulinich <entaytion@gmail.com>
 Date: Tue, 1 Sep 2026 11:12:44 +0300
-Subject: entinyGram build configuration
+Subject: Softgram build configuration
 
 ---
  .gitignore                                    |   3 +
@@ -443,7 +443,7 @@ index 0000000..0000000 100644
      buildToolsVersion '36.0.0'
 +    ndkVersion "27.2.12479018"
  
-     defaultConfig.applicationId = "ua.entaytion.entinygram"
+     defaultConfig.applicationId = "org.softgram.messenger"
  
 +    sourceSets.main.jniLibs.srcDirs = ['../TMessagesProj/jni/']
  

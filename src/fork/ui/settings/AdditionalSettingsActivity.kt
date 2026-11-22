@@ -56,7 +56,7 @@ class AdditionalSettingsActivity : SettingsPageActivity(), NotificationCenter.No
                 BUTTON_CHANNEL_LINK,
                 R.drawable.entiny_telegram,
                 LocaleController.getString(R.string.InuAboutChannel),
-                "@entinyGram"
+                "@Softgram_org"
             )
         )
         items.add(
@@ -64,7 +64,7 @@ class AdditionalSettingsActivity : SettingsPageActivity(), NotificationCenter.No
                 BUTTON_GITHUB,
                 R.drawable.entiny_github,
                 LocaleController.getString(R.string.InuAboutGitHub),
-                "Entaytion/entinyGram"
+                "Entaytion/Softgram"
             )
         )
         items.add(mkTwoLineEntry(BUTTON_DONATE, R.drawable.entiny_support, LocaleController.getString(R.string.InuDonateRow), LocaleController.getString(R.string.InuDonateRowInfo), chevron = true))
@@ -196,9 +196,9 @@ class AdditionalSettingsActivity : SettingsPageActivity(), NotificationCenter.No
 
             BUTTON_DONATE -> presentFragment(DonateActivity())
 
-            BUTTON_CHANNEL_LINK -> Browser.openUrl(context ?: return, "https://t.me/entinyGram")
+            BUTTON_CHANNEL_LINK -> Browser.openUrl(context ?: return, "https://t.me/Softgram_org")
 
-            BUTTON_GITHUB -> Browser.openUrl(context ?: return, "https://github.com/Entaytion/EntinyGram")
+            BUTTON_GITHUB -> Browser.openUrl(context ?: return, "https://t.me/Softgram_org")
 
         }
     }

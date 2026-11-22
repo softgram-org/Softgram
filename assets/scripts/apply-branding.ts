@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { worktreeDir } from './config.js'
 import { cd, step, success } from './lib.js'
 
-const TARGET_PACKAGE = 'ua.entaytion.entinygram'
+const TARGET_PACKAGE = 'org.softgram.messenger'
 
 // HockeyApp/Huawei/Standalone app variants are removed by misc/remove-unused-* patches --
 // only the main app modules still build and need a branded google-services.json.
@@ -56,7 +56,7 @@ async function ensureGoogleServicesBranding() {
 }
 
 async function main() {
-  step('Applying entinyGram branding...')
+  step('Applying Softgram branding...')
   await ensureGoogleServicesBranding()
   success('Branding applied successfully.')
 }

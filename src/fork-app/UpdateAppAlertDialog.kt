@@ -218,7 +218,7 @@ class UpdateAppAlertDialog(
             setTextColor(Theme.getColor(Theme.key_dialogTextBlack))
             isSingleLine = true
             ellipsize = TextUtils.TruncateAt.END
-            text = "entinyGram"
+            text = "Softgram"
         }
         val titleRow = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL

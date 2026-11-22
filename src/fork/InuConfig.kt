@@ -467,7 +467,7 @@ object InuConfig {
     val ATTACH_CAMERA_EXPOSURE_BACK = FloatItem("attach_camera_exposure_back", 0f)
 
     @JvmField
-    val DOWNLOAD_DIRECTORY = StringItem("download_directory", "entinyGram", allowed = setOf("entinyGram", "Telegram"))
+    val DOWNLOAD_DIRECTORY = StringItem("download_directory", "Softgram", allowed = setOf("Softgram", "Telegram"))
 
     @JvmField
     val SAVE_FILENAME_DATE = BoolItem("save_filename_date", false)

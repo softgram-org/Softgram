@@ -12,7 +12,7 @@ import { step, success } from './lib.js'
  *   bun run assets/scripts/sync-badges-bundle.ts
  */
 
-const ENDPOINT = 'https://entaytion.is-a.dev/api/entinygram/badges'
+const ENDPOINT = 'https://entaytion.is-a.dev/api/Softgram/badges'
 const target = join(rootDir, 'src/res/raw/inu_badges_bundled.json')
 
 step(`Fetching ${ENDPOINT}`)

@@ -5,7 +5,7 @@
             <path android:name="old_bg" android:pathData="M12,4.5a7.5,7.5 0,1 0,0 15a7.5,7.5 0,1 0,0 -15z">
                 <aapt:attr name="android:fillColor">
                     <gradient android:type="linear" android:startX="12" android:startY="4.5" android:endX="12" android:endY="19.5">
-                        <item android:offset="0" android:color="#FFF20C3C" />
+                        <item android:offset="0" android:color="#FF0A84F0" />
                         <item android:offset="1" android:color="#FFA00320" />
                     </gradient>
                 </aapt:attr>

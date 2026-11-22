@@ -37,7 +37,7 @@ object MapsHelper {
     fun syncMapProvider(messagesController: MessagesController) {
         messagesController.mapProvider = overrideMapProvider(messagesController.mainSettings.getInt("mapProvider", 0));
         if (messagesController.mapProvider == 101) {
-            messagesController.mapKey = "AIzaSyA81BteNJiB2NZoAJzDV4A-dR4tAqWsYuU" // entinygram google maps api key
+            messagesController.mapKey = "AIzaSyA81BteNJiB2NZoAJzDV4A-dR4tAqWsYuU" // Softgram google maps api key
         }
     }
 }

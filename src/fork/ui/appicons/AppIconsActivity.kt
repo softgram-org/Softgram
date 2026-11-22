@@ -147,7 +147,7 @@ class AppIconsActivity : BaseFragment() {
             list.forEach { entries.add(Entry.Item(it)) }
         }
         val own = setOf(LauncherIcon.DEFAULT, LauncherIcon.OLD)
-        section("entinyGram", all.filter { it in own })
+        section("Softgram", all.filter { it in own })
         section(LocaleController.getString(R.string.InuAppIconsConcepts), all.filter { it.concept && it !in own })
         section("Telegram", all.filter { !it.concept && it !in own })
     }

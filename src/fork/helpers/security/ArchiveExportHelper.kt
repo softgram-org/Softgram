@@ -37,7 +37,7 @@ object ArchiveExportHelper {
         val dir = File(filesDir, "cache/inu_share_once")
         if (!dir.exists()) dir.mkdirs()
         val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-        val target = File(dir, "entinygram-archive-$stamp.json")
+        val target = File(dir, "Softgram-archive-$stamp.json")
         val count = target.bufferedWriter().use { ArchiveStore.writeArchiveJson(db, it) }
         return target to count
     }

@@ -127,7 +127,7 @@ index 0000000..0000000 100644
      PURPLE(0xFFC46EF4, 0xFF9F55DF),
 -    GRAY(0xFF8699AA, 0xFF6E8397);
 +    GRAY(0xFF8699AA, 0xFF6E8397),
-+    ENTINY(0xFFF20C3C, 0xFFF20C3C);
++    ENTINY(0xFF0A84F0, 0xFF0A84F0);
  
      public final int top;
      public final int bottom;

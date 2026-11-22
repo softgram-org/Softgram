@@ -150,7 +150,7 @@
     <string name="InuAppIconDescBlush">やわらかなピンクから黄色へのグラデーション</string>
     <string name="InuAppIconDescConstellation">電波でつながる星々</string>
     <string name="InuAppIconDescCrimson">桜の黄昏に浮かぶ血の月</string>
-    <string name="InuAppIconDescDefault">クラシックな entinyGram のディッシュ</string>
+    <string name="InuAppIconDescDefault">クラシックな Softgram のディッシュ</string>
     <string name="InuAppIconDescDish">ディッシュだけ、他には何もなし</string>
     <string name="InuAppIconDescGold">純金メッキ</string>
     <string name="InuAppIconDescGoogle26">やわらかな白地に光沢のあるブルー</string>
@@ -173,7 +173,7 @@
     <string name="InuAppIconInuTribute">Inu トリビュート</string>
     <string name="InuAppIconInverse">反転</string>
     <string name="InuAppIconJungle">ジャングル</string>
-    <string name="InuAppIconLicenseConcept">**entinyGram** によるコンセプトアイコン</string>
+    <string name="InuAppIconLicenseConcept">**Softgram** によるコンセプトアイコン</string>
     <string name="InuAppIconLicenseInugram">仮アイコンです。より良いものを提供していただけたら嬉しいです</string>
     <string name="InuAppIconLicenseTelegram">**Telegram** によるアイコン。All rights reserved.</string>
     <string name="InuAppIconLunar">月</string>
@@ -181,7 +181,7 @@
     <string name="InuAppIconMono">モノ</string>
     <string name="InuAppIconNothing">Nothing</string>
     <string name="InuAppIconNoxSky">Nox Sky</string>
-    <string name="InuAppIconOldEntinygram">旧 entinyGram</string>
+    <string name="InuAppIconOldEntinygram">旧 Softgram</string>
     <string name="InuAppIconOrbit">軌道</string>
     <string name="InuAppIconOsu">osu!</string>
     <string name="InuAppIconRadar">レーダー</string>
@@ -237,7 +237,7 @@
     <string name="InuAutoTranslateAll">すべてのチャットを自動翻訳</string>
     <string name="InuAutoTranslateAllInfo">すべてのチャットで翻訳を既定でオンにします。チャット単位のオフは記憶されます。</string>
     <string name="InuAutoUpdateCheck">アップデートを確認</string>
-    <string name="InuAutoUpdateCheckInfo">entinyGram CI チャンネルを定期的に確認し、新しいリリースがあればダウンロードを提案します。</string>
+    <string name="InuAutoUpdateCheckInfo">Softgram CI チャンネルを定期的に確認し、新しいリリースがあればダウンロードを提案します。</string>
     <string name="InuAvailableFonts">利用可能なフォント</string>
     <string name="InuAvatarCorners">アバターの角丸</string>
     <string name="InuAvatarCornersLeft">直線</string>
@@ -263,7 +263,7 @@
     <string name="InuBackupImportSheetTitle">これらの設定を適用しますか？</string>
     <string name="InuBackupImportSuccess">%1$d 件の設定をインポートしました</string>
     <string name="InuBackupReset">設定をリセット</string>
-    <string name="InuBackupResetConfirm">すべての entinyGram 設定が初期値にリセットされます。チャット、アカウント、Telegram 本体の設定はそのまま残ります。\n\nこの操作は取り消せません。</string>
+    <string name="InuBackupResetConfirm">すべての Softgram 設定が初期値にリセットされます。チャット、アカウント、Telegram 本体の設定はそのまま残ります。\n\nこの操作は取り消せません。</string>
     <string name="InuBackupResetNoChanges">設定はすでに初期値です</string>
     <string name="InuBackupResetSuccess">%1$d 件の設定をリセットしました</string>
     <string name="InuBackupSettings">バックアップとリセット</string>
@@ -459,7 +459,7 @@
     <string name="InuCloudSync">設定を同期</string>
     <string name="InuCloudSyncAccountInactive">アカウントがログアウトされました。同期を再開するには別のアカウントを選択してください。</string>
     <string name="InuCloudSyncAuto">自動アップロード</string>
-    <string name="InuCloudSyncDesc">entinyGram の設定を [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) 経由で Telegram クラウドにバックアップします — データが当方のサーバーに送られることはありません。</string>
+    <string name="InuCloudSyncDesc">Softgram の設定を [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) 経由で Telegram クラウドにバックアップします — データが当方のサーバーに送られることはありません。</string>
     <string name="InuCloudSyncedAt">最終バックアップ: %1$s</string>
     <string name="InuCloudSyncFailed">同期に失敗</string>
     <string name="InuCloudSyncing">同期中…</string>
@@ -523,13 +523,13 @@
     <string name="InuCrashDescOom">ご迷惑をおかけしました。メモリ不足の問題にはクラッシュログはあまり役立ちません — ヒープダンプの方が有用です。</string>
     <string name="InuCrashDiscard">破棄</string>
     <string name="InuCrashNotifText">タップで再起動</string>
-    <string name="InuCrashNotifTitle">entinyGram がクラッシュしました</string>
-    <string name="InuCrashOomEnableLogs">entinyGram 設定 > アプリについて でデバッグモードを有効にすると、次回以降の OOM 発生時にヒープダンプを作成します。</string>
+    <string name="InuCrashNotifTitle">Softgram がクラッシュしました</string>
+    <string name="InuCrashOomEnableLogs">Softgram 設定 > アプリについて でデバッグモードを有効にすると、次回以降の OOM 発生時にヒープダンプを作成します。</string>
     <string name="InuCrashPluginHooks">クラッシュ前後にプラグインのフックが実行されていました。以下のいずれかが原因の可能性があります:</string>
     <string name="InuCrashShare">クラッシュログを共有</string>
     <string name="InuCrashShareHeapDump">ヒープダンプを保存</string>
-    <string name="InuCrashTitle">前回 entinyGram がクラッシュしました</string>
-    <string name="InuCrashTitleOom">entinyGram のメモリが不足しました</string>
+    <string name="InuCrashTitle">前回 Softgram がクラッシュしました</string>
+    <string name="InuCrashTitleOom">Softgram のメモリが不足しました</string>
     <string name="InuCreateAsSupergroup">スーパーグループとして作成</string>
     <string name="InuCreatedDate">作成日: %s</string>
     <string name="InuCustomizeMessages">メッセージ</string>
@@ -572,8 +572,8 @@
     <string name="InuDeleteSelectedProfilePhotosConfirm">選択した %1$d 枚のプロフィール写真を削除してもよろしいですか？</string>
     <string name="InuDeselectAll">選択をすべて解除</string>
     <string name="InuDesignStyle">デザインスタイル</string>
-    <string name="InuDevBadge">entinyGramチーム</string>
-    <string name="InuDevBadgeInfo">このアカウントはentinyGramチームによって公認されています。</string>
+    <string name="InuDevBadge">Softgramチーム</string>
+    <string name="InuDevBadgeInfo">このアカウントはSoftgramチームによって公認されています。</string>
     <string name="InuDeviceSection">デバイス</string>
     <string name="InuDeviceSpoof">デバイスの偽装</string>
     <string name="InuDeviceSpoofApp">アプリバージョン</string>
@@ -689,7 +689,7 @@
     <string name="InuDonateSectionCrypto">暗号資産</string>
     <string name="InuDonateSectionOther">その他</string>
     <string name="InuDonateSheetInfo">タップしてコピーまたは開きます。完全に任意です。</string>
-    <string name="InuDonateSheetTitle">entinyGram を支援</string>
+    <string name="InuDonateSheetTitle">Softgram を支援</string>
     <string name="InuDonateThanks">来てくれてありがとう ❤️</string>
     <string name="InuDonateWebsite">すべての方法はウェブサイトで</string>
     <string name="InuDontAutoplayWidgets">ウィジェットを自動再生しない</string>
@@ -953,7 +953,7 @@
     <string name="InuHideCollectibleStatus">コレクタブル絵文字ステータスを非表示</string>
     <string name="InuHideCustomTheme">カスタムテーマを非表示</string>
     <string name="InuHideCustomWallpaper">カスタム壁紙を非表示</string>
-    <string name="InuHideDevBadges">entinyGramバッジを無効化</string>
+    <string name="InuHideDevBadges">Softgramバッジを無効化</string>
     <string name="InuHideDevBadgesInfo">これらには特別な意味も特典もありません。単なる開発者からの感謝の印です</string>
     <string name="InuHideDialogPreview">最後のメッセージのプレビューを隠す</string>
     <string name="InuHideDialogPreviewInfo">チャットリストの最後のメッセージをスポイラーで隠して表示します</string>
@@ -970,7 +970,7 @@
     <string name="InuHideGiveaways">プレゼント企画を非表示</string>
     <string name="InuHideGroupStickerPack">グループ絵文字パックのヒントを非表示</string>
     <string name="InuHideHashtagSuggestions">ハッシュタグ候補を非表示</string>
-    <string name="InuHideInugramSettings">entinyGram の設定を非表示</string>
+    <string name="InuHideInugramSettings">Softgram の設定を非表示</string>
     <string name="InuHideIvSummary">Instant View 要約</string>
     <string name="InuHideJoinBar">チャンネルの「参加」バーを隠す</string>
     <string name="InuHideJoinBarInfo">チャンネルのプロフィールから参加できます</string>
@@ -1194,10 +1194,10 @@
     <string name="InuMarketEmpty">まだ何もありません</string>
     <string name="InuMarketEmptySearch">一致するプラグインがありません</string>
     <string name="InuMarketFailed">カタログを読み込めませんでした</string>
-    <string name="InuMarketFeaturedTitle">entinyGramから</string>
+    <string name="InuMarketFeaturedTitle">Softgramから</string>
     <string name="InuMarketFilters">フィルター</string>
     <string name="InuMarketGroupCommunity">コミュニティ</string>
-    <string name="InuMarketGroupOfficial">entinyGram</string>
+    <string name="InuMarketGroupOfficial">Softgram</string>
     <string name="InuMarketInstalled">インストール済み</string>
     <string name="InuMarketLoading">カタログを読み込み中…</string>
     <string name="InuMarketNoInstalled">インストール済みのプラグインはありません</string>
@@ -1210,7 +1210,7 @@
     <string name="InuMarketShow">表示</string>
     <string name="InuMarketSortDefault">デフォルト</string>
     <string name="InuMarketSortInstalled">インストール済みを先に表示</string>
-    <string name="InuMarketSourceOfficial">entinyGram</string>
+    <string name="InuMarketSourceOfficial">Softgram</string>
     <string name="InuMarketTagAi">言語とAI</string>
     <string name="InuMarketTagAiAbout">翻訳と言語モデルのアシスタント</string>
     <string name="InuMarketTagCalls">通話</string>
@@ -1238,7 +1238,7 @@
     <string name="InuMarketWhatsNew">v%1$s の新機能</string>
     <string name="InuMarketWhatsNewTitle">リリースノート</string>
     <string name="InuMaskServerAppName">サーバー上のアプリ名を隠す</string>
-    <string name="InuMaskServerAppNameInfo">セッション一覧でentinyGramの名前を隠し、公式クライアント名を表示します</string>
+    <string name="InuMaskServerAppNameInfo">セッション一覧でSoftgramの名前を隠し、公式クライアント名を表示します</string>
     <string name="InuMaterial3">Material Design 3</string>
     <string name="InuMaterial3Avatars">アバター</string>
     <string name="InuMaterial3BottomTabs">下部タブ</string>
@@ -1433,8 +1433,8 @@
     <string name="InuNoProfilePhotos">プロフィール写真が見つかりません</string>
     <string name="InuNothingToTranslate">翻訳対象のメッセージが選択されていません。</string>
     <string name="InuNotificationIcon">通知アイコン</string>
-    <string name="InuNotificationIconInugram">entinyGram</string>
-    <string name="InuNotificationIconOldEntinygram">旧 entinyGram</string>
+    <string name="InuNotificationIconInugram">Softgram</string>
+    <string name="InuNotificationIconOldEntinygram">旧 Softgram</string>
     <string name="InuNotificationIconTelegram">Telegram</string>
     <string name="InuNotifyBellInMenu">ベルをチャットメニューに移動</string>
     <string name="InuNotifyBellInMenuInfo">投稿できるチャンネルの入力欄から、サイレント配信のベルを取り除きます。代わりにチャットメニューから切り替えられます</string>
@@ -1456,7 +1456,7 @@
     <string name="InuParanoiaCount">%1$d 件のチャット</string>
     <string name="InuParanoiaDisableNotifications">通知を無効化</string>
     <string name="InuParanoiaDisguise">Telegram に偽装</string>
-    <string name="InuParanoiaDisguiseInfo">ランチャーのアイコンと名前のみが変わり、通知には引き続き「entinyGram」と表示されます。</string>
+    <string name="InuParanoiaDisguiseInfo">ランチャーのアイコンと名前のみが変わり、通知には引き続き「Softgram」と表示されます。</string>
     <string name="InuParanoiaEnable">パラノイアモードに入る</string>
     <string name="InuParanoiaEnableConfirm">パラノイアモードに入って再起動しますか？この項目は消えます — 戻るにはチャット検索で解除コードを入力するか、アプリを再インストールするしかありません！</string>
     <string name="InuParanoiaExit">パラノイアモードを解除</string>
@@ -1499,7 +1499,7 @@
     <string name="InuPasscodeRemove">パスコードを削除</string>
     <string name="InuPasscodeRemoveConfirm">このアカウントのパスコードを削除しますか？</string>
     <string name="InuPasscodeSet">パスコードを設定</string>
-    <string name="InuPasscodeShowInSettings">entinyGram の設定に表示</string>
+    <string name="InuPasscodeShowInSettings">Softgram の設定に表示</string>
     <string name="InuPasscodeShowInSettingsInfo">オフの場合、このページは下のリンクからしか開けません。今すぐ保存してください — 一度生成されると変更されません。</string>
     <string name="InuPasscodeStateHidden">非表示</string>
     <string name="InuPasscodeStateNone">未設定</string>
@@ -1700,7 +1700,7 @@
     <string name="InuPluginsEnableEngine">プラグインを有効化</string>
     <string name="InuPluginsEnableEngineInfo">起動時にインストール済みのプラグインを実行します</string>
     <string name="InuPluginsEngineDisabled">プラグインは現在無効です\n\nこのプラグインをインストールするには設定で有効にしてください</string>
-    <string name="InuPluginsErrorApiVersion">新しい entinyGram が必要です（プラグイン API %1$d、このアプリは %2$d）</string>
+    <string name="InuPluginsErrorApiVersion">新しい Softgram が必要です（プラグイン API %1$d、このアプリは %2$d）</string>
     <string name="InuPluginsErrorBadAssets">無効な同梱ファイル（%1$s）</string>
     <string name="InuPluginsErrorBadGrant">無効な権限が要求されました（%1$s）</string>
     <string name="InuPluginsErrorNoManifest">有効なプラグインではありません（メタデータヘッダーがありません）</string>
@@ -2066,9 +2066,9 @@
     <string name="InuSendWithoutViaConfirm">この結果を通常のメッセージとして（「via」なしで）送信しますか？</string>
     <string name="InuSendWithoutViaRestrictedConfirm">このチャットではインラインボットが制限されています。代わりに通常のメッセージとして送信しますか？</string>
     <string name="InuSetReminder">リマインダーを設定</string>
-    <string name="InuSettingNotFound">このバージョンの entinyGram ではこの設定は利用できません</string>
-    <string name="InuSettings">entinyGram 設定</string>
-    <string name="InuSettingsInfo">犬は何してるの？</string>
+    <string name="InuSettingNotFound">このバージョンの Softgram ではこの設定は利用できません</string>
+    <string name="InuSettings">Softgram 設定</string>
+    <string name="InuSettingsInfo">Yours. By design Softgram</string>
     <string name="InuSettingsShowAccounts">設定にアカウントを表示</string>
     <string name="InuShorterSwipeGestures">スワイプ距離を短くする</string>
     <string name="InuShorterSwipeGesturesInfo">戻る、返信、チャットフォルダー、メディアページ、ビューアーでの下スワイプを半分の距離で認識します。</string>
@@ -2289,7 +2289,7 @@
     <string name="InuUserProfile">ユーザープロフィール</string>
     <string name="InuUseSystemEmoji">システム絵文字を使う</string>
     <string name="InuUseSystemEmojiInfo">Telegramのセットではなくシステムフォントで絵文字を描画します。すべてに反映するにはアプリを再起動してください。</string>
-    <string name="InuVersion">entinyGram v%1$s (ビルド %2$s)</string>
+    <string name="InuVersion">Softgram v%1$s (ビルド %2$s)</string>
     <string name="InuVersionBetaSuffix">(ベータ)</string>
     <string name="InuViewOnceShowNormal">1回限りの表示で制限せず、通常の写真として表示する</string>
     <string name="InuVoiceMessages">ボイスメッセージ</string>

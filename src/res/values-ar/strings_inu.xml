@@ -150,7 +150,7 @@
     <string name="InuAppIconDescBlush">وردي ناعم يتدرج إلى الأصفر</string>
     <string name="InuAppIconDescConstellation">نجوم تربطها الإشارة</string>
     <string name="InuAppIconDescCrimson">قمر دموي فوق غسق أزهار الساكورا</string>
-    <string name="InuAppIconDescDefault">طبق entinyGram الكلاسيكي</string>
+    <string name="InuAppIconDescDefault">طبق Softgram الكلاسيكي</string>
     <string name="InuAppIconDescDish">الطبق فقط، لا شيء آخر</string>
     <string name="InuAppIconDescGold">طلاء ذهبي خالص</string>
     <string name="InuAppIconDescGoogle26">أزرق لامع على أبيض ناعم</string>
@@ -173,7 +173,7 @@
     <string name="InuAppIconInuTribute">تحية لـ Inu</string>
     <string name="InuAppIconInverse">معكوس</string>
     <string name="InuAppIconJungle">أدغال</string>
-    <string name="InuAppIconLicenseConcept">أيقونة تصورية من **entinyGram**</string>
+    <string name="InuAppIconLicenseConcept">أيقونة تصورية من **Softgram**</string>
     <string name="InuAppIconLicenseInugram">أيقونة مؤقتة، نرحب بمساهمتك بأيقونة أفضل</string>
     <string name="InuAppIconLicenseTelegram">الأيقونة من **Telegram**. جميع الحقوق محفوظة.</string>
     <string name="InuAppIconLunar">قمري</string>
@@ -181,7 +181,7 @@
     <string name="InuAppIconMono">أحادي اللون</string>
     <string name="InuAppIconNothing">Nothing</string>
     <string name="InuAppIconNoxSky">Nox Sky</string>
-    <string name="InuAppIconOldEntinygram">entinyGram القديمة</string>
+    <string name="InuAppIconOldEntinygram">Softgram القديمة</string>
     <string name="InuAppIconOrbit">مدار</string>
     <string name="InuAppIconOsu">osu!</string>
     <string name="InuAppIconRadar">الرادار</string>
@@ -237,7 +237,7 @@
     <string name="InuAutoTranslateAll">ترجمة كل محادثة تلقائياً</string>
     <string name="InuAutoTranslateAllInfo">تفعيل ترجمة المحادثات في كل مكان افتراضياً؛ يُحفظ إيقافها لكل محادثة.</string>
     <string name="InuAutoUpdateCheck">التحقق من التحديثات</string>
-    <string name="InuAutoUpdateCheckInfo">التحقق دورياً من قناة entinyGram CI بحثاً عن إصدارات جديدة واقتراح تنزيلها.</string>
+    <string name="InuAutoUpdateCheckInfo">التحقق دورياً من قناة Softgram CI بحثاً عن إصدارات جديدة واقتراح تنزيلها.</string>
     <string name="InuAvailableFonts">الخطوط المتاحة</string>
     <string name="InuAvatarCorners">زوايا الصور الرمزية</string>
     <string name="InuAvatarCornersLeft">حادة</string>
@@ -265,7 +265,7 @@
     <string name="InuBackupImportSheetTitle">هل أنت متأكد أنك تريد تطبيق هذه الإعدادات؟</string>
     <string name="InuBackupImportSuccess">تم استيراد %1$d إعداد</string>
     <string name="InuBackupReset">إعادة تعيين الإعدادات</string>
-    <string name="InuBackupResetConfirm">ستُعاد جميع إعدادات entinyGram إلى قيمها الافتراضية. تبقى محادثاتك وحساباتك وإعدادات Telegram الخاصة كما هي.\n\nلا يمكن التراجع عن هذا.</string>
+    <string name="InuBackupResetConfirm">ستُعاد جميع إعدادات Softgram إلى قيمها الافتراضية. تبقى محادثاتك وحساباتك وإعدادات Telegram الخاصة كما هي.\n\nلا يمكن التراجع عن هذا.</string>
     <string name="InuBackupResetNoChanges">الإعدادات على قيمها الافتراضية بالفعل</string>
     <string name="InuBackupResetSuccess">تمت إعادة تعيين %1$d إعداد</string>
     <string name="InuBackupSettings">النسخ الاحتياطي &amp; إعادة التعيين</string>
@@ -461,7 +461,7 @@
     <string name="InuCloudSync">مزامنة الإعدادات</string>
     <string name="InuCloudSyncAccountInactive">لم يعد الحساب مسجلاً للدخول. اختر حساباً آخر لاستئناف المزامنة.</string>
     <string name="InuCloudSyncAuto">رفع تلقائي</string>
-    <string name="InuCloudSyncDesc">ينسخ إعدادات entinyGram احتياطياً إلى سحابة Telegram عبر [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) — لا تمر بياناتك بخوادمنا أبداً.</string>
+    <string name="InuCloudSyncDesc">ينسخ إعدادات Softgram احتياطياً إلى سحابة Telegram عبر [CloudStorage API](https://core.telegram.org/bots/webapps#cloudstorage) — لا تمر بياناتك بخوادمنا أبداً.</string>
     <string name="InuCloudSyncedAt">آخر نسخة احتياطية %1$s</string>
     <string name="InuCloudSyncFailed">فشلت المزامنة</string>
     <string name="InuCloudSyncing">جارٍ المزامنة…</string>
@@ -525,13 +525,13 @@
     <string name="InuCrashDescOom">نعتذر عن ذلك. سجلات التعطل ليست مفيدة كثيراً في مشاكل نفاد الذاكرة — الذي يساعد هو تفريغ الذاكرة (heap dump).</string>
     <string name="InuCrashDiscard">تجاهل</string>
     <string name="InuCrashNotifText">انقر لإعادة التشغيل</string>
-    <string name="InuCrashNotifTitle">تعطّل entinyGram</string>
-    <string name="InuCrashOomEnableLogs">فعّل وضع التصحيح في إعدادات entinyGram > حول لإنشاء تفريغ للذاكرة عند كل نفاد ذاكرة مستقبلاً.</string>
+    <string name="InuCrashNotifTitle">تعطّل Softgram</string>
+    <string name="InuCrashOomEnableLogs">فعّل وضع التصحيح في إعدادات Softgram > حول لإنشاء تفريغ للذاكرة عند كل نفاد ذاكرة مستقبلاً.</string>
     <string name="InuCrashPluginHooks">عملت خطافات الإضافات حول الانهيار، وقد يكون أحد هذه الإضافات السبب:</string>
     <string name="InuCrashShare">مشاركة سجل التعطل</string>
     <string name="InuCrashShareHeapDump">حفظ تفريغ الذاكرة</string>
-    <string name="InuCrashTitle">تعطّل entinyGram في المرة السابقة</string>
-    <string name="InuCrashTitleOom">نفدت ذاكرة entinyGram</string>
+    <string name="InuCrashTitle">تعطّل Softgram في المرة السابقة</string>
+    <string name="InuCrashTitleOom">نفدت ذاكرة Softgram</string>
     <string name="InuCreateAsSupergroup">الإنشاء كمجموعة خارقة</string>
     <string name="InuCreatedDate">تاريخ الإنشاء: %s</string>
     <string name="InuCustomizeMessages">الرسائل</string>
@@ -574,8 +574,8 @@
     <string name="InuDeleteSelectedProfilePhotosConfirm">هل أنت متأكد أنك تريد حذف %1$d من صور الملف الشخصي المحددة؟</string>
     <string name="InuDeselectAll">إلغاء تحديد الكل</string>
     <string name="InuDesignStyle">نمط التصميم</string>
-    <string name="InuDevBadge">فريق entinyGram</string>
-    <string name="InuDevBadgeInfo">هذا الحساب معروف لدى فريق entinyGram.</string>
+    <string name="InuDevBadge">فريق Softgram</string>
+    <string name="InuDevBadgeInfo">هذا الحساب معروف لدى فريق Softgram.</string>
     <string name="InuDeviceSection">الجهاز</string>
     <string name="InuDeviceSpoof">انتحال الجهاز</string>
     <string name="InuDeviceSpoofApp">إصدار التطبيق</string>
@@ -691,7 +691,7 @@
     <string name="InuDonateSectionCrypto">العملات الرقمية</string>
     <string name="InuDonateSectionOther">أخرى</string>
     <string name="InuDonateSheetInfo">انقر للنسخ أو الفتح. اختياري تماماً.</string>
-    <string name="InuDonateSheetTitle">دعم entinyGram</string>
+    <string name="InuDonateSheetTitle">دعم Softgram</string>
     <string name="InuDonateThanks">شكراً لوجودك هنا ❤️</string>
     <string name="InuDonateWebsite">جميع الطرق على الموقع</string>
     <string name="InuDontAutoplayWidgets">عدم تشغيل الأدوات تلقائيًا</string>
@@ -957,7 +957,7 @@
     <string name="InuHideCollectibleStatus">إخفاء الحالة المقتناة</string>
     <string name="InuHideCustomTheme">إخفاء السمة المخصصة</string>
     <string name="InuHideCustomWallpaper">إخفاء الخلفية المخصصة</string>
-    <string name="InuHideDevBadges">تعطيل شارات entinyGram</string>
+    <string name="InuHideDevBadges">تعطيل شارات Softgram</string>
     <string name="InuHideDevBadgesInfo">لا تعني شيئاً ولا تمنح أي ميزة — مجرد شكر من المطوّر</string>
     <string name="InuHideDialogPreview">إخفاء معاينة آخر رسالة</string>
     <string name="InuHideDialogPreviewInfo">عرض آخر رسالة في قائمة المحادثات تحت ساتر</string>
@@ -974,7 +974,7 @@
     <string name="InuHideGiveaways">إخفاء المسابقات</string>
     <string name="InuHideGroupStickerPack">إخفاء تلميح حزمة إيموجي المجموعة</string>
     <string name="InuHideHashtagSuggestions">إخفاء اقتراحات الوسوم</string>
-    <string name="InuHideInugramSettings">إخفاء إعدادات entinyGram</string>
+    <string name="InuHideInugramSettings">إخفاء إعدادات Softgram</string>
     <string name="InuHideIvSummary">ملخص العرض الفوري</string>
     <string name="InuHideJoinBar">إخفاء شريط الانضمام في القنوات</string>
     <string name="InuHideJoinBarInfo">يمكنك الانضمام من ملف القناة</string>
@@ -1203,10 +1203,10 @@
     <string name="InuMarketEmpty">لا شيء هنا بعد</string>
     <string name="InuMarketEmptySearch">لا توجد إضافات مطابقة</string>
     <string name="InuMarketFailed">تعذر تحميل الدليل</string>
-    <string name="InuMarketFeaturedTitle">من entinyGram</string>
+    <string name="InuMarketFeaturedTitle">من Softgram</string>
     <string name="InuMarketFilters">الفلاتر</string>
     <string name="InuMarketGroupCommunity">المجتمع</string>
-    <string name="InuMarketGroupOfficial">entinyGram</string>
+    <string name="InuMarketGroupOfficial">Softgram</string>
     <string name="InuMarketInstalled">المثبتة</string>
     <string name="InuMarketLoading">جارٍ تحميل الدليل…</string>
     <string name="InuMarketNoInstalled">لم يتم تثبيت أي إضافات بعد</string>
@@ -1219,7 +1219,7 @@
     <string name="InuMarketShow">إظهار</string>
     <string name="InuMarketSortDefault">الافتراضي</string>
     <string name="InuMarketSortInstalled">المثبتة أولًا</string>
-    <string name="InuMarketSourceOfficial">entinyGram</string>
+    <string name="InuMarketSourceOfficial">Softgram</string>
     <string name="InuMarketTagAi">اللغة والذكاء الاصطناعي</string>
     <string name="InuMarketTagAiAbout">الترجمة ومساعدو النماذج اللغوية</string>
     <string name="InuMarketTagCalls">المكالمات</string>
@@ -1247,7 +1247,7 @@
     <string name="InuMarketWhatsNew">الجديد في v%1$s</string>
     <string name="InuMarketWhatsNewTitle">ملاحظات الإصدار</string>
     <string name="InuMaskServerAppName">إخفاء اسم التطبيق على الخادم</string>
-    <string name="InuMaskServerAppNameInfo">يخفي اسم entinyGram في قائمة الجلسات ويعرض اسم العميل الرسمي بدلًا منه</string>
+    <string name="InuMaskServerAppNameInfo">يخفي اسم Softgram في قائمة الجلسات ويعرض اسم العميل الرسمي بدلًا منه</string>
     <string name="InuMaterial3">Material Design 3</string>
     <string name="InuMaterial3Avatars">الصور الرمزية</string>
     <string name="InuMaterial3BottomTabs">علامات التبويب السفلية</string>
@@ -1337,7 +1337,7 @@
     <string name="InuMinimize">تصغير</string>
     <string name="InuMiscPreviewEditedMessage">كلاهما الأفضل، قاعدة الكلب 🐶⚡</string>
     <string name="InuMiscPreviewForwardedFrom">inu</string>
-    <string name="InuMiscPreviewForwardedMessage">هاو! entinyGram أم inuGram؟ 🐶</string>
+    <string name="InuMiscPreviewForwardedMessage">هاو! Softgram أم inuGram؟ 🐶</string>
     <string name="InuMonetStyle">نمط Monet</string>
     <string name="InuMonetStyleClassic">كلاسيكي</string>
     <string name="InuMonetStyleMaterial3">Material 3</string>
@@ -1442,8 +1442,8 @@
     <string name="InuNoProfilePhotos">لم يتم العثور على صور للملف الشخصي</string>
     <string name="InuNothingToTranslate">لم تُحدد رسائل قابلة للترجمة.</string>
     <string name="InuNotificationIcon">أيقونة الإشعار</string>
-    <string name="InuNotificationIconInugram">entinyGram</string>
-    <string name="InuNotificationIconOldEntinygram">entinyGram القديمة</string>
+    <string name="InuNotificationIconInugram">Softgram</string>
+    <string name="InuNotificationIconOldEntinygram">Softgram القديمة</string>
     <string name="InuNotificationIconTelegram">Telegram</string>
     <string name="InuNotifyBellInMenu">نقل الجرس إلى قائمة الدردشة</string>
     <string name="InuNotifyBellInMenuInfo">يزيل جرس الإرسال الصامت من حقل الإدخال في القنوات التي تنشر فيها. بدلاً من ذلك بدّله من قائمة الدردشة</string>
@@ -1465,7 +1465,7 @@
     <string name="InuParanoiaCount">%1$d محادثة</string>
     <string name="InuParanoiaDisableNotifications">تعطيل الإشعارات</string>
     <string name="InuParanoiaDisguise">التنكر كـ Telegram</string>
-    <string name="InuParanoiaDisguiseInfo">يتغير فقط رمز المشغّل والاسم؛ تبقى الإشعارات تذكر \"entinyGram\".</string>
+    <string name="InuParanoiaDisguiseInfo">يتغير فقط رمز المشغّل والاسم؛ تبقى الإشعارات تذكر \"Softgram\".</string>
     <string name="InuParanoiaEnable">دخول وضع الارتياب</string>
     <string name="InuParanoiaEnableConfirm">دخول وضع الارتياب وإعادة التشغيل؟ سيختفي هذا الخيار — والطريقة الوحيدة للعودة هي كتابة رمز الخروج في بحث المحادثات، أو إعادة تثبيت التطبيق!</string>
     <string name="InuParanoiaExit">الخروج من وضع الارتياب</string>
@@ -1508,7 +1508,7 @@
     <string name="InuPasscodeRemove">إزالة رمز المرور</string>
     <string name="InuPasscodeRemoveConfirm">إزالة رمز المرور لهذا الحساب؟</string>
     <string name="InuPasscodeSet">ضبط رمز المرور</string>
-    <string name="InuPasscodeShowInSettings">إظهار في إعدادات entinyGram</string>
+    <string name="InuPasscodeShowInSettings">إظهار في إعدادات Softgram</string>
     <string name="InuPasscodeShowInSettingsInfo">عند الإيقاف، تُفتح هذه الصفحة عبر الرابط أدناه فقط — احفظه الآن.</string>
     <string name="InuPasscodeStateHidden">مخفي</string>
     <string name="InuPasscodeStateNone">غير مضبوط</string>
@@ -1713,7 +1713,7 @@
     <string name="InuPluginsEnableEngine">تفعيل الإضافات</string>
     <string name="InuPluginsEnableEngineInfo">تشغيل الإضافات المثبتة عند بدء التطبيق</string>
     <string name="InuPluginsEngineDisabled">الإضافات معطلة حالياً\n\nفعّلها من الإعدادات لتثبيت هذه الإضافة</string>
-    <string name="InuPluginsErrorApiVersion">يتطلب إصدارًا أحدث من entinyGram (واجهة الإضافات %1$d، وهذا التطبيق %2$d)</string>
+    <string name="InuPluginsErrorApiVersion">يتطلب إصدارًا أحدث من Softgram (واجهة الإضافات %1$d، وهذا التطبيق %2$d)</string>
     <string name="InuPluginsErrorBadAssets">ملفات مضمّنة غير صالحة (%1$s)</string>
     <string name="InuPluginsErrorBadGrant">أذونات غير صالحة مطلوبة (%1$s)</string>
     <string name="InuPluginsErrorNoManifest">ليست إضافة صالحة (ترويسة البيانات الوصفية مفقودة)</string>
@@ -2079,9 +2079,9 @@
     <string name="InuSendWithoutViaConfirm">هل تريد إرسال هذه النتيجة كرسالة عادية (دون «عبر»)؟</string>
     <string name="InuSendWithoutViaRestrictedConfirm">البوتات المضمّنة مقيّدة في هذه المحادثة. هل تريد إرسال النتيجة كرسالة عادية بدلًا من ذلك؟</string>
     <string name="InuSetReminder">ضبط تذكير</string>
-    <string name="InuSettingNotFound">هذا الإعداد غير متوفر في هذا الإصدار من entinyGram</string>
-    <string name="InuSettings">إعدادات entinyGram</string>
-    <string name="InuSettingsInfo">عبر الأرض والرياح أتبعك</string>
+    <string name="InuSettingNotFound">هذا الإعداد غير متوفر في هذا الإصدار من Softgram</string>
+    <string name="InuSettings">إعدادات Softgram</string>
+    <string name="InuSettingsInfo">Yours. By design Softgram</string>
     <string name="InuSettingsShowAccounts">إظهار الحسابات في الإعدادات</string>
     <string name="InuShorterSwipeGestures">إيماءات تمرير أقصر</string>
     <string name="InuShorterSwipeGesturesInfo">يُحتسب التمرير عند نصف المسافة للرجوع والرد ومجلدات المحادثات وصفحات الوسائط والسحب لأسفل في العارض.</string>
@@ -2302,7 +2302,7 @@
     <string name="InuUserProfile">ملف المستخدم</string>
     <string name="InuUseSystemEmoji">استخدام رموز النظام التعبيرية</string>
     <string name="InuUseSystemEmojiInfo">يرسم الرموز التعبيرية بخط النظام بدل مجموعة Telegram. أعد تشغيل التطبيق لتطبيق ذلك في كل مكان.</string>
-    <string name="InuVersion">entinyGram %1$s (%2$s)</string>
+    <string name="InuVersion">Softgram %1$s (%2$s)</string>
     <string name="InuVersionBetaSuffix">(تجريبي)</string>
     <string name="InuViewOnceShowNormal">إظهارها كصورة عادية بدلاً من حجبها خلف الكشف لمرة واحدة</string>
     <string name="InuVoiceMessages">الرسائل الصوتية</string>

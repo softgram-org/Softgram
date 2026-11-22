@@ -467,7 +467,7 @@ export async function generateStablePatchFromCommit(repoDir: string, commitId: s
   // Writing to a file instead of piping --stdout through cmd.exe avoids a Windows-only
   // ENOBUFS crash (Node's execSync/cmd.exe pipe chokes on very large diffs, e.g. removing
   // a big vendored module in one commit) that persists no matter how high maxBuffer is set.
-  const outDir = await fs.mkdtemp(join(tmpdir(), 'entinygram-patch-'))
+  const outDir = await fs.mkdtemp(join(tmpdir(), 'Softgram-patch-'))
   let stdout: string
   try {
     execSync(`git format-patch --ignore-submodules=none --zero-commit --no-signature --subject-prefix= -1 ${commitId} -o "${outDir}"`, {

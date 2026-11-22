@@ -304,7 +304,7 @@ index 0000000..0000000 100644
  
 -        TranslateAlert2.setToLanguage(language);
 +        // A per-dialog choice must not reset the global target language selected in
-+        // entinyGram's Translator settings. Keep Telegram's legacy behavior only when the
++        // Softgram's Translator settings. Keep Telegram's legacy behavior only when the
 +        // fork has no explicit global target configured.
 +        if (TextUtils.isEmpty(desu.inugram.InuConfig.TRANSLATE_TARGET_LANGUAGE.getValue())) {
 +            TranslateAlert2.setToLanguage(language);
@@ -444,7 +444,7 @@ index 0000000..0000000 100644
 +            desu.inugram.helpers.translate.TranslationProviderHelper.setSourceLanguage(source, message.messageOwner.originalLanguage);
 +        }
 +
-+        // entinyGram: route to third-party providers when one is selected.
++        // Softgram: route to third-party providers when one is selected.
 +        if (desu.inugram.helpers.translate.engine.EntinyTranslate.handle(
 +            dialogId, message.getId(), isTranscription, source.text, message.messageOwner.entities, language, callback, currentAccount)) {
 +            return;
@@ -563,7 +563,7 @@ index 0000000..0000000 100644
              }
              final TLRPC.TL_messageMediaPoll mediaPoll = (TLRPC.TL_messageMediaPoll) media;
              final PollText pollText = PollText.fromPoll(mediaPoll);
-+            // entinyGram: route polls to third-party providers when one is selected.
++            // Softgram: route polls to third-party providers when one is selected.
 +            if (desu.inugram.helpers.translate.engine.EntinyTranslate.handlePoll(
 +                dialogId, message.getId(), pollText, language, callback, currentAccount)) {
 +                return;
@@ -734,7 +734,7 @@ index 0000000..0000000 100644
 +    }
 +
 +    private boolean isLanguageRestricted(String lng, MessageObject message, boolean respectForceTranslate) {
-+        // entinyGram: force-translate mode overrides the "own language" / do-not-translate gate
++        // Softgram: force-translate mode overrides the "own language" / do-not-translate gate
 +        if (respectForceTranslate && desu.inugram.InuConfig.FORCE_TRANSLATE.getValue()) {
 +            return false;
          }
@@ -1646,7 +1646,7 @@ index 0000000..0000000 100644
          });
  
 -        if (UserConfig.getInstance(currentAccount).isPremium() && detectedLanguageNameAccusative != null) {
-+        // entinyGram: the translate bar itself is no longer premium-gated (TranslateController
++        // Softgram: the translate bar itself is no longer premium-gated (TranslateController
 +        // .isFeatureAvailable), so its opt-out must not be either. Stock hid "Do not translate
 +        // <language>" behind Premium, which left an unlocked non-premium user with a bar in every
 +        // foreign-language chat and only the per-chat "Hide" to fight it, one chat at a time.
@@ -1659,7 +1659,7 @@ index 0000000..0000000 100644
          popupLayout.addView(new ActionBarPopupWindow.GapView(getContext(), resourcesProvider), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 8));
  
 +        if (desu.inugram.helpers.translate.engine.EntinyTranslate.isActive()) {
-+            // entinyGram: a third-party provider handles translations — name it instead of
++            // Softgram: a third-party provider handles translations — name it instead of
 +            // showing the stock Cocoon branding.
 +            final LinkSpanDrawable.LinksTextView providerButton = new LinkSpanDrawable.LinksTextView(getContext());
 +            providerButton.setPadding(dp(13), dp(8.33f), dp(13), dp(8.33f));

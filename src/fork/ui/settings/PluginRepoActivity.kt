@@ -93,7 +93,7 @@ class PluginRepoActivity(private val repo: PluginRepo) : SettingsPageActivity() 
     }
 
     private fun fromDeveloper(manifest: PluginManifest): Boolean =
-        manifest.id?.startsWith(MarketEntry.OFFICIAL_PREFIX) == true || manifest.author?.contains("entinygram", ignoreCase = true) == true
+        manifest.id?.startsWith(MarketEntry.OFFICIAL_PREFIX) == true || manifest.author?.contains("Softgram", ignoreCase = true) == true
 
     private fun sortLabel(): String = LocaleController.getString(
         when (InuConfig.PLUGIN_REPO_SORT.value) {
