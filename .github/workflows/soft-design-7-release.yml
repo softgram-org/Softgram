@@ -1,0 +1,427 @@
+name: Softgram Release
+
+# One-time: uploading this file applies the changes (it runs by itself).
+# Every release: Actions -> "Softgram Release" -> Run workflow. The bot asks you for the
+# version, the release number and the What's new text, then builds and publishes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'release = ask the bot questions, build and publish.  patch = only re-apply the code changes'
+        required: false
+        default: release
+        type: choice
+        options:
+          - release
+          - patch
+      mode:
+        description: 'release = GitHub release + CI channel.  release+tg = also the main Telegram channel'
+        required: false
+        default: release+tg
+        type: choice
+        options:
+          - release
+          - release+tg
+      prerelease:
+        description: 'Mark as a pre-release build'
+        required: false
+        default: false
+        type: boolean
+      build_arm7:
+        description: 'Also build an armeabi-v7a (32-bit) APK'
+        required: false
+        default: false
+        type: boolean
+      build_plugins:
+        description: 'Also build an arm64 APK with plugins'
+        required: false
+        default: false
+        type: boolean
+  push:
+    paths:
+      - '.github/workflows/soft-design-7-release.yml'
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  apply:
+    if: ${{ github.event_name == 'push' || inputs.task == 'patch' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    concurrency:
+      group: softgram-chain
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply changes
+        run: |
+          cat > /tmp/step.py <<'PYEOF'
+          import os, re, sys, base64
+
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+
+          def wr(p, s):
+              d = os.path.dirname(p)
+              if d:
+                  os.makedirs(d, exist_ok=True)
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+
+          def die(msg):
+              print("ERROR: " + msg)
+              sys.exit(1)
+
+
+          def need(p):
+              if not os.path.isfile(p):
+                  die("missing file " + p)
+
+
+          def rep(p, old, new):
+              need(p)
+              s = rd(p)
+              if old not in s:
+                  die("anchor not found in %s: %r" % (p, old[:100]))
+              wr(p, s.replace(old, new, 1))
+
+
+          if not os.path.isdir("src/res") or not os.path.isfile("series"):
+              die("run from the repository root")
+          if os.path.exists(".softgram/7-defaults-release.done"):
+              print("Already applied.")
+              sys.exit(0)
+
+          DEFAULTS_B64 = "ewogInZlcnNpb24iOiAxLAogInZhbHVlcyI6IHsKICAidW5yZWFkX2JhZGdlX29uX2JhY2tfYnV0dG9uIjogZmFsc2UsCiAgImlvc19tZXNzYWdlX21lbnUiOiBmYWxzZSwKICAiZGlzYWJsZV9iZ19wYXJhbGxheCI6IGZhbHNlLAogICJzYXZlX2RlbGV0ZWRfbWVzc2FnZXMiOiBmYWxzZSwKICAiZGlhbG9nc190aXRsZV90ZXh0IjogMSwKICAiZGlhbG9nc19tZW51X2l0ZW1zIjogIlt7XCJrXCI6XCJ0aGVtZV90b2dnbGVcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJjb21wb3NlXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwic2F2ZWRfbWVzc2FnZXNcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJ3YWxsZXRcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJyZWNlbnRfY2hhdHNcIixcImVcIjpmYWxzZX0se1wia1wiOlwiYm9va21hcmtzXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImNsZWFyX2NhY2hlXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImZlZWRcIixcImVcIjpmYWxzZX0se1wia1wiOlwiY29udGFjdHNcIixcImVcIjpmYWxzZX0se1wia1wiOlwibXlfcHJvZmlsZVwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJhcmNoaXZlXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcInByb3h5XCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImdob3N0X21vZGVcIixcImVcIjpmYWxzZX0se1wia1wiOlwicGFyYW5vaWFcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJyZXN0YXJ0X2FwcFwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJzZXR0aW5nc1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJkb3dubG9hZHNcIixcImVcIjpmYWxzZX1dIiwKICAiZGlzYWJsZV9yb3VuZGluZyI6IHRydWUsCiAgIm0zX2FjY2VudF9pY29ucyI6IGZhbHNlLAogICJ3aWRlX2NoYW5uZWxfcG9zdHMiOiBmYWxzZSwKICAibm9fam9pbmVkX25vdGlmaWNhdGlvbnMiOiB0cnVlLAogICJzb3J0X2FsYnVtc19ieV9zaXplIjogZmFsc2UsCiAgInNob3dfbXV0dWFsX2NvbnRhY3RfaW5fY2hhdHMiOiBmYWxzZSwKICAiZm9yY2VfdHJhbnNsYXRlIjogdHJ1ZSwKICAid2ViX3ByZXZpZXdfcmVwbGFjZW1lbnRzX2VuYWJsZWQiOiBmYWxzZSwKICAiaGlkZV9zcG9uc29yZWRfbWVzc2FnZXMiOiB0cnVlLAogICJmb2xkZXJzX3VucmVhZF9jb3VudGVyX21vZGUiOiAxLAogICJnaG9zdF9oaWRlX2FwcF9iYXJfaWNvbiI6IGZhbHNlLAogICJzdXBwcmVzc19zY3JlZW5zaG90X25vdGlmaWNhdGlvbiI6IHRydWUsCiAgImFsbG93X3NjcmVlbnNob3RzIjogdHJ1ZSwKICAiY2hhdF9yZW1lbWJlcl9hbGxfcmVwbGllcyI6IGZhbHNlLAogICJpb3NfYnV0dG9uX3BsYWNlbWVudCI6IHRydWUsCiAgImhpZGVfcHJvZmlsZV9tZW51X2FyY2hpdmVkX3N0b3JpZXMiOiBmYWxzZSwKICAicm91bmRfcmVjb3JkZXJfbG9ja19leHBvc3VyZSI6IHRydWUsCiAgImZvbGRlcnNfZGlzcGxheV9tb2RlIjogMiwKICAicmVkdWNlX21lbnVfbW90aW9uIjogZmFsc2UsCiAgInNob3dfYWxsX3JlY2VudF9zdGlja2VycyI6IGZhbHNlLAogICJsaW5rX3ByZXZpZXdfc3BvaWxlciI6IGZhbHNlLAogICJpb3NfaW5wdXRfY29tbWFuZHNfbmVhcl9zdGlja2VycyI6IHRydWUsCiAgImhpZGVfc3VnZ2VzdGlvbl9waG9uZSI6IHRydWUsCiAgImRpc2FibGVfbG9ja3NjcmVlbl9wZXJtaXNzaW9uX25hZyI6IGZhbHNlLAogICJkZWxldGVkX21hcmtfc3R5bGUiOiAxLAogICJwcm9maWxlX3NldHRpbmdzX3Jvd3MiOiAiW3tcImtcIjpcImludWdyYW1cIixcImVcIjp0cnVlfSx7XCJrXCI6XCJhY2NvdW50XCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwiY2hhdFwiLFwiZVwiOnRydWV9LHtcImtcIjpcInByaXZhY3lcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJub3RpZmljYXRpb25zXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwiZGF0YVwiLFwiZVwiOnRydWV9LHtcImtcIjpcImZpbHRlcnNcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJkZXZpY2VzXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwibGl0ZV9tb2RlXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwibGFuZ3VhZ2VcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJ3YWxsZXRcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJ0b25cIixcImVcIjp0cnVlfSx7XCJrXCI6XCJwcmVtaXVtXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwic3RhcnNcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJidXNpbmVzc1wiLFwiZVwiOnRydWV9LHtcImtcIjpcInByZW1pdW1fZ2lmdGluZ1wiLFwiZVwiOnRydWV9LHtcImtcIjpcInF1ZXN0aW9uXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwiZmVhdHVyZXNcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJwb2xpY3lcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJmYXFcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJyb3VuZF92aWRlb1wiLFwiZVwiOnRydWV9LHtcImtcIjpcImF1ZGlvX3JlY29yZGVyXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwiaGVhZGVyX3NldHRpbmdzXCIsXCJlXCI6dHJ1ZX1dIiwKICAiZGVsZXRlZF9tYXJrX2NvbG9yIjogLTY1NTM2LAogICJtYXRlcmlhbDNfYXZhdGFycyI6IHRydWUsCiAgImNvbmZpcm1faW50ZXJuYWxfbGlua3MiOiBmYWxzZSwKICAiZGlzYWJsZV9nbGFzc19nbGFyZSI6IGZhbHNlLAogICJmb3J1bV9tM19zZWN0aW9ucyI6IGZhbHNlLAogICJpb3NfYm90dG9tX2Jhcl90cmFuc3BhcmVuY3kiOiA1NywKICAiaGlkZV9kaXZpZGVycyI6IGZhbHNlLAogICJzaW1wbGVfYXR0YWNoX3BvcHVwX2FuaW1hdGlvbiI6IGZhbHNlLAogICJtb25ldF9zdHlsZSI6IDEsCiAgImdpZl9zZWVrYmFyIjogZmFsc2UsCiAgImZvbGRlcl90YWJzX2F0X2JvdHRvbSI6IGZhbHNlLAogICJtYXRlcmlhbDNfc2xpZGVycyI6IHRydWUsCiAgImlvc19jaGF0X2hlYWRlcl9hdmF0YXJfc3dhcCI6IHRydWUsCiAgImdsYXNzX2dsYXJlX3NvbGlkIjogZmFsc2UsCiAgImRpc2FibGVfbmV4dF9tdXNpY19hdXRvcGxheSI6IHRydWUsCiAgImNlbnRlcl90aXRsZV9wYWdlcyI6IGZhbHNlLAogICJyb3VuZF9yZWNvcmRlcl9ldl9zbGlkZXJfcmlnaHQiOiB0cnVlLAogICJvcHRpbWl6ZWRfYXR0YWNobWVudF9tZW51IjogdHJ1ZSwKICAiaGlkZV9ib3Rfd2Vidmlld19kaWFsb2dzIjogZmFsc2UsCiAgImRvdWJsZV90YXBfYWN0aW9uX291dGdvaW5nIjogMCwKICAiZGlzYWJsZV9jaGF0X3RpdGxlX3Bob25lIjogZmFsc2UsCiAgInByb2ZpbGVfaWRfbW9kZSI6IDEsCiAgIm0zX25hdmlnYXRpb25fYW5pbWF0aW9uIjogZmFsc2UsCiAgImRpYWxvZ3NfbTNfc2VjdGlvbnMiOiBmYWxzZSwKICAicGlsbF9zdGFja19lbmFibGVkIjogdHJ1ZSwKICAidW5pZmllZF9hdmF0YXJfcmFkaXVzIjogdHJ1ZSwKICAiYm90dG9tX3RhYnNfaGlkZV90b3Bfc2VhcmNoIjogZmFsc2UsCiAgImlvc19pbnB1dF9hcHBlYXJhbmNlIjogdHJ1ZSwKICAiaGlkZV9wYWlkX3JlYWN0aW9uX3Vwc2VsbCI6IGZhbHNlLAogICJoaWRlX2FsbF9jaGF0c190YWIiOiBmYWxzZSwKICAibGlxdWlkX2dsYXNzX2JsdXIiOiA0MiwKICAiaGlkZV9yZWFjdGlvbnNfZW50cnkiOiBmYWxzZSwKICAiaWNvbl9wYWNrcyI6ICJzb2xhciIsCiAgImFpX3JvbGVzIjogIlt7XCJpZFwiOlwiYmM2ZjE4ZDUtYjQyYS00NDRmLThmNWEtOTMwYjM5NDI1ZTEwXCIsXCJ0ZXh0XCI6XCLYr9iz2KrbjNin2LFcIixcInByb21wdFwiOlwiWW91IGFyZSBhIGhlbHBmdWwsIHByZWNpc2UgYXNzaXN0YW50LiBGb2xsb3cgdGhlIGluc3RydWN0aW9uIGV4YWN0bHksIHJlcGx5IGluIHRoZSBzYW1lIGxhbmd1YWdlIGFzIHRoZSB1c2VyJ3MgdGV4dCwgYW5kIGFkZCBubyBwcmVhbWJsZSBvciBjb21tZW50YXJ5LlwifSx7XCJpZFwiOlwiZjdhOWY1NGUtZjNiMi00ZWNjLThjZWMtMTZkZDRhM2MyNzI4XCIsXCJ0ZXh0XCI6XCLZiNuM2LHYp9iz2KrYp9ixXCIsXCJwcm9tcHRcIjpcIllvdSBhcmUgYSBtZXRpY3Vsb3VzIGNvcHkgZWRpdG9yLiBLZWVwIHRoZSBhdXRob3IncyBtZWFuaW5nLCB2b2ljZSBhbmQgZm9ybWF0dGluZzsgZml4IG1pc3Rha2VzIGFuZCBpbXByb3ZlIGNsYXJpdHkgYW5kIGZsb3cgd2l0aG91dCBhZGRpbmcgbmV3IGZhY3RzIG9yIGNoYW5naW5nIHRoZSB0b25lLlwifSx7XCJpZFwiOlwiNzUwODdlNzAtMzk2NC00MTgzLTk3YmYtNGFmOWU3ZWJiMGRhXCIsXCJ0ZXh0XCI6XCLZhdiu2KrYtdixXCIsXCJwcm9tcHRcIjpcIllvdSB3cml0ZSBzaG9ydCwgZGlyZWN0IHRleHQuIEN1dCBmaWxsZXIgYW5kIHJlcGV0aXRpb24sIGtlZXAgZXZlcnkgZXNzZW50aWFsIGZhY3QsIHVzZSBwbGFpbiB3b3JkcyBhbmQgc2hvcnQgc2VudGVuY2VzLCBhbmQgcmVwbHkgaW4gdGhlIHNhbWUgbGFuZ3VhZ2UgYXMgdGhlIGlucHV0LlwifV0iLAogICJwcm9maWxlX3ByZWZlcl9tZWRpYV90YWIiOiBmYWxzZSwKICAibG9jYWxfZm9sZGVycyI6IHRydWUsCiAgInNlbmRfbXA0X2RvY3VtZW50X2FzX3ZpZGVvIjogZmFsc2UsCiAgInVwZGF0ZXNfaW5jbHVkZV9iZXRhIjogZmFsc2UsCiAgIm1hdGVyaWFsM19mYWJzIjogdHJ1ZSwKICAidGFiX2luZGljYXRvcl9zdHJva2UiOiBmYWxzZSwKICAic2F2ZV9zZWxmX2Rlc3RydWN0X21lZGlhIjogZmFsc2UsCiAgImJvdHRvbV90YWJzX3NlYXJjaF9zZXBhcmF0ZSI6IGZhbHNlLAogICJoZF9ibHVldG9vdGhfY2FsbF9hdWRpbyI6IGZhbHNlLAogICJjb21wYWN0X2VkaXRlZCI6IGZhbHNlLAogICJkb3VibGVfdGFwX2FjdGlvbl9jaGFubmVsIjogMCwKICAiZmVlZF9pbmNsdWRlX2FyY2hpdmVkIjogZmFsc2UsCiAgIm0zX2hlYWRlcnNfaW5fY2FyZCI6IHRydWUsCiAgImNlbnRlcl90aXRsZV9yaWdodF9hdmF0YXIiOiBmYWxzZSwKICAicGlsbF9zdGFja192aXNpYmxlX2NvdW50IjogMiwKICAic2hvd19mb3J3YXJkc19jb3VudCI6IHRydWUsCiAgImRlbGV0ZV9mb3JfYm90aF9kbXMiOiB0cnVlLAogICJwaW5uZWRfcmVhY3Rpb25zIjogIlt7XCJlXCI6XCLwn5GNXCJ9LHtcImVcIjpcIuKdpFwifSx7XCJlXCI6XCLwn5GMXCJ9LHtcImVcIjpcIvCfmY9cIn0se1wiZVwiOlwi8J+kt+KAjeKZglwifSx7XCJlXCI6XCLwn6S34oCN4pmAXCJ9XSIsCiAgImNsb3duX2F2YXRhcl9lbW9qaSI6IDEsCiAgImhpZGVfcmVwbHlfYmFja2dyb3VuZCI6IGZhbHNlLAogICJwcm9maWxlX2luZm9fcm93cyI6ICJbe1wia1wiOlwicGhvbmVcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJiaW9cIixcImVcIjp0cnVlfSx7XCJrXCI6XCJ1c2VybmFtZVwiLFwiZVwiOnRydWV9LHtcImtcIjpcImlkXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwicmVnX2RhdGVcIixcImVcIjpmYWxzZX1dIiwKICAicGlubmVkX3JlYWN0aW9uc19lbmFibGVkIjogdHJ1ZSwKICAicmVhY3Rpb25zX2luX3JvdyI6IDYsCiAgInJlYWN0aW9uX2Jhcl9iZWxvdyI6IGZhbHNlLAogICJhdmF0YXJfY29ybmVycyI6IDI4LAogICJpb3NfY2hhdF9oZWFkZXIiOiBmYWxzZSwKICAiZGlzYWJsZV9zY3JpbV9ibHVyIjogZmFsc2UsCiAgImhpZGVfc3VnZ2VzdGlvbl9iaXJ0aGRheV9zZXR1cCI6IHRydWUsCiAgImhpZGVfa2V5Ym9hcmRfb25fc2Nyb2xsIjogZmFsc2UsCiAgInNhdmVfc2VsZl9kZXN0cnVjdF90ZXh0IjogZmFsc2UsCiAgImZlZWRfZW5hYmxlZCI6IGZhbHNlLAogICJ0cmFuc2xhdGVfdGFyZ2V0X2xhbmd1YWdlIjogImZhIiwKICAiaW9zX2NoYXRfaGVhZGVyX2F2YXRhcl9zbG90IjogZmFsc2UsCiAgImRpc2FibGVfcHJvZmlsZV9zY3JvbGxfc25hcCI6IGZhbHNlLAogICJkZXZpY2Vfc3Bvb2YiOiBmYWxzZSwKICAiZ2hvc3Rfc3RvcnlfYWxlcnQiOiBmYWxzZSwKICAicmVkdWNlX3Byb2ZpbGVfbW90aW9uIjogZmFsc2UsCiAgImxpcXVpZF9nbGFzc19pbnRlbnNpdHkiOiA1MSwKICAibm90aWZpY2F0aW9uX2ljb24iOiAxLAogICJwbGF5X29yaWdpbmFsX3ZpZGVvIjogdHJ1ZSwKICAicGx1Z2luc19lbmFibGVkIjogdHJ1ZSwKICAidGFibGV0X21vZGUiOiAwLAogICJpb3NfY2hhdHNfdGFiX3JldHVybnNfdG9fZmlyc3RfZm9sZGVyIjogZmFsc2UsCiAgImRpc2FibGVfY2FsbF9yYXRpbmciOiB0cnVlLAogICJoaWRlX3N1Z2dlc3Rpb25fcGFzc3dvcmQiOiB0cnVlLAogICJyZW1lbWJlcl9zZWxlY3RlZF9mb2xkZXIiOiBmYWxzZSwKICAidHJhbnNsYXRlX291dGdvaW5nIjogdHJ1ZSwKICAiYWN0aW9uX2J1dHRvbl9zdHlsZSI6IDAsCiAgIm5vbl9pc2xhbmRfY2hhdF9lbGVtZW50cyI6IGZhbHNlLAogICJkb3VibGVfdGFwX2FjdGlvbl9pbmNvbWluZyI6IDMsCiAgImF0dGFjaF9jYW1lcmFfcmVzb2x1dGlvbiI6IDIsCiAgImNvbXBhY3RfaW5wdXRfc2l6ZSI6IGZhbHNlLAogICJkaWFsb2dzX2ZhYl9vZmZzZXRfZm9yX2JvdHRvbV9iYXIiOiBmYWxzZSwKICAicHJvZmlsZV9waG90b19ncmFkaWVudF9mYWRlIjogZmFsc2UsCiAgInN0YXJ0X3RhYiI6IDAsCiAgImRpc2FibGVfY29udGFjdHNfcGVybWlzc2lvbl9uYWciOiB0cnVlLAogICJkaXNhYmxlX3ZpZGVvX21lc3NhZ2VfYXV0b3BsYXkiOiBmYWxzZSwKICAidW5saW1pdGVkX3Bpbm5lZF9jaGF0cyI6IHRydWUsCiAgImJvdHRvbV90YWJzX29yZGVyIjogIlt7XCJrXCI6XCJjaGF0c1wiLFwiZVwiOnRydWV9LHtcImtcIjpcImNvbnRhY3RzXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwic2V0dGluZ3NcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJjYWxsc1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJwcm9maWxlXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwiZmVlZFwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJzZWFyY2hcIixcImVcIjpmYWxzZX1dIiwKICAibWVkaWFfc3BvaWxlcl9tb2RlIjogMCwKICAiYm90dG9tX3RhYnNfc2hvd190aXRsZXMiOiB0cnVlLAogICJza2lwX2xpbmtfY29uZmlybSI6IGZhbHNlLAogICJjZW50ZXJfdGl0bGVfY2hhdHMiOiBmYWxzZSwKICAicGlsbF9zdGFja19wcm94eV9jb3VudHJ5IjogdHJ1ZSwKICAic3RpY2tlcl9zaXplIjogMTQsCiAgImNoYXRfaW5wdXRfbWF4X2xpbmVzIjogNSwKICAic3RpY2tlcl9zaGFwZSI6IDIsCiAgImJvdHRvbV90YWJzX2hpZGVfY29tcGFjdF9tb2RlIjogZmFsc2UsCiAgImlvc19jaGF0X2xpc3QiOiBmYWxzZSwKICAiY2xvdWRfc3luY19hdXRvIjogdHJ1ZSwKICAic2hvd19vbmxpbmVfaW5kaWNhdG9yIjogdHJ1ZSwKICAic2hvd19wcm9maWxlX3JlZ19kYXRlIjogZmFsc2UsCiAgInN5c3RlbV9mb2xkZXJzX3N0YXRlIjogIkFETUlOSVNUUkFUT1I6MDotMSxVTlJFQUQ6MDotMSxHUk9VUFM6MDotMSIsCiAgInBpbGxfc3RhY2tfYWN0aXZlX3BpbGxzIjogIjQiLAogICJjaGF0X2hlYWRlcl9ub19waWxsIjogZmFsc2UsCiAgImlvc19jaGF0X2hlYWRlcl9hdmF0YXJfc3RhdGljIjogZmFsc2UsCiAgImJpb21ldHJpY19jb25maXJtX2xvZ291dCI6IHRydWUsCiAgIm0zX3NlY3Rpb25zX3N0eWxlIjogZmFsc2UsCiAgIm1lc3NhZ2VfbWVudV9pdGVtcyI6ICJbe1wia1wiOlwicmVwbHlcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJyZXBseV9pblwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJhZGRfdG9fc3RpY2tlcnNcIixcImVcIjpmYWxzZX0se1wia1wiOlwiY29weVwiLFwiZVwiOnRydWV9LHtcImtcIjpcImNvcHlfcGhvdG9cIixcImVcIjpmYWxzZX0se1wia1wiOlwiY29weV9saW5rXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwic2F2ZV90b19nYWxsZXJ5XCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwic2F2ZV90b19kb3dubG9hZHNcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZm9yd2FyZFwiLFwiZVwiOnRydWV9LHtcImtcIjpcImZvcndhcmRfbm9fcXVvdGVcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZm9yd2FyZF9wcm9cIixcImVcIjp0cnVlfSx7XCJrXCI6XCJyZXBlYXRcIixcImVcIjpmYWxzZX0se1wia1wiOlwic2F2ZVwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJwaW5cIixcImVcIjp0cnVlfSx7XCJrXCI6XCJ0cmFuc2xhdGVcIixcImVcIjpmYWxzZX0se1wia1wiOlwic3VtbWFyaXplXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImVkaXRcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJyZXBvcnRcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJzaGFyZVwiLFwiZVwiOnRydWV9LHtcImtcIjpcInN0YXRpc3RpY3NcIixcImVcIjpmYWxzZX0se1wia1wiOlwic2hvd19pbl9jaGF0XCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwicmVtb3ZlX2Zyb21fY2FjaGVcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZGVsZXRlXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwiZGV0YWlsc1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJtYXJrX2FzX3JlYWRcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZWRpdF9oaXN0b3J5XCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImFkZF9maWx0ZXJcIixcImVcIjpmYWxzZX0se1wia1wiOlwic2V0X3JlbWluZGVyXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImJvb2ttYXJrXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImxvY2FsX2VkaXRcIixcImVcIjpmYWxzZX0se1wia1wiOlwiaGlkZV9tZXNzYWdlXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImFjdGlvbnNcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJzbG90X3JlcGx5XCIsXCJlXCI6dHJ1ZSxcImJcIjp0cnVlfSx7XCJrXCI6XCJzbG90X2NvcHlcIixcImVcIjp0cnVlLFwiYlwiOnRydWV9LHtcImtcIjpcInNsb3RfZGVsZXRlXCIsXCJlXCI6dHJ1ZSxcImJcIjp0cnVlfSx7XCJrXCI6XCJzbG90X2VkaXRfZm9yd2FyZFwiLFwiZVwiOnRydWUsXCJiXCI6dHJ1ZX1dIiwKICAiZGlzYWJsZV9uZXh0X2F1ZGlvX3ByZWxvYWQiOiB0cnVlLAogICJwaWxsX3N0YWNrX2luX2hlYWRlciI6IGZhbHNlLAogICJzdHJpcF90cmFja2luZ19wYXJhbXNfb25fcGFzdGUiOiBmYWxzZSwKICAiZGlhbG9nc19mYWJfaGlkZSI6IGZhbHNlLAogICJzZXR0aW5nc19zaG93X2FjY291bnRzIjogdHJ1ZSwKICAic3RyaXBfdHJhY2tpbmdfcGFyYW1zIjogZmFsc2UsCiAgInByZWRpY3RpdmVfYmFja19tb2RlIjogMCwKICAic2F2ZV9hbnlfc3RvcnkiOiB0cnVlLAogICJkaXNhYmxlX3B1bGxfdG9fbmV4dCI6IGZhbHNlLAogICJoaWRlX2JvdF9zbGFzaF9ncm91cHMiOiBmYWxzZSwKICAiY2hhdF92aWV3c19ib3R0b20iOiB0cnVlLAogICJzaG93X21lZGlhX3NpemUiOiBmYWxzZSwKICAiY2hhdF9tZW51X2l0ZW1zIjogIlt7XCJrXCI6XCJzZWFyY2hcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJjaGFuZ2VfY29sb3JzXCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwiY2xlYXJfaGlzdG9yeVwiLFwiZVwiOnRydWV9LHtcImtcIjpcImRlbGV0ZV9jaGF0XCIsXCJlXCI6dHJ1ZX0se1wia1wiOlwiY2hhdF9kZWxldGVfbXlfbWVzc2FnZXNcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJ2aWV3X2FzX3RvcGljc1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJvcGVuX2RpcmVjdFwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJjYWxsXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcInZpZGVvX2NhbGxcIixcImVcIjpmYWxzZX0se1wia1wiOlwiYm9vc3RfZ3JvdXBcIixcImVcIjpmYWxzZX0se1wia1wiOlwidHJhbnNsYXRlXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcInJlcG9ydFwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJhZGRfY29udGFjdFwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJzZXRfdGltZXJcIixcImVcIjpmYWxzZX0se1wia1wiOlwiYWRkX3Nob3J0Y3V0XCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImJvdF9zZXR0aW5nc1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJib3RfaGVscFwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJvcGVuX2ZvcnVtXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImNsb3NlX3RvcGljXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcInNob3dfaGlkZGVuX21lc3NhZ2VzXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcInNob3dfcGlubmVkX3BhbmVsXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcInJlY2VudF9hY3Rpb25zXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImdvX3RvX2JlZ2lubmluZ1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJnb190b19tZXNzYWdlXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImxpbmtlZF9jaGF0XCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImNsZWFyX2RlbGV0ZWRcIixcImVcIjpmYWxzZX0se1wia1wiOlwiaGlkZV90aXRsZVwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJzdGF0aXN0aWNzXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImFkbWluaXN0cmF0b3JzXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcInBlcm1pc3Npb25zXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcInR5cGluZ19zcG9vZlwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJyZWdleF9jaGF0X2ZpbHRlcnNcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZGVsZXRlZF9tZXNzYWdlc1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJlZGl0ZWRfbWVzc2FnZXNcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZ2hvc3RfbW9kZVwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJpbnZpdGVfbGlua3NcIixcImVcIjpmYWxzZX0se1wia1wiOlwic2hvd19oaWRkZW5cIixcImVcIjpmYWxzZX0se1wia1wiOlwiY2hhdF9leHBvcnRcIixcImVcIjpmYWxzZX0se1wia1wiOlwiY2hhdF9wcm94eVwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJzaWxlbnRfYnJvYWRjYXN0XCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImNoYXRfbG9jYWxfbmFtZVwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJjaGF0X21hcmtfcmVhZFwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJidXNpbmVzc19ib3RcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZW50aW55X21lbnVcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJhY3Rpb25zXCIsXCJlXCI6dHJ1ZX1dIiwKICAiZHJhd2VyX21lbnVfaXRlbXMiOiAiW3tcImtcIjpcIm15X3Byb2ZpbGVcIixcImVcIjpmYWxzZX0se1wia1wiOlwiYm90c1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJkaXZpZGVyXzFcIixcImVcIjpmYWxzZX0se1wia1wiOlwiY29tcG9zZVwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJuZXdfY2hhbm5lbFwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJjb250YWN0c1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJjYWxsc1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJzYXZlZF9tZXNzYWdlc1wiLFwiZVwiOnRydWV9LHtcImtcIjpcInJlY2VudF9jaGF0c1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJib29rbWFya3NcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZmVlZFwiLFwiZVwiOnRydWV9LHtcImtcIjpcImFyY2hpdmVcIixcImVcIjpmYWxzZX0se1wia1wiOlwicHJveHlcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZ2hvc3RfbW9kZVwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJzZXR0aW5nc1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJlbnRpbnlfc2V0dGluZ3NcIixcImVcIjp0cnVlfSx7XCJrXCI6XCJwbHVnaW5fc2V0dGluZ3NcIixcImVcIjpmYWxzZX0se1wia1wiOlwicmVzdGFydF9hcHBcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZGl2aWRlcl8yXCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImRpdmlkZXJfM1wiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJkaXZpZGVyXzRcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZGl2aWRlcl81XCIsXCJlXCI6ZmFsc2V9LHtcImtcIjpcImRpdmlkZXJfNlwiLFwiZVwiOmZhbHNlfSx7XCJrXCI6XCJkaXZpZGVyXzdcIixcImVcIjpmYWxzZX0se1wia1wiOlwiZGl2aWRlcl84XCIsXCJlXCI6ZmFsc2V9XSIsCiAgImRlbGV0ZV9mb3JfYm90aF9ncm91cHMiOiB0cnVlLAogICJwaWxsX3N0YWNrX2hpZGRlbl9waWxscyI6ICIyLDYsOCwxMCwxMSwxMiwxMDAsNSwzLDEsOSIsCiAgImhpZGVfY2FsbF9hY3Rpb25fYnV0dG9uIjogZmFsc2UsCiAgIm1kM19wbGF5ZXIiOiB0cnVlLAogICJtM19ib3R0b21fdGFicyI6IGZhbHNlLAogICJkaXNhYmxlX25leHRfdm9pY2VfYXV0b3BsYXkiOiB0cnVlLAogICJtYXRlcmlhbF9wcm9maWxlX2FjdGlvbnMiOiB0cnVlLAogICJkaXNhYmxlX2NoYXRfYnViYmxlcyI6IGZhbHNlLAogICJmb2xkZXJzX2luZmluaXRlX3N3aXBlIjogdHJ1ZSwKICAicm91bmRfZGVmYXVsdF9jYW1lcmEiOiAyLAogICJpb3NfYm90dG9tX25hdmlnYXRpb25fYmFyIjogZmFsc2UsCiAgImhpZGVfcmVwb3N0X3RvX3N0b3J5IjogZmFsc2UsCiAgImFpX3RyYW5zY3JpYmVfZW5hYmxlZCI6IHRydWUsCiAgInNlbmRfdG9fZGlzY3Vzc193aXRob3V0X2pvaW4iOiBmYWxzZSwKICAiaGlkZV9oYXNodGFnX3N1Z2dlc3Rpb25zIjogZmFsc2UsCiAgImZvcndhcmRfbG9uZ190YXBfYWN0aW9uIjogMCwKICAiZGlhbG9nc19tM19zZXBhcmF0ZV9waW5uZWQiOiBmYWxzZSwKICAibWF0ZXJpYWwzX3N3aXRjaGVzIjogZmFsc2UsCiAgImRpYWxvZ3NfbTNfbWFyZ2luIjogMCwKICAiZmVlZF9uZXdlc3Rfb25fdG9wIjogdHJ1ZSwKICAiYm90dG9tX3RhYnNfbGlmdCI6IDAsCiAgImhpZGVfc3RvcnlfYXZhdGFycyI6IGZhbHNlLAogICJ0cmFuc2xhdGVfYXV0b19kZXRlY3RfbGFuZyI6IGZhbHNlLAogICJoaWRlX2NoYXRfYXZhdGFyIjogZmFsc2UsCiAgInNjcmltX2JsdXJfc3RyZW5ndGgiOiAyMCwKICAiZGlzYWJsZV9tb3Rpb25fcGhvdG9zIjogZmFsc2UsCiAgImNlbnRlcl90aXRsZV9kaWFsb2dzIjogZmFsc2UsCiAgImFuaW1hdGlvbl9zcGVlZCI6IDEuMTUwMDAwMSwKICAiYXV0b19kaXNhYmxlX3Byb3h5X29uX3ZwbiI6IHRydWUsCiAgImJvdHRvbV90YWJzX2hpZGUiOiBmYWxzZSwKICAibGlxdWlkX2dsYXNzX2FuZ2xlIjogMCwKICAiZGlzYWJsZV9wcm9maWxlX211c2ljX2F1dG9wbGF5IjogdHJ1ZSwKICAiaGlkZV9teV9waG9uZV9udW1iZXIiOiBmYWxzZSwKICAidW5saW1pdGVkX2ZvbGRlcl9jaGF0cyI6IHRydWUsCiAgImJpb21ldHJpY19jb25maXJtX2RlbGV0ZV9jaGF0IjogZmFsc2UsCiAgInVucmVhZF9iYWRnZV9vbl9iYWNrX2J1dHRvbl9pb3MiOiBmYWxzZSwKICAic3VnZ2VzdF9jdXN0b21fZW1vamlfYWZ0ZXIiOiBmYWxzZSwKICAiaGlkZV9zZW5kX2FzX3BpY2tlciI6IGZhbHNlLAogICJkaWFsb2dzX2ZhYl9oaWRlX29uX3Njcm9sbCI6IHRydWUsCiAgImljb25fcGFja3Nfb3JkZXIiOiAic29sYXIiLAogICJ0cmFuc2xhdGVfbmV3X2dvb2dsZSI6IHRydWUsCiAgImRpc2FibGVfc2Vuc2l0aXZlIjogdHJ1ZSwKICAic2F2ZV92aWV3X29uY2VfbWVkaWEiOiBmYWxzZSwKICAiYnViYmxlX3RhaWxzIjogZmFsc2UsCiAgImNoYXRfdHdvX2Zpbmdlcl9zZWxlY3QiOiB0cnVlLAogICJhdXRvX3NhdmVfc3RvcmllcyI6IGZhbHNlLAogICJzYXZlX3RpbWVkX21lc3NhZ2VzIjogZmFsc2UsCiAgImhpZGVfZ3JvdXBfc3RpY2tlcl9wYWNrIjogdHJ1ZSwKICAiZ2hvc3RfbWFya19yZWFkX2xvY2FsbHkiOiBmYWxzZSwKICAiaW5wdXRfdHJhbnNsYXRlX2xhbmd1YWdlIjogImZhIiwKICAicGlsbF9zdGFja19yYXRlX2luc3RhbmNlcyI6ICIxMDA6QlRDPkFVVE8iLAogICJieXBhc3NfZ2lmX3Jlc3RyaWN0aW9ucyI6IHRydWUKIH0sCiAic3RvY2siOiB7CiAgIm1haW5jb25maWciOiB7CiAgICJwYXVzZU11c2ljT25SZWNvcmQiOiBmYWxzZSwKICAgImJ1YmJsZVJhZGl1cyI6IDE3LAogICAidHJhbnNsYXRlX2J1dHRvbl9yZXN0cmljdGVkX2xhbmd1YWdlc192ZXJzaW9uIjogMiwKICAgInJlcGVhdE1vZGUiOiAyLAogICAic3VnZ2VzdFN0aWNrZXJzIjogMiwKICAgImFsbG93QmlnRW1vamkiOiBmYWxzZSwKICAgImFyY2hpdmVIaWRkZW4iOiB0cnVlLAogICAidHJhbnNsYXRlX2J1dHRvbl9yZXN0cmljdGVkX2xhbmd1YWdlc19jaGFuZ2VkIjogdHJ1ZSwKICAgInVzZVRocmVlTGluZXNMYXlvdXQiOiB0cnVlCiAgfQogfQp9"
+
+          KOTLIN_DEFAULTS = r'''package desu.inugram.helpers
+
+          import android.content.Context
+          import androidx.core.content.edit
+          import desu.inugram.helpers.cloud.CloudSettingsHelper
+          import desu.inugram.helpers.cloud.SettingsBackupHelper
+          import org.telegram.messenger.R
+
+          // softgram: factory defaults come from the bundled softgram_defaults.json (same format as a settings export)
+          object SoftgramDefaults {
+              private const val SEED_PREFS = "softgram_seed"
+              private const val SEED_DONE = "defaults_v1"
+              private const val SEED_PENDING = "defaults_v1_pending"
+
+              // true only on a clean install, before any setting has been written
+              @JvmStatic
+              fun isFreshInstall(context: Context): Boolean {
+                  val seed = context.getSharedPreferences(SEED_PREFS, Context.MODE_PRIVATE)
+                  if (seed.getBoolean(SEED_DONE, false)) return false
+                  if (seed.getBoolean(SEED_PENDING, false)) return true
+                  val fresh = context.getSharedPreferences("inugram", Context.MODE_PRIVATE).all.isEmpty()
+                  if (fresh) seed.edit { putBoolean(SEED_PENDING, true) }
+                  return fresh
+              }
+
+              @JvmStatic
+              fun seed(context: Context) {
+                  try {
+                      if (applyBundled(context)) {
+                          context.getSharedPreferences(SEED_PREFS, Context.MODE_PRIVATE).edit {
+                              putBoolean(SEED_DONE, true)
+                              remove(SEED_PENDING)
+                          }
+                      }
+                  } catch (_: Throwable) {
+                  }
+              }
+
+              @JvmStatic
+              fun applyBundled(context: Context): Boolean {
+                  val json = context.resources.openRawResource(R.raw.softgram_defaults).bufferedReader(Charsets.UTF_8).use { it.readText() }
+                  val parsed = SettingsBackupHelper.parse(json) as? SettingsBackupHelper.ParseResult.Ok ?: return false
+                  SettingsBackupHelper.apply(parsed)
+                  return true
+              }
+
+              // "reset to defaults" goes back to the Softgram defaults, not to the stock code defaults
+              @JvmStatic
+              fun reapplyAfterReset(context: Context) {
+                  if (CloudSettingsHelper.restoring) return
+                  try {
+                      applyBundled(context)
+                  } catch (_: Throwable) {
+                  }
+              }
+          }
+          '''
+
+          POST_TS = r'''/** Softgram post: title, channel, files, then the owner's own What's new text in a collapsed block. */
+          export function softPost(info: PostInfo, lines: string[], apks: RichApk[]): string {
+            const items = lines.map(l => `- ${mdEsc(l)}`).join('\n')
+            return [richTitle(info), '@Softgram_org', richFiles(apks), `<details><summary>What's new</summary>\n\n${items}\n\n</details>`].filter(Boolean).join('\n\n')
+          }
+          '''
+
+          SEND_TS_FUNCS = r'''interface SoftPost { createdAt: number, base: string, label: string, lines: string[] }
+          const softPath = resolve('assets/release/softgram-post.json')
+          const soft: SoftPost | null = await fs.readFile(softPath, 'utf8')
+            .then(text => JSON.parse(text) as SoftPost)
+            .then(p => (Date.now() - p.createdAt < 36 * 3600 * 1000 && p.lines?.length ? p : null))
+            .catch(() => null)
+          const softRequired = true
+
+          function git(...args: string[]) {
+            return new Promise<void>((res, rej) => {
+              const p = spawn('git', args, { stdio: 'inherit' })
+              p.on('error', rej)
+              p.on('exit', code => (code === 0 ? res() : rej(new Error(`git ${args[0]} exited ${code}`))))
+            })
+          }
+
+          async function consumeSoftPost() {
+            try {
+              await git('config', 'user.name', 'github-actions[bot]')
+              await git('config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com')
+              await git('rm', '-q', '-f', 'assets/release/softgram-post.json')
+              await git('commit', '-q', '-m', 'Softgram: release post published')
+              await git('pull', '--rebase', '-q')
+              await git('push', '-q')
+            } catch (e) {
+              console.warn('could not remove the used post file:', e)
+            }
+          }
+
+          async function publishSoft(files: string[]) {
+            const s = soft!
+            const post: PostInfo = { base: s.base, label: s.label, track: info.track, repo: info.repo }
+            const apks = richApks(files)
+            const attachments: Record<string, InputRichMessageMedia> = {}
+            for (const apk of apks) {
+              // @ts-expect-error mtcute 0.31 omits document inputs from its rich-media type
+              attachments[apk.id] = InputMedia.document(`file:${join(outDir, apk.file)}`, { fileName: apk.file, fileMime: APK_MIME })
+            }
+            const uploadCache: RichMediaUploadCache = new Map()
+            const content = { type: 'markdown' as const, content: softPost(post, s.lines, apks), attachments }
+            await tg.sendRichMessage(channelCI, { content, uploadCache })
+            if (ciOnly || info.track === 'beta') {
+              console.log('CI channel only: skipping the main channel post.')
+            } else {
+              await tg.sendRichMessage(channelMain, { content, uploadCache })
+            }
+            await consumeSoftPost()
+          }
+
+          '''
+
+          # ---- 1. factory defaults: bundled settings file + loader
+          wr("src/res/raw/softgram_defaults.json", base64.b64decode(DEFAULTS_B64).decode("utf-8"))
+          wr("src/fork/helpers/SoftgramDefaults.kt", KOTLIN_DEFAULTS)
+
+          HOOKS = "src/fork/InuHooks.kt"
+          rep(HOOKS, "        InuConfig.load(context)\n",
+              "        val softFresh = desu.inugram.helpers.SoftgramDefaults.isFreshInstall(context)\n"
+              "        InuConfig.load(context)\n"
+              "        if (softFresh) desu.inugram.helpers.SoftgramDefaults.seed(context)\n")
+
+          BK = "src/fork/helpers/cloud/SettingsBackupHelper.kt"
+          rep(BK, "        return toRemove.size + stockReset\n",
+              "        org.telegram.messenger.ApplicationLoader.applicationContext?.let { desu.inugram.helpers.SoftgramDefaults.reapplyAfterReset(it) }\n"
+              "        return toRemove.size + stockReset\n")
+
+          # ---- 2. exported settings file name
+          rep(BK, 'const val FILENAME_SUFFIX = ".entiny-settings.json"', 'const val FILENAME_SUFFIX = "Softgram-settings.json"')
+          rep("src/fork/ui/settings/BackupSettingsActivity.kt",
+              '            val date = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())\n'
+              '            val file = File(AndroidUtilities.getCacheDir(), "$date${SettingsBackupHelper.FILENAME_SUFFIX}")\n',
+              '            val file = File(AndroidUtilities.getCacheDir(), SettingsBackupHelper.FILENAME_SUFFIX)\n')
+          CH = "src/fork/helpers/chat/ChatHelper.kt"
+          rep(CH, "        name.endsWith(SettingsBackupHelper.FILENAME_SUFFIX) ||\n",
+              '        name.endsWith(SettingsBackupHelper.FILENAME_SUFFIX) || name.endsWith(".entiny-settings.json") ||\n')
+          rep(CH, "        val isSettings = name.endsWith(SettingsBackupHelper.FILENAME_SUFFIX)\n",
+              '        val isSettings = name.endsWith(SettingsBackupHelper.FILENAME_SUFFIX) || name.endsWith(".entiny-settings.json")\n')
+
+          # ---- 3. Telegram release post: english only, text comes from the owner
+          P = "assets/release/post.ts"
+          need(P)
+          if "export function softPost" not in rd(P):
+              wr(P, rd(P).rstrip("\n") + "\n\n" + POST_TS)
+
+          S = "assets/release/send.ts"
+          rep(S, "import { fitCaption, mainPost, noteLines, richApks, richCiPost, richMainPost, richSections, type PostInfo } from './post'",
+              "import { fitCaption, mainPost, noteLines, richApks, richCiPost, richMainPost, richSections, softPost, type PostInfo } from './post'")
+          rep(S, "try {\n  const post: PostInfo = {", SEND_TS_FUNCS + "try {\n  const post: PostInfo = {")
+          rep(S, "  if (richMode) {\n    await publishRich(post, files)\n  } else {",
+              "  if (soft) {\n    await publishSoft(files)\n  } else if (softRequired) {\n"
+              "    console.error('No fresh What\\'s new text found. Start the build from the \"Softgram Release\" workflow so the bot can ask for it. Nothing was posted.')\n"
+              "    process.exitCode = 1\n"
+              "  } else if (richMode) {\n    await publishRich(post, files)\n  } else {")
+
+          os.makedirs(".softgram", exist_ok=True)
+          wr(".softgram/7-defaults-release.done", "defaults and release flow applied\n")
+          print("OK: defaults, file name and release flow applied")
+          PYEOF
+          python3 /tmp/step.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+          else
+            git commit -m "Softgram: default settings, settings file name, release flow"
+            git pull --rebase -q
+            git push
+          fi
+
+  release:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.task != 'patch' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 185
+    concurrency:
+      group: softgram-release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check that the release flow is applied
+        run: |
+          if [ ! -f .softgram/7-defaults-release.done ]; then
+            echo "The release flow is not applied yet. Run this workflow once with task = patch."
+            exit 1
+          fi
+
+      - name: Ask for version, release number and What's new
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          PRERELEASE: ${{ inputs.prerelease }}
+          OWNER_ID: '8314774851'
+        run: |
+          cat > /tmp/ask.py <<'PYEOF'
+          import json, os, re, subprocess, sys, time, urllib.error, urllib.request
+
+          TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+          OWNER = int(os.environ.get("OWNER_ID", "8314774851"))
+          PRERELEASE = os.environ.get("PRERELEASE", "false") == "true"
+          DEADLINE = time.time() + int(os.environ.get("ASK_TIMEOUT_MIN", "170")) * 60
+          if not TOKEN:
+              print("ERROR: secret TELEGRAM_BOT_TOKEN is not set")
+              sys.exit(1)
+
+
+          def api(method, payload, timeout=30):
+              req = urllib.request.Request(
+                  "https://api.telegram.org/bot%s/%s" % (TOKEN, method),
+                  data=json.dumps(payload).encode("utf-8"),
+                  headers={"Content-Type": "application/json"},
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=timeout) as r:
+                      return json.loads(r.read().decode("utf-8"))
+              except urllib.error.HTTPError as e:
+                  try:
+                      return json.loads(e.read().decode("utf-8"))
+                  except Exception:
+                      return {"ok": False, "description": "HTTP %s" % e.code}
+              except Exception as e:
+                  return {"ok": False, "description": type(e).__name__}
+
+
+          def say(text):
+              r = api("sendMessage", {"chat_id": OWNER, "text": text, "disable_web_page_preview": True})
+              if not r.get("ok"):
+                  print("ERROR: cannot message the owner: %s" % r.get("description"))
+                  print("Open the bot in Telegram, press Start, then run this workflow again.")
+                  sys.exit(1)
+
+
+          # skip anything that was sent before this run started
+          offset = 0
+          r = api("getUpdates", {"offset": -1, "timeout": 0})
+          if not r.get("ok") and "webhook" in str(r.get("description", "")).lower():
+              api("deleteWebhook", {"drop_pending_updates": False})
+              r = api("getUpdates", {"offset": -1, "timeout": 0})
+          if r.get("ok") and r.get("result"):
+              offset = r["result"][-1]["update_id"] + 1
+
+
+          def wait_text():
+              global offset
+              while time.time() < DEADLINE:
+                  r = api("getUpdates", {"offset": offset, "timeout": 50, "allowed_updates": ["message"]}, timeout=70)
+                  if not r.get("ok"):
+                      time.sleep(5)
+                      continue
+                  for u in r["result"]:
+                      offset = u["update_id"] + 1
+                      m = u.get("message") or {}
+                      if (m.get("from") or {}).get("id") != OWNER or (m.get("chat") or {}).get("id") != OWNER:
+                          continue
+                      t = (m.get("text") or "").strip()
+                      if not t:
+                          continue
+                      if t.lower().startswith("/cancel"):
+                          say("Cancelled. Nothing was built or published.")
+                          print("Cancelled by the owner.")
+                          sys.exit(1)
+                      return t
+              print("ERROR: no answer before the deadline")
+              sys.exit(1)
+
+
+          def ask(question, pattern, hint):
+              say(question)
+              while True:
+                  t = wait_text()
+                  if re.fullmatch(pattern, t):
+                      return t
+                  say(hint)
+
+
+          say("Softgram release is starting. Send /cancel at any time to stop.")
+          version = ask("Which version? Send only the number, like 13.2.2", r"\d+(\.\d+){1,3}", "Send only the version, like 13.2.2")
+          number = ask("Which release number? Send only the number, like 1", r"\d+", "Send only the number, like 1")
+          say("Now send the What's new text in ONE message. One change per line. It goes into the What's new drawer exactly as you send it.")
+
+          lines = []
+          while not lines:
+              raw = wait_text()
+              for ln in raw.splitlines():
+                  ln = re.sub(r"^\s*(?:[-*\u2022\u2013\u2014]+\s+)", "", ln).strip()
+                  if ln:
+                      lines.append(ln)
+              if not lines:
+                  say("That was empty. Send the What's new text again.")
+
+          label = ("pre-release " if PRERELEASE else "release ") + number
+          post = {"createdAt": int(time.time() * 1000), "base": version, "label": label, "lines": lines}
+          os.makedirs("assets/release", exist_ok=True)
+          with open("assets/release/softgram-post.json", "w", encoding="utf-8") as f:
+              json.dump(post, f, ensure_ascii=False, indent=2)
+              f.write("\n")
+          say("Saved. Building Softgram %s \u00b7 %s now, and I will publish it when the build is ready." % (version, label))
+          print("OK: Softgram %s - %s, %d lines" % (version, label, len(lines)))
+          PYEOF
+          python3 /tmp/ask.py
+
+      - name: Save the text and start the build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/release/softgram-post.json
+          git commit -m "Softgram: release post text"
+          git pull --rebase -q
+          git push
+          gh workflow run apk.yml --ref "${{ github.ref_name }}" \
+            -f mode="${{ inputs.mode }}" \
+            -f prerelease="${{ inputs.prerelease }}" \
+            -f build_arm7="${{ inputs.build_arm7 }}" \
+            -f build_plugins="${{ inputs.build_plugins }}"
