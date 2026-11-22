@@ -1,0 +1,245 @@
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
+index 7f4bf6f..d26b971 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java
+@@ -48453,7 +48453,7 @@ public class ChatActivity extends BaseFragment implements
+                 if (!selectedObject.isPaidSuggestedPostProtected() && chatMode == MODE_SCHEDULED) {
+                     items.add(LocaleController.getString(R.string.MessageScheduleSend));
+                     options.add(OPTION_SEND_NOW);
+-                    icons.add(R.drawable.msg_send);
++                    icons.add(R.drawable.softgram_send_24);
+                 }
+                 if (selectedObject.messageOwner.action instanceof TLRPC.TL_messageActionPhoneCall) {
+                     TLRPC.TL_messageActionPhoneCall call = (TLRPC.TL_messageActionPhoneCall) message.messageOwner.action;
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/AIEditorAlert.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/AIEditorAlert.java
+index 1ef2809..0e93d2e 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Components/AIEditorAlert.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/AIEditorAlert.java
+@@ -433,7 +433,7 @@ public class AIEditorAlert extends BottomSheetWithRecyclerListView implements No
+     private void updateSendButtonIcon() {
+         sendButton.setVisibility(editing || !hasSend() ? View.GONE : View.VISIBLE);
+         final SpannableStringBuilder sendButtonText = new SpannableStringBuilder(getString(R.string.Send));
+-        final ColoredImageSpan sendIconSpan = new ColoredImageSpan(editing ? R.drawable.filled_profile_edit_24 : R.drawable.send_plane_24);
++        final ColoredImageSpan sendIconSpan = new ColoredImageSpan(editing ? R.drawable.filled_profile_edit_24 : R.drawable.softgram_send_24);
+         sendIconSpan.setTranslateY(dp(1));
+         sendButtonText.setSpan(sendIconSpan, 0, sendButtonText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+         sendButton.setText(sendButtonText);
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAttachAlert.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAttachAlert.java
+index 355a713..e925ed6 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAttachAlert.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatAttachAlert.java
+@@ -3570,7 +3570,7 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
+         writeButtonContainer.setClipToPadding(false);
+         containerView.addView(writeButtonContainer, LayoutHelper.createFrame(110, 50, Gravity.RIGHT | Gravity.BOTTOM));
+ 
+-        writeButton = new ChatActivityEnterView.SendButton(context, R.drawable.send_plane_24, resourcesProvider) {
++        writeButton = new ChatActivityEnterView.SendButton(context, R.drawable.softgram_send_24, resourcesProvider) {
+             @Override
+             public boolean isOpen() {
+                 return true;
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/MessagePreviewView.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/MessagePreviewView.java
+index d7ea01e..8e4d2bb 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Components/MessagePreviewView.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/MessagePreviewView.java
+@@ -1156,7 +1156,7 @@ public class MessagePreviewView extends FrameLayout {
+ 
+                 if (messagePreviewParams.webpage != null && (messagePreviewParams.webpage.document != null || messagePreviewParams.webpage.photo != null)) {
+                     ActionBarMenuSubItem sendMediaItem = new ActionBarMenuSubItem(context, false, false, resourcesProvider);
+-                    sendMediaItem.setTextAndIcon(LocaleController.getString(messagePreviewParams.webpage.document != null ? (messagePreviewParams.isVideo ? R.string.InuPreviewSendVideo : R.string.InuPreviewSendFile) : R.string.InuPreviewSendPhoto), R.drawable.msg_send);
++                    sendMediaItem.setTextAndIcon(LocaleController.getString(messagePreviewParams.webpage.document != null ? (messagePreviewParams.isVideo ? R.string.InuPreviewSendVideo : R.string.InuPreviewSendFile) : R.string.InuPreviewSendPhoto), R.drawable.softgram_send_24);
+                     sendMediaItem.setOnClickListener(v -> {
+                         if (chatActivity.isInScheduleMode()) {
+                             AlertsCreator.createScheduleDatePickerDialog(chatActivity.getParentActivity(), chatActivity.getDialogId(), MessagePreviewView.this::sendWebpageMedia).show();
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/ShareAlert.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/ShareAlert.java
+index 1e3a7b5..9e426cf 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Components/ShareAlert.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/ShareAlert.java
+@@ -1765,7 +1765,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
+         writeButtonContainer.setAlpha(0.0f);
+         containerView.addView(writeButtonContainer, LayoutHelper.createFrame(110, 50, Gravity.RIGHT | Gravity.BOTTOM));
+ 
+-        writeButton = new ChatActivityEnterView.SendButton(context, R.drawable.send_plane_24, resourcesProvider) {
++        writeButton = new ChatActivityEnterView.SendButton(context, R.drawable.softgram_send_24, resourcesProvider) {
+             @Override
+             public boolean isOpen() {
+                 return true;
+@@ -2431,7 +2431,7 @@ public class ShareAlert extends BottomSheet implements NotificationCenter.Notifi
+             sendMessage.setTextColor(getThemedColor(Theme.key_voipgroup_nameText));
+             sendMessage.setIconColor(getThemedColor(Theme.key_windowBackgroundWhiteHintText));
+         }
+-        sendMessage.setTextAndIcon(LocaleController.getString(R.string.SendMessage), R.drawable.msg_send);
++        sendMessage.setTextAndIcon(LocaleController.getString(R.string.SendMessage), R.drawable.softgram_send_24);
+         sendMessage.setMinimumWidth(dp(196));
+         sendPopupLayout2.addView(sendMessage, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+         sendMessage.setOnClickListener(v -> {
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/UnsupportedBlockDrawable.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/UnsupportedBlockDrawable.java
+index 4bdbfca..e63b572 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Components/UnsupportedBlockDrawable.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/UnsupportedBlockDrawable.java
+@@ -99,7 +99,7 @@ public class UnsupportedBlockDrawable extends Drawable {
+     public UnsupportedBlockDrawable(Theme.ResourcesProvider resourceProvider) {
+         this.resourcesProvider = resourceProvider;
+ 
+-        planeDrawable = ApplicationLoader.applicationContext.getDrawable(R.drawable.send_plane_26).mutate();
++        planeDrawable = ApplicationLoader.applicationContext.getDrawable(R.drawable.softgram_send_24).mutate();
+         bubbleDrawable = ApplicationLoader.applicationContext.getDrawable(R.drawable.large_unsupported).mutate();
+ 
+         buttonBounce.setAdditionalInvalidate(this::invalidateSelf);
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ContentPreviewViewer.java b/TMessagesProj/src/main/java/org/telegram/ui/ContentPreviewViewer.java
+index fb14aa8..b327736 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/ContentPreviewViewer.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/ContentPreviewViewer.java
+@@ -577,7 +577,7 @@ public class ContentPreviewViewer {
+                     } else {
+                         if (delegate.canSendSticker()) {
+                             items.add(LocaleController.getString(R.string.SendStickerPreview));
+-                            icons.add(R.drawable.msg_send);
++                            icons.add(R.drawable.softgram_send_24);
+                             actions.add(0);
+                         }
+ 
+@@ -735,7 +735,7 @@ public class ContentPreviewViewer {
+                 if (delegate != null) {
+                     if (delegate.needSend(currentContentType) && !delegate.isInScheduleMode()) {
+                         items.add(LocaleController.getString(R.string.SendStickerPreview));
+-                        icons.add(R.drawable.msg_send);
++                        icons.add(R.drawable.softgram_send_24);
+                         actions.add(0);
+                     }
+                     if (delegate.needSend(currentContentType) && !delegate.isInScheduleMode()) {
+@@ -926,7 +926,7 @@ public class ContentPreviewViewer {
+ 
+                 if (delegate.needSend(currentContentType)) {
+                     items.add(LocaleController.getString(R.string.SendEmojiPreview));
+-                    icons.add(R.drawable.msg_send);
++                    icons.add(R.drawable.softgram_send_24);
+                     actions.add(0);
+                 }
+                 Boolean canSetAsStatus = delegate.canSetAsStatus(currentDocument);
+@@ -1064,7 +1064,7 @@ public class ContentPreviewViewer {
+ 
+                 if (delegate.needSend(currentContentType) && !delegate.isInScheduleMode()) {
+                     items.add(LocaleController.getString(R.string.SendGifPreview));
+-                    icons.add(R.drawable.msg_send);
++                    icons.add(R.drawable.softgram_send_24);
+                     actions.add(0);
+                 }
+                 if (delegate.needSend(currentContentType) && !delegate.isInScheduleMode()) {
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
+index d0371ad..0c0ac4b 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
+@@ -5256,7 +5256,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
+                 }
+             });
+ 
+-            writeButton = new ChatActivityEnterView.SendButton(context, R.drawable.send_plane_24, resourceProvider) {
++            writeButton = new ChatActivityEnterView.SendButton(context, R.drawable.softgram_send_24, resourceProvider) {
+                 @Override
+                 public boolean isOpen() {
+                     return true;
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Gifts/GiftMessageBottomSheet.java b/TMessagesProj/src/main/java/org/telegram/ui/Gifts/GiftMessageBottomSheet.java
+index 609b84c..5b31b70 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Gifts/GiftMessageBottomSheet.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Gifts/GiftMessageBottomSheet.java
+@@ -374,7 +374,7 @@ public class GiftMessageBottomSheet extends BottomSheet {
+         captionLimitView.setGravity(Gravity.CENTER);
+         containerView.addView(captionLimitView, LayoutHelper.createFrame(56, 20, Gravity.BOTTOM | Gravity.RIGHT, 3, 0, 3, 54));
+ 
+-        writeButton = new ChatActivityEnterView.SendButton(context, R.drawable.send_plane_24, resourcesProvider) {
++        writeButton = new ChatActivityEnterView.SendButton(context, R.drawable.softgram_send_24, resourcesProvider) {
+             @Override
+             public boolean isOpen() {
+                 return true;
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/GroupCallActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/GroupCallActivity.java
+index 57f00f6..5d7d332 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/GroupCallActivity.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/GroupCallActivity.java
+@@ -5534,7 +5534,7 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
+         ThemeBind.selectorBackground(callMessageSendButton, Theme.createSelectorDrawable(getThemedColor(Theme.key_listSelector)), null, ThemeBind.of(Theme.key_listSelector), resourcesProvider);
+         ThemeBind.colorFilter(callMessageSendButton, Theme.key_windowBackgroundWhiteBlueIcon, resourcesProvider, PorterDuff.Mode.MULTIPLY);
+         callMessageSendButton.setScaleType(ImageView.ScaleType.CENTER);
+-        callMessageSendButton.setImageResource(R.drawable.ic_send);
++        callMessageSendButton.setImageResource(R.drawable.softgram_send_21);
+         callMessageSendButton.setOnClickListener(v -> {
+             CharSequence text = callMessageEnterView.getText();
+             TLRPC.TL_textWithEntities toSend = new TLRPC.TL_textWithEntities();
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/PhotoViewer.java b/TMessagesProj/src/main/java/org/telegram/ui/PhotoViewer.java
+index 2458e8e..10deda5 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/PhotoViewer.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/PhotoViewer.java
+@@ -7410,7 +7410,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+         videoAvatarTooltip.setTextColor(0xff8c8c8c);
+         containerView.addView(videoAvatarTooltip, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.BOTTOM, 0, 8, 0, 0));
+ 
+-        pickerViewSendButton = new ChatActivityEnterView.SendButton(parentActivity, R.drawable.send_plane_24, resourcesProvider) {
++        pickerViewSendButton = new ChatActivityEnterView.SendButton(parentActivity, R.drawable.softgram_send_24, resourcesProvider) {
+             @Override
+             public boolean isOpen() {
+                 return true;
+@@ -7526,7 +7526,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+                     desu.inugram.helpers.chat.StickerSendHelper.arm();
+                     sendPressed(true, 0, 0);
+                 })
+-                .addIf(canReplace, R.drawable.msg_send, getString(R.string.SendAsNewPhoto), () -> sendPressed(true, 0, 0))
++                .addIf(canReplace, R.drawable.softgram_send_24, getString(R.string.SendAsNewPhoto), () -> sendPressed(true, 0, 0))
+                 .addIf(canReplace, R.drawable.msg_replace, getString(R.string.ReplacePhoto), this::replacePressed)
+                 .addIf(showSchedule, R.drawable.msg_calendar2, getString(userIsSelf ? R.string.SetReminder : R.string.ScheduleMessage), this::showScheduleDatePickerDialog)
+                 .addIf(showWithoutSound, R.drawable.input_notify_off, getString(R.string.SendWithoutSound), () -> sendPressed(false, 0, 0))
+@@ -17390,8 +17390,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+         if (pickerViewSendButton != null) {
+             FrameLayout.LayoutParams layoutParams2 = (FrameLayout.LayoutParams) pickerViewSendButton.getLayoutParams();
+             if (type == 4 || type == 5) {
+-                pickerViewSendButton.setResourceId(R.drawable.send_plane_24);
+-//                pickerViewSendButton.setImageResource(R.drawable.send_plane_24);
++                pickerViewSendButton.setResourceId(R.drawable.softgram_send_24);
++//                pickerViewSendButton.setImageResource(R.drawable.softgram_send_24);
+                 layoutParams2.bottomMargin = dp(1);
+             } else if (type == SELECT_TYPE_POLL_MEDIA || type == SELECT_TYPE_POLL_MEDIA_EDIT || type == SELECT_TYPE_AVATAR || type == SELECT_TYPE_WALLPAPER || type == SELECT_TYPE_QR || type == SELECT_TYPE_STICKER) {
+ //                pickerViewSendButton.setImageResource(R.drawable.floating_check);
+@@ -17399,8 +17399,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
+                 pickerViewSendButton.setPadding(0, dp(1), 0, 0);
+                 layoutParams2.bottomMargin = dp(1f);
+             } else {
+-//                pickerViewSendButton.setImageResource(R.drawable.send_plane_24);
+-                pickerViewSendButton.setResourceId(R.drawable.send_plane_24);
++//                pickerViewSendButton.setImageResource(R.drawable.softgram_send_24);
++                pickerViewSendButton.setResourceId(R.drawable.softgram_send_24);
+                 layoutParams2.bottomMargin = dp(1);
+             }
+             pickerViewSendButton.setLayoutParams(layoutParams2);
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/iv/RichEditor.java b/TMessagesProj/src/main/java/org/telegram/ui/iv/RichEditor.java
+index ca14531..6b398a7 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/iv/RichEditor.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/iv/RichEditor.java
+@@ -986,7 +986,7 @@ public class RichEditor extends BaseFragment implements NotificationCenter.Notif
+         aiStyleButton.setOnClickListener(v -> onAiStyleSelection());
+         formattingLayout1.addView(aiStyleButton, LayoutHelper.createLinear(38, 38, Gravity.CENTER_VERTICAL));
+ 
+-        final int sendIcon = editingMessageObject != null ? R.drawable.input_done : (isInScheduleMode() ? R.drawable.input_schedule : R.drawable.send_plane_24);
++        final int sendIcon = editingMessageObject != null ? R.drawable.input_done : (isInScheduleMode() ? R.drawable.input_schedule : R.drawable.softgram_send_24);
+         sendButton = new ChatActivityEnterView.SendButton(context, sendIcon, getResourceProvider(), true) {
+             @Override
+             public boolean isOpen() {
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/iv/RichEditorToolbar.java b/TMessagesProj/src/main/java/org/telegram/ui/iv/RichEditorToolbar.java
+index ec56ff2..5225aee 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/iv/RichEditorToolbar.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/iv/RichEditorToolbar.java
+@@ -408,7 +408,7 @@ public class RichEditorToolbar extends FrameLayout implements Theme.Colorable {
+         aiStyleButton.setOnClickListener(v -> delegate.onAiStyle());
+         formattingLayout1.addView(aiStyleButton, LayoutHelper.createLinear(38, 38, Gravity.CENTER_VERTICAL));
+ 
+-        sendButton = new ChatActivityEnterView.SendButton(context, R.drawable.send_plane_24, resourcesProvider, true) {
++        sendButton = new ChatActivityEnterView.SendButton(context, R.drawable.softgram_send_24, resourcesProvider, true) {
+             @Override
+             public boolean isOpen() {
+                 return sendLoading || super.isOpen();
+@@ -669,7 +669,7 @@ public class RichEditorToolbar extends FrameLayout implements Theme.Colorable {
+     }
+ 
+     public void setSendEditing(boolean editing) {
+-        sendButton.setResourceId(editing ? R.drawable.input_done : R.drawable.send_plane_24);
++        sendButton.setResourceId(editing ? R.drawable.input_done : R.drawable.softgram_send_24);
+     }
+ 
+     public void setSendLoading(boolean loading) {

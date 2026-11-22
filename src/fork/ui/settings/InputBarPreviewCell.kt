@@ -64,7 +64,7 @@ class InputBarPreviewCell(
 
         attachIconView = createIconView(context, R.drawable.msg_input_attach2, iconColor)
         emojiIconView = createIconView(context, R.drawable.smiles_tab_smiles, iconColor)
-        sendIconView = createIconView(context, R.drawable.send_plane_24, sendColor)
+        sendIconView = createIconView(context, R.drawable.softgram_send_24, sendColor)
 
         buildGlassFactory()
         updateInputBarState()

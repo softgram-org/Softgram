@@ -1,10 +1,10 @@
-# entinygram
+# Softgram
 
 an independent telegram for android, built as a stgit patch stack over stock telegram.
 
 ## highlights
 
-everything entinygram adds lives in **settings → entinygram**, grouped into pages.
+everything Softgram adds lives in **settings → Softgram**, grouped into pages.
 
 - [ghost mode](../FEATURES.md#privacy--protection): hide read receipts, story views, online status, and typing indicators.
 - [kept deleted messages](../FEATURES.md#privacy--protection): keep deleted messages in chat and browse deleted text, media, and edit history in an archive.
@@ -20,9 +20,9 @@ everything entinygram adds lives in **settings → entinygram**, grouped into pa
 
 | guide | contents |
 | --- | --- |
-| [all features](../FEATURES.md) | every entinyGram feature |
+| [all features](../FEATURES.md) | every Softgram feature |
 | [removed features](removed.md) | what was removed and why |
-| [build guide](https://entinygram.vercel.app/build) | prerequisites, setup, and signing |
+| [build guide](https://Softgram.vercel.app/build) | prerequisites, setup, and signing |
 | [plugin sdk](../sdk/docs/README.md) | plugin api and authoring |
 | [translation](skills/translation/SKILL.md) | audit locale strings and add a language |
 | [craft](skills/craft/SKILL.md) | bugfixes and small features |

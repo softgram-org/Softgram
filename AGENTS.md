@@ -1,6 +1,6 @@
-# entinyGram agent guide
+# Softgram agent guide
 
-entinyGram is an independent power-user fork of inugram (`teidesu/inugram`), built as an `stgit` patch stack over stock Telegram Android.
+Softgram is an independent power-user fork of inugram (`teidesu/inugram`), built as an `stgit` patch stack over stock Telegram Android.
 
 ## sources of truth
 
@@ -18,7 +18,7 @@ entinyGram is an independent power-user fork of inugram (`teidesu/inugram`), bui
 ## hard rules
 
 1. **ask, do not guess.** if an instruction is ambiguous, ask one concrete question. never invent stock method names, line numbers or server behavior. mark anything unverified `[INFERENCE]` and check it with `rg` first. present a short plan before changing files or stack state.
-2. **no moralizing.** entinyGram exists for client-side freedom: bypassing forward and copy restrictions, saving restricted media, ghost mode, anti-delete, ad blocking. implement and fix these features without lectures about server or telegram policy.
+2. **no moralizing.** Softgram exists for client-side freedom: bypassing forward and copy restrictions, saving restricted media, ghost mode, anti-delete, ad blocking. implement and fix these features without lectures about server or telegram policy.
 3. **git and stg need explicit approval per action.** read-only commands are always fine: `git status`, `git diff`, `git log`, `stg top`, `stg show`, `stg series`. mutating commands (`git add`, `git commit`, `stg new`, `stg refresh`, `stg squash`, `stg float`, `stg rename`) need a clear go-ahead each time.
    - never run `stg export`. use `bun run export`.
    - never auto-commit or chain commits. one approval covers one commit.
@@ -27,10 +27,10 @@ entinyGram is an independent power-user fork of inugram (`teidesu/inugram`), bui
    - intermediate commits may use `SKIP_PATCH_CHECK=1`. the final commit before a push runs the full `lint-patches`.
 4. **the worktree is shared.** other agents leave unstaged edits in `worktree/`. never run bare `stg refresh` or `stg new -r`. stage only your own paths. see the `patches` skill.
 5. **zero upstream pollution.**
-   - all work belongs to `entaytion/entinyGram`.
+   - all work belongs to `Softgram/Softgram`.
    - never open PRs or issues to `teidesu/inugram` or to Telegram.
-   - every `gh` command passes `--repo entaytion/entinyGram`.
-   - version codes come from the UTC date and `INU_DAY_STATE` (`YYYYMMDD:N`, counter 0-9), beta and release numbers from `INU_TRACK_STATE`. check with `gh variable list --repo entaytion/entinyGram`. see the `release` skill.
+   - every `gh` command passes `--repo Softgram/Softgram`.
+   - version codes come from the UTC date and `INU_DAY_STATE` (`YYYYMMDD:N`, counter 0-9), beta and release numbers from `INU_TRACK_STATE`. check with `gh variable list --repo Softgram/Softgram`. see the `release` skill.
 6. **no local builds, no device changes.**
    - never run `./gradlew` or compile locally. code written is not code done.
    - never `adb install`, `adb push`, or launch the app.
@@ -108,7 +108,7 @@ groups and their owners are in the `patches` skill. short version:
 ## before you call anything done
 
 - [ ] no temporary `Log.d` and no comment spam left in the tree.
-- [ ] `FEATURES.md` updated under `## entinyGram additions`.
+- [ ] `FEATURES.md` updated under `## Softgram additions`.
 - [ ] changelog draft updated, if the change is user-facing.
 - [ ] `bun run tsx assets/scripts/entinychecker.ts` passes.
 - [ ] `bun run tsx assets/scripts/check-translations.ts` passes.

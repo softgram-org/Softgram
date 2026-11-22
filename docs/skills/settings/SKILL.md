@@ -1,6 +1,6 @@
 ---
 name: settings
-description: Add, move, or retire an entinyGram settings toggle or page. Covers InuConfig items, Schemas.kt sections, SearchRegistry slugs and legacy aliases, strings in all locales, and the backup rules. Use when a setting is added, moved between pages, renamed, or removed.
+description: Add, move, or retire an Softgram settings toggle or page. Covers InuConfig items, Schemas.kt sections, SearchRegistry slugs and legacy aliases, strings in all locales, and the backup rules. Use when a setting is added, moved between pages, renamed, or removed.
 ---
 
 # settings

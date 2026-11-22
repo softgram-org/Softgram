@@ -1,6 +1,6 @@
 ---
 name: gotcha
-description: Known traps in entinyGram, each with how it bites and what to do instead. Read before adding anything that starts a download, before touching the stock file loader classes, before diagnosing disk usage or a tester report, and before building on this windows machine. Add a new entry whenever the same mistake costs time twice.
+description: Known traps in Softgram, each with how it bites and what to do instead. Read before adding anything that starts a download, before touching the stock file loader classes, before diagnosing disk usage or a tester report, and before building on this windows machine. Add a new entry whenever the same mistake costs time twice.
 ---
 
 # gotcha
@@ -60,7 +60,7 @@ traps that already cost real time. each entry: the trap, why it bites, what to d
 | source | size |
 | --- | --- |
 | `/sdcard/Android/data/<pkg>` | 1.7 gb, 595 mb of it a leftover `LumineGram` folder |
-| `/sdcard/Download/entinyGram` | 56 mb |
+| `/sdcard/Download/Softgram` | 56 mb |
 | `dumpsys diskstats` for the package | about 2.7 gb, a cached snapshot |
 | private `/data/data/<pkg>` (debug build) | 254 mb |
 | free space on `/data` | 78.9 gb before a reinstall, 90.8 gb right after, data intact |
@@ -75,7 +75,7 @@ traps that already cost real time. each entry: the trap, why it bites, what to d
 - measure with the open-file list, on a debug build, after hours of use (right after install it is empty):
 
 ```bash
-adb shell "run-as ua.entaytion.entinygram sh -c 'ls -l /proc/$(pidof ua.entaytion.entinygram)/fd | grep -i deleted'"
+adb shell "run-as ua.Softgram.Softgram sh -c 'ls -l /proc/$(pidof ua.Softgram.Softgram)/fd | grep -i deleted'"
 ```
 
 - compare free space on `/data` before and after a force stop. a jump without any file removed means open deleted files.
@@ -132,7 +132,7 @@ Set-Location worktree
 ```
 
 - the apk lands in `TMessagesProj_App/build/outputs/apk/release/app.apk`. check it with `aapt2 dump badging` and `apksigner verify --print-certs` instead of installing blind.
-- file name for hand-built betas: `entinygram-beta-arm64-<base>-<versionCode>.apk`.
+- file name for hand-built betas: `Softgram-beta-arm64-<base>-<versionCode>.apk`.
 - a local build runs only when the user asks for it.
 
 ## 7. changing the stack and the tree together

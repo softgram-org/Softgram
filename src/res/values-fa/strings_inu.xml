@@ -2070,7 +2070,7 @@
     <string name="InuSetReminder">تنظیم یادآور</string>
     <string name="InuSettingNotFound">این تنظیم در این نسخه از Softgram موجود نیست</string>
     <string name="InuSettings">تنظیمات Softgram</string>
-    <string name="InuSettingsInfo">Yours. By design Softgram</string>
+    <string name="InuSettingsInfo">از آنِ شما. با طراحی Softgram</string>
     <string name="InuSettingsShowAccounts">نمایش حساب‌ها در تنظیمات</string>
     <string name="InuShorterSwipeGestures">حرکت‌های کشیدن کوتاه‌تر</string>
     <string name="InuShorterSwipeGesturesInfo">حرکت کشیدن را در نصف فاصله برای بازگشت، پاسخ، پوشه‌های گفتگو، صفحات رسانه و کشیدن به پایین در نمایشگر تشخیص می‌دهد.</string>
@@ -2355,4 +2355,24 @@
     <string name="InuSectionChatsMedia">گفتگوها و رسانه</string>
     <string name="InuSectionPrivacyAccount">حریم خصوصی و حساب</string>
     <string name="InuSectionGeneral">عمومی</string>
+    <string name="InuArchiveAll">همه</string>
+    <string name="InuArchiveDeleteEntry">حذف از آرشیو</string>
+    <string name="InuArchiveMediaDeleteSelected">فایل‌های انتخاب‌شده حذف شوند؟ از آرشیو هم پاک می‌شوند.</string>
+    <string name="InuArchiveOpenChat">باز کردن گفتگو</string>
+    <string name="InuArchiveTitle">حذف‌شده و ویرایش‌شده</string>
+    <string name="InuChatMenuEntinyGram">Softgram</string>
+    <string name="InuDisguiseName">Telegram</string>
+    <string name="InuTypingSpoofAddChat">افزودن گفتگو</string>
+    <string name="InuTypingSpoofAddChatInfo">یک نفر یا گروه را انتخاب کنید، سپس وضعیتی را که باید نشان داده شود برگزینید</string>
+    <string name="InuTypingSpoofChats">گفتگوها</string>
+    <string name="InuTypingSpoofChooseSticker">در حال انتخاب استیکر…</string>
+    <string name="InuTypingSpoofEmpty">هنوز گفتگویی نیست. یکی اضافه کنید تا وضعیت جعلی در آن نمایش داده شود.</string>
+    <string name="InuTypingSpoofGamePlay">در حال بازی…</string>
+    <string name="InuTypingSpoofListInfo">برای انتخاب وضعیت روی یک گفتگو بزنید. برای حذف، نگه دارید. وضعیت تا وقتی برنامه باز است فعال می‌ماند.</string>
+    <string name="InuTypingSpoofMode">وضعیت</string>
+    <string name="InuTypingSpoofModeInfo">وضعیت انتخاب‌شده تا زمانی که خاموشش نکنید به طرف مقابل نشان داده می‌شود.</string>
+    <string name="InuTypingSpoofUploadAudio">در حال ارسال صدا…</string>
+    <string name="InuTypingSpoofUploadPhoto">در حال ارسال عکس…</string>
+    <string name="InuTypingSpoofUploadRound">در حال ارسال پیام ویدیویی…</string>
+    <string name="InuTypingSpoofUploadVideo">در حال ارسال ویدیو…</string>
 </resources>

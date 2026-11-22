@@ -1,6 +1,6 @@
 # features
 
-entinygram is built on top of [inugram](https://github.com/teidesu/inugram). for the base features see [inugram FEATURES.md](https://github.com/teidesu/inugram/blob/main/FEATURES.md). this page lists only what entinygram adds. most things are toggled in **settings → entinygram**.
+Softgram is built on top of [inugram](https://github.com/teidesu/inugram). for the base features see [inugram FEATURES.md](https://github.com/teidesu/inugram/blob/main/FEATURES.md). this page lists only what Softgram adds. most things are toggled in **settings → Softgram**.
 
 ## highlights
 
@@ -17,7 +17,7 @@ entinygram is built on top of [inugram](https://github.com/teidesu/inugram). for
 | [proxy, plugins & performance](#proxy-plugins--performance) | plugin market, osmdroid map, smaller apk |
 | [debloat & premium noise](#debloat--premium-noise) | hide gifts, premium badges, upsells and banners |
 
-## entinygram additions
+## Softgram additions
 
 ### privacy & protection
 
@@ -113,7 +113,7 @@ entinygram is built on top of [inugram](https://github.com/teidesu/inugram). for
 - **bookmarks** — up to 500 per chat, star next to the time, tap to jump to the message
 - **silent broadcast bell** — moved out of the input into the chat menu
 - **reactions** — hide them, disable setting them, hide chat-list badges, mark read instantly
-- **chat menu** — privacy and local-data actions grouped under entinygram, with its own order section
+- **chat menu** — privacy and local-data actions grouped under Softgram, with its own order section
 - **text & input fixes** — better url parsing, separator after mention, keyboard stays up when scrolling a chat with a draft
 - **long-press to close the pinned panel** — until a new pin, or always in this chat
 - **return after a pinned jump** — the down button takes you back to where you were reading after jumping to a pinned message

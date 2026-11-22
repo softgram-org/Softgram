@@ -1,6 +1,6 @@
 ---
 name: release
-description: How entinyGram builds, versions and announces a release or beta: assets/release scripts, the INU_TRACK_STATE and INU_DAY_STATE counters, post layout, updater contract. Use when changing the release pipeline, a post, the version labels, or when asked why a build got a number.
+description: How Softgram builds, versions and announces a release or beta: assets/release scripts, the INU_TRACK_STATE and INU_DAY_STATE counters, post layout, updater contract. Use when changing the release pipeline, a post, the version labels, or when asked why a build got a number.
 ---
 
 # release
@@ -38,7 +38,7 @@ state lives in repo variables, written by the last step of `apk.yml`:
 | `INU_DAY_STATE` | `YYYYMMDD:N` |
 | `INU_TRACK_STATE` | `<base> beta:N release:N`, for example `13.2.1 beta:4 release:1` |
 
-check with `gh variable list --repo entaytion/entinyGram`. an empty `INU_TRACK_STATE` starts both counters at 0.
+check with `gh variable list --repo Softgram/Softgram`. an empty `INU_TRACK_STATE` starts both counters at 0.
 
 ## posts
 
@@ -63,7 +63,7 @@ check with `gh variable list --repo entaytion/entinyGram`. an empty `INU_TRACK_S
 
 | what | rule |
 | --- | --- |
-| file name | `entinygram[-beta][-plugins]-arm64-<base>-<versionCode>.apk`. the arm7 build is invisible to the updater |
+| file name | `Softgram[-beta][-plugins]-arm64-<base>-<versionCode>.apk`. the arm7 build is invisible to the updater |
 | tags in the post | `#release` or `#prerelease`, exactly |
 | notes | caption post: the first blockquote is the update dialog. rich post: the `Що нового` details for `uk`, `What's new` for other languages, falling back to the other one. the `Plugins` group is dropped for pluginless builds |
 | rich apk | documents of `rich_message`, same file name rule. a truncated (`part`) post is loaded with `getRichMessage` |

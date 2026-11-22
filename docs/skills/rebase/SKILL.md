@@ -1,6 +1,6 @@
 ---
 name: rebase
-description: Move the entinyGram stgit patch stack onto a newer upstream Telegram Android release and resolve its conflicts. Use when `bun run rebase` reports conflicts, worktree files show `<<<<<<< current` / `>>>>>>> patched` markers, or the user says "rebase the patchset", "update the base", "fix the rebase conflict", "continue the rebase". Not for editing one patch or for ordinary git merges.
+description: Move the Softgram stgit patch stack onto a newer upstream Telegram Android release and resolve its conflicts. Use when `bun run rebase` reports conflicts, worktree files show `<<<<<<< current` / `>>>>>>> patched` markers, or the user says "rebase the patchset", "update the base", "fix the rebase conflict", "continue the rebase". Not for editing one patch or for ordinary git merges.
 ---
 
 # rebase
@@ -108,7 +108,7 @@ do not build a debug apk unless the user asks.
 
 ## 6. smoke test
 
-only when the user asks. walk the basics with all toggles at defaults first: open a chat, the message menu, send text, photo and sticker, the profile, `settings → entinyGram` (every page opens, search finds a setting), the chat list title, the folder tabs. then the areas the rebase touched by hand. adb rules are in `craft`.
+only when the user asks. walk the basics with all toggles at defaults first: open a chat, the message menu, send text, photo and sticker, the profile, `settings → Softgram` (every page opens, search finds a setting), the chat list title, the folder tabs. then the areas the rebase touched by hand. adb rules are in `craft`.
 
 ## 7. finishing checks
 

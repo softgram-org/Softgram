@@ -1,6 +1,6 @@
 ---
 name: merge
-description: Take changes from upstream inugram into entinyGram with a plain git merge, then rebuild the stgit patch stack and fix what breaks. Use when the user says "merge inugram", "sync upstream", "take from inugram", "updated to inugram", or when inugram has new commits to pull. Not for a new stock Telegram base (that is `rebase`).
+description: Take changes from upstream inugram into Softgram with a plain git merge, then rebuild the stgit patch stack and fix what breaks. Use when the user says "merge inugram", "sync upstream", "take from inugram", "updated to inugram", or when inugram has new commits to pull. Not for a new stock Telegram base (that is `rebase`).
 ---
 
 # merge
@@ -17,7 +17,7 @@ the difference from `rebase`: `rebase` moves our stack to a newer stock Telegram
 | keep ours | our `entiny__` patches and overlays (`patches/entiny/`), and features inugram does not have. say which one you keep and why |
 | search before writing | if inugram already has the feature, use theirs. no duplicate toggles, drawables or helpers (`InuConfig`, `src/fork/helpers`, `series`, `patches/hooks/`) |
 | no upstream changelogs | never pull `changelogs/` from upstream. our notes live in `changelogs/<YYYYMMDD>.md` |
-| no upstream FEATURES | never take inugram's `FEATURES.md`. ours lists only entinyGram additions and links to inugram's file for the base |
+| no upstream FEATURES | never take inugram's `FEATURES.md`. ours lists only Softgram additions and links to inugram's file for the base |
 | nothing goes upstream | never open issues or PRs to inugram or Telegram |
 
 ## 1. before the merge

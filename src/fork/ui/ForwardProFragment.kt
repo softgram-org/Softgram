@@ -205,7 +205,7 @@ class ForwardProFragment(
         expanded = value
         panel?.visibility = if (value) View.VISIBLE else View.GONE
         strip?.visibility = if (value) View.GONE else View.VISIBLE
-        trailing?.setImageResource(if (value) R.drawable.entiny_eye else R.drawable.msg_send)
+        trailing?.setImageResource(if (value) R.drawable.entiny_eye else R.drawable.softgram_send_24)
         if (value) {
             editor?.requestFocus()
             editor?.let { AndroidUtilities.showKeyboard(it) }
@@ -251,7 +251,7 @@ class ForwardProFragment(
         }
         bar.addView(title, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 56f, Gravity.LEFT or Gravity.CENTER_VERTICAL, 68f, 0f, 0f, 0f))
 
-        val action = circle(context, if (expanded) R.drawable.entiny_eye else R.drawable.msg_send).apply {
+        val action = circle(context, if (expanded) R.drawable.entiny_eye else R.drawable.softgram_send_24).apply {
             setOnClickListener { if (expanded) apply() else done() }
         }
         trailing = action
@@ -321,7 +321,7 @@ class ForwardProFragment(
 
         val send = ImageView(context).apply {
             scaleType = ImageView.ScaleType.CENTER
-            setImageResource(R.drawable.msg_send)
+            setImageResource(R.drawable.softgram_send_24)
             colorFilter = PorterDuffColorFilter(0xffffffff.toInt(), PorterDuff.Mode.SRC_IN)
             background = Theme.createCircleDrawable(dp(38f), accent)
             setOnClickListener { done() }

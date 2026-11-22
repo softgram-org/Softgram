@@ -1,14 +1,14 @@
 <p align="center">
-  <img src="assets/banner.svg" width="100%" alt="entinyGram" />
+  <img src="assets/softgram.svg" width="160" alt="Softgram" />
 </p>
 
-# entinyGram
+# Softgram
 
 an independent StGit patchset on top of official Telegram and Inugram.
 
 ## highlights
 
-everything entinygram adds lives in **settings → entinygram**, grouped into pages. the full list is in [FEATURES.md](FEATURES.md).
+everything Softgram adds lives in **settings → Softgram**, grouped into pages. the full list is in [FEATURES.md](FEATURES.md).
 
 - [ghost mode](FEATURES.md#privacy--protection): hide read receipts, story views, online status and typing.
 - [kept deleted messages](FEATURES.md#privacy--protection): keep deleted messages and browse the edit history.
@@ -22,26 +22,25 @@ everything entinygram adds lives in **settings → entinygram**, grouped into pa
 
 | guide | contents |
 | --- | --- |
-| [all features](FEATURES.md) | every entinygram feature |
+| [all features](FEATURES.md) | every Softgram feature |
 | [removed features](docs/removed.md) | what was removed and why |
-| [build guide](https://entinygram.vercel.app/build) | prerequisites, setup and signing |
 | [plugin sdk](sdk/docs/README.md) | plugin api and authoring |
 | [docs index](docs/README.md) | contributor guides and skills |
 
 ## quick start
 
-signed apks are on the [releases](https://github.com/entaytion/entinyGram/releases) page.
+signed apks are on the [releases](https://github.com/Softingram/Softgram/releases) page.
 
 ```sh
-git clone https://github.com/entaytion/entinyGram.git
-cd entinyGram
+git clone https://github.com/Softingram/Softgram.git
+cd Softgram
 bun install
 bun run setup
 ```
 
 ## credits
 
-entinygram builds on [inugram](https://github.com/teidesu/inugram) by [@teidesu](https://github.com/teidesu) and the official [telegram for android](https://github.com/DrKLO/Telegram) client. thanks to the forks credited next to each feature in [FEATURES.md](FEATURES.md).
+Softgram builds on [inugram](https://github.com/teidesu/inugram) by [@teidesu](https://github.com/teidesu) and the official [telegram for android](https://github.com/DrKLO/Telegram) client. thanks to the forks credited next to each feature in [FEATURES.md](FEATURES.md).
 
 ## license
 

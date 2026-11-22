@@ -1133,7 +1133,6 @@ object Schemas {
     }
 
     val PROXY = schema("proxy", R.string.InuProxyPage, R.drawable.entiny_proxy) {
-        notice(R.string.InuProxyDisclaimer)
         section(R.string.InuProxyListHeader) {
             toggle(InuConfig.PROXY_LIST_TOOLS, R.string.InuProxyListTools, R.string.InuProxyListToolsInfo)
             toggle(InuConfig.PROXY_LIST_MENU, R.string.InuProxyListMenu, R.string.InuProxyListMenuInfo)

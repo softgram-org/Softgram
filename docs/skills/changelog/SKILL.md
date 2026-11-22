@@ -1,6 +1,6 @@
 ---
 name: changelog
-description: Write and release entinyGram changelog bullets, the gitignored draft changelogs/unreleased.md, the release step bun run changelog:release, and the Telegram post limits. Use when a user-facing change is finished or reverted, when preparing a release, or when the user asks for release notes.
+description: Write and release Softgram changelog bullets, the gitignored draft changelogs/unreleased.md, the release step bun run changelog:release, and the Telegram post limits. Use when a user-facing change is finished or reverted, when preparing a release, or when the user asks for release notes.
 ---
 
 # changelog
@@ -17,7 +17,7 @@ release notes are hand-written. never generate them from commits or with a model
 
 ## bullets
 
-write under both `## uk` and `## en`, under `## entinyGram additions` in the matching topical subsection.
+write under both `## uk` and `## en`, under `## Softgram additions` in the matching topical subsection.
 
 | rule | detail |
 | --- | --- |
@@ -28,7 +28,7 @@ write under both `## uk` and `## en`, under `## entinyGram additions` in the mat
 | groups | optional `### new`, `### fixed`, `### removed` inside a language. bullets without one count as new. the post shows bold titles only when a language uses more than new |
 | reverted | delete the bullet |
 | wip | the bullet ends with `⚠️` and a short note in its own language, under about 60 characters. word it fresh each time: not finished or tested, may misbehave, bug reports welcome |
-| telegram base | one plain line, no bracket prefix, english tag in both languages: `Rebase to 12.10.4 (ported by entinyGram)` after a rebase, `Updated to Telegram X.Y.Z (via inugram)` after a merge |
+| telegram base | one plain line, no bracket prefix, english tag in both languages: `Rebase to 12.10.4 (ported by Softgram)` after a rebase, `Updated to Telegram X.Y.Z (via inugram)` after a merge |
 
 ## release
 

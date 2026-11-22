@@ -59,7 +59,7 @@ class AdditionalSettingsActivity : SettingsPageActivity(), NotificationCenter.No
                 "@Softgram_org"
             )
         )
-        items.add(mkTwoLineEntry(BUTTON_DONATE, R.drawable.entiny_support, LocaleController.getString(R.string.InuDonateRow), LocaleController.getString(R.string.InuDonateRowInfo), chevron = true))
+        items.add(mkTwoLineEntry(BUTTON_DONATE, R.drawable.softgram_plane, LocaleController.getString(R.string.InuDonateRow), LocaleController.getString(R.string.InuDonateRowInfo), chevron = true))
         items.add(UItem.asShadow(null))
     }
 

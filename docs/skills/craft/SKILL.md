@@ -1,9 +1,9 @@
 ---
 name: craft
-description: Fast path for entinyGram bugfixes and small features. Use for any bug report or feature work. Checks src/fork first, uses exact stock anchors, aims for a 1-3 line fix.
+description: Fast path for Softgram bugfixes and small features. Use for any bug report or feature work. Checks src/fork first, uses exact stock anchors, aims for a 1-3 line fix.
 ---
 
-# entinygram craft
+# Softgram craft
 
 context bloat is the main risk: stock telegram android has 50k-line files. search narrowly, read little.
 

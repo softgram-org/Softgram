@@ -38,7 +38,7 @@ object StickerSendHelper {
         val anchor = actions.indexOf(ACTION_SEND_SILENT).takeIf { it >= 0 } ?: actions.indexOf(ACTION_SEND)
         if (anchor < 0) return
         items.add(anchor + 1, LocaleController.getString(R.string.InuSendWithoutPack))
-        icons.add(anchor + 1, R.drawable.msg_send)
+        icons.add(anchor + 1, R.drawable.softgram_send_24)
         actions.add(anchor + 1, MENU_OPTION_SEND_WITHOUT_PACK)
     }
 

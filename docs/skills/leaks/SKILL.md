@@ -26,16 +26,16 @@ target: $ARGUMENTS
 ## MAT usage
 
 ```bash
-python3 /path/to/entinyGram/docs/scripts/leaks/extract_mat_reports.py private/my-oom.ec.hprof
+python3 /path/to/Softgram/docs/scripts/leaks/extract_mat_reports.py private/my-oom.ec.hprof
 ```
 
 if reports are missing and MAT is installed:
 
 ```bash
 # macOS
-python3 /path/to/entinyGram/docs/scripts/leaks/extract_mat_reports.py dump.ec.hprof --mat /Applications/MemoryAnalyzer.app --xmx 8g
+python3 /path/to/Softgram/docs/scripts/leaks/extract_mat_reports.py dump.ec.hprof --mat /Applications/MemoryAnalyzer.app --xmx 8g
 # Windows (Git Bash): --mat points at the folder with MemoryAnalyzerc.exe
-python /path/to/entinyGram/docs/scripts/leaks/extract_mat_reports.py dump.ec.hprof --mat "$HOME/Downloads/mat/mat" --xmx 6g
+python /path/to/Softgram/docs/scripts/leaks/extract_mat_reports.py dump.ec.hprof --mat "$HOME/Downloads/mat/mat" --xmx 6g
 ```
 
 | note | detail |

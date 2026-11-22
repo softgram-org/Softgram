@@ -1,11 +1,11 @@
 ---
 name: translation
-description: Audit and update entinyGram locale files (strings_inu.xml) and add a new language. Use when asked to check, sync or translate strings, or to add a locale.
+description: Audit and update Softgram locale files (strings_inu.xml) and add a new language. Use when asked to check, sync or translate strings, or to add a locale.
 ---
 
 # translation
 
-guide for auditing and updating entinygram's `strings_inu.xml` locale files.
+guide for auditing and updating Softgram's `strings_inu.xml` locale files.
 
 ## audit a locale
 

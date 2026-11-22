@@ -47,6 +47,7 @@ object LocaleHelper {
     fun getResourceString(res: Int, fallback: String?): String? {
         getLocalString(fallback)?.let { return it }
         if (res == 0) return null
+        resolve(res)?.let { return it }
         return try {
             ApplicationLoader.applicationContext.getString(res)
         } catch (_: Exception) {

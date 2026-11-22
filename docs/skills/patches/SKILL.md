@@ -1,6 +1,6 @@
 ---
 name: patches
-description: Create, update, rename, squash, and export entinyGram stgit patches (entiny__ group, index-only staging, subjects). Use when a change needs its own patch, an existing patch needs a fix, an inugram patch is taken over, or the patch stack is exported.
+description: Create, update, rename, squash, and export Softgram stgit patches (entiny__ group, index-only staging, subjects). Use when a change needs its own patch, an existing patch needs a fix, an inugram patch is taken over, or the patch stack is exported.
 ---
 
 # patches
@@ -11,7 +11,7 @@ description: Create, update, rename, squash, and export entinyGram stgit patches
 
 | group | owner | rule |
 | --- | --- | --- |
-| `entiny` | entinyGram | new patches go here as `entiny__<name>`. exported flat to `patches/entiny/<name>.patch` |
+| `entiny` | Softgram | new patches go here as `entiny__<name>`. exported flat to `patches/entiny/<name>.patch` |
 | `bugfix`, `feature`, `debloat`, `hooks`, `misc` | inugram base | never create a new patch here |
 
 ## create a patch (index-only)
