@@ -52,76 +52,14 @@ class AdditionalSettingsActivity : SettingsPageActivity(), NotificationCenter.No
         items.add(UItem.asCustomShadow(InuSettingsHeader(context)))
         items.add(UItem.asShadow(null))
         items.add(
-            UItem.asButton(
+            SoftIcons.button(
                 BUTTON_CHANNEL_LINK,
                 R.drawable.entiny_telegram,
                 LocaleController.getString(R.string.InuAboutChannel),
                 "@Softgram_org"
             )
         )
-        items.add(
-            UItem.asButton(
-                BUTTON_GITHUB,
-                R.drawable.entiny_github,
-                LocaleController.getString(R.string.InuAboutGitHub),
-                "Entaytion/Softgram"
-            )
-        )
         items.add(mkTwoLineEntry(BUTTON_DONATE, R.drawable.entiny_support, LocaleController.getString(R.string.InuDonateRow), LocaleController.getString(R.string.InuDonateRowInfo), chevron = true))
-        items.add(UItem.asShadow(null))
-        items.add(
-            mkTwoLineCheckItem(
-                TOGGLE_HIDE_DEV_BADGES,
-                R.string.InuHideDevBadges,
-                R.string.InuHideDevBadgesInfo,
-                InuConfig.HIDE_DEV_BADGES.value,
-            )
-        )
-        items.add(UItem.asShadow(null))
-
-        items.add(UItem.asHeader(LocaleController.getString(R.string.InuUpdates)))
-        items.add(
-            mkTwoLineCheckItem(
-                TOGGLE_AUTO_UPDATE_CHECK,
-                R.string.InuAutoUpdateCheck,
-                R.string.InuAutoUpdateCheckInfo,
-                InuConfig.UPDATES_ENABLED.value,
-            )
-        )
-        if (InuConfig.UPDATES_ENABLED.value) {
-            items.add(
-                mkTwoLineCheckItem(
-                    TOGGLE_UPDATES_INCLUDE_BETA,
-                    R.string.InuUpdatesIncludeBeta,
-                    R.string.InuUpdatesIncludeBetaInfo,
-                    InuConfig.UPDATES_INCLUDE_BETA.value,
-                )
-            )
-        }
-        items.add(UItem.asShadow(null))
-
-        items.add(UItem.asHeader(LocaleController.getString(R.string.InuLogs)))
-        items.add(
-            UItem.asCheck(
-                TOGGLE_LOGS_ENABLED,
-                LocaleController.getString(R.string.InuLogsEnabled),
-            ).setChecked(LogsHelper.isEnabled())
-        )
-        if (LogsHelper.isEnabled()) {
-            items.add(
-                mkTwoLineCheckItem(
-                    TOGGLE_LOGS_REDACT,
-                    R.string.InuLogsRedact,
-                    R.string.InuLogsRedactInfo,
-                    InuConfig.LOGS_REDACT.value,
-                )
-            )
-            items.add(UItem.asCustom(getOrCreateLogsRow()))
-            items.add(UItem.asCustom(getOrCreateHeapRow()))
-        }
-        items.add(UItem.asShadow(null))
-
-        items.add(UItem.asButton(BUTTON_COPY_SYSINFO, R.drawable.entiny_about, LocaleController.getString(R.string.InuLogsCopySystemInfo)))
         items.add(UItem.asShadow(null))
     }
 
@@ -472,13 +410,7 @@ class AdditionalSettingsActivity : SettingsPageActivity(), NotificationCenter.No
             factory = ::AdditionalSettingsActivity,
             entries = listOf(
                 SearchRegistry.Entry("channel", R.string.InuAboutChannel, BUTTON_CHANNEL_LINK),
-                SearchRegistry.Entry("github", R.string.InuAboutGitHub, BUTTON_GITHUB),
-                SearchRegistry.Entry("logs-enabled", R.string.InuLogsEnabled, TOGGLE_LOGS_ENABLED),
-                SearchRegistry.Entry("logs-redact", R.string.InuLogsRedact, TOGGLE_LOGS_REDACT),
                 SearchRegistry.Entry("additional-donate", R.string.InuDonateRow, BUTTON_DONATE),
-                SearchRegistry.Entry("hide-dev-badges", R.string.InuHideDevBadges, TOGGLE_HIDE_DEV_BADGES),
-                SearchRegistry.Entry("auto-update-check", R.string.InuAutoUpdateCheck, TOGGLE_AUTO_UPDATE_CHECK),
-                SearchRegistry.Entry("updates-include-beta", R.string.InuUpdatesIncludeBeta, TOGGLE_UPDATES_INCLUDE_BETA),
             ),
         )
     }

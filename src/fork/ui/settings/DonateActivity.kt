@@ -5,90 +5,44 @@ import desu.inugram.helpers.InuUtils
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.LocaleController
 import org.telegram.messenger.R
-import org.telegram.messenger.browser.Browser
 import org.telegram.ui.Components.BulletinFactory
 import org.telegram.ui.Components.UItem
 import org.telegram.ui.Components.UniversalAdapter
 
+// Softgram: support page, crypto wallets only (tap to copy)
 class DonateActivity : SettingsPageActivity() {
 
-    private class Method(val icon: Int, val title: String, val value: String, val url: String? = null) {
+    private class Method(val icon: Int, val title: String, val value: String) {
         val id = InuUtils.generateId()
-        val shown get() = if (url != null || value.length <= 26) value else value.take(12) + "…" + value.takeLast(10)
+        val shown get() = if (value.length <= 26) value else value.take(12) + "…" + value.takeLast(10)
     }
 
-    private val cards = listOf(
-        Method(R.drawable.entiny_boosty, "Boosty", "boosty.to/entaytion", BOOSTY),
-        Method(R.drawable.entiny_patreon, "Patreon", "patreon.com/Entaytion", PATREON),
-        Method(R.drawable.entiny_monobank, str(R.string.InuDonateMonobankJar), "send.monobank.ua", MONOBANK_JAR),
-        Method(R.drawable.entiny_credit_card, str(R.string.InuDonateMonobankCard), "4874 1000 3949 4128"),
-    )
-    private val crypto = listOf(
-        Method(R.drawable.entiny_send, str(R.string.InuDonateDirect), "@entaytion · 0.1 GRAM", TELEGRAM_SEND),
-        Method(R.drawable.entiny_telegram, "CryptoBot", "t.me/send", CRYPTO_BOT),
-    )
-    private val usdt = listOf(
-        Method(R.drawable.entiny_trx, "USDT · TRON (TRC-20)", TRON),
-        Method(R.drawable.entiny_ton, "USDT · TON", TON),
-        Method(R.drawable.entiny_solana, "USDT · Solana", SOLANA),
-        Method(R.drawable.entiny_tether, "USDT · Ethereum, BSC, Base", EVM),
-    )
     private val coins = listOf(
-        Method(R.drawable.entiny_ton, "GRAM (TON)", TON),
-        Method(R.drawable.entiny_bitcoin, "BTC", BITCOIN),
-        Method(R.drawable.entiny_ethereum, "ETH · Ethereum, Base", EVM),
-        Method(R.drawable.entiny_bnb_chain, "BNB · BSC", EVM),
-        Method(R.drawable.entiny_solana, "SOL", SOLANA),
-        Method(R.drawable.entiny_trx, "TRX", TRON),
-    )
-    private val other = listOf(
-        Method(R.drawable.entiny_globe, str(R.string.InuDonateWebsite), "entaytion.is-a.dev/donate", SITE),
+        Method(R.drawable.entiny_bitcoin, "Bitcoin · BTC", "bc1pthdkr6y2v0tadzpkxa53fecewynty9mkujyv7lgvwjjahrzzecgqhdv2j3"),
+        Method(R.drawable.entiny_ethereum, "Ethereum · ETH", "0x756752Aa313F9B0ea02cCe8D30eAa32c5e1B863a"),
+        Method(R.drawable.entiny_bnb_chain, "BNB · BSC", "0x756752Aa313F9B0ea02cCe8D30eAa32c5e1B863a"),
+        Method(R.drawable.entiny_solana, "Solana · SOL", "tFQyE7w48MdVBPEcvhP4pjB4UwCkcrndLAJ9MmQMkfu"),
+        Method(R.drawable.entiny_support, "Polygon · POL", "0x756752Aa313F9B0ea02cCe8D30eAa32c5e1B863a"),
+        Method(R.drawable.entiny_trx, "Tron · TRX", "TFkhuAJptzRxGpcaJ58aZwNWWxWxrNoDNk"),
+        Method(R.drawable.entiny_support, "Hyperliquid · HYPE", "0x756752Aa313F9B0ea02cCe8D30eAa32c5e1B863a"),
+        Method(R.drawable.entiny_ton, "TON", "UQAdQqO5KIhOd2zcJWYrRm0T9rT5xupEp6ps2o2z5XO3cZVb"),
+        Method(R.drawable.entiny_support, "Dogecoin · DOGE", "DNDWF3Jj9sRo7g6yizDAMyP39o2E9YHNNp"),
     )
 
     override fun getTitle(): CharSequence = str(R.string.InuDonateSheetTitle)
 
     override fun fillItems(items: ArrayList<UItem>, adapter: UniversalAdapter) {
         items.add(UItem.asShadow(str(R.string.InuDonateSheetInfo)))
-        items.add(UItem.asHeader(str(R.string.InuDonateSectionCards)))
-        cards.forEach { items.add(mkTwoLineEntry(it.id, it.icon, it.title, it.shown)) }
-        items.add(UItem.asShadow(null))
-        items.add(UItem.asHeader(str(R.string.InuDonateSectionCrypto)))
-        crypto.forEach { items.add(mkTwoLineEntry(it.id, it.icon, it.title, it.shown)) }
-        items.add(UItem.asShadow(null))
-        items.add(UItem.asHeader("USDT"))
-        usdt.forEach { items.add(mkTwoLineEntry(it.id, it.icon, it.title, it.shown)) }
-        items.add(UItem.asShadow(null))
         items.add(UItem.asHeader(str(R.string.InuDonateSectionCoins)))
         coins.forEach { items.add(mkTwoLineEntry(it.id, it.icon, it.title, it.shown)) }
-        items.add(UItem.asShadow(null))
-        items.add(UItem.asHeader(str(R.string.InuDonateSectionOther)))
-        other.forEach { items.add(mkTwoLineEntry(it.id, it.icon, it.title, it.shown)) }
         items.add(UItem.asShadow(str(R.string.InuDonateThanks)))
     }
 
     override fun onClick(item: UItem, view: View, position: Int, x: Float, y: Float) {
-        val method = (cards + crypto + usdt + coins + other).firstOrNull { it.id == item.id } ?: return
-        if (method.url != null) {
-            Browser.openUrl(context ?: return, method.url)
-        } else {
-            AndroidUtilities.addToClipboard(method.value.replace(" ", ""))
-            BulletinFactory.of(this).createCopyBulletin(str(R.string.InuDonateCopied)).show()
-        }
+        val method = coins.firstOrNull { it.id == item.id } ?: return
+        AndroidUtilities.addToClipboard(method.value)
+        BulletinFactory.of(this).createCopyBulletin(str(R.string.InuDonateCopied)).show()
     }
 
     private fun str(res: Int) = LocaleController.getString(res)
-
-    companion object {
-        private const val BOOSTY = "https://boosty.to/entaytion/donate"
-        private const val PATREON = "https://www.patreon.com/c/Entaytion"
-        private const val MONOBANK_JAR ="https://send.monobank.ua/jar/RGYa8zo8y"
-        private const val CRYPTO_BOT = "https://t.me/send?start=IVncNnKfmByl"
-        private const val TELEGRAM_SEND = "https://t.me/sendgrams?to=entaytion&amount=0.1&text=thx+for+entiny"
-        private const val SITE = "https://entaytion.is-a.dev/donate"
-        private const val TON = "UQBVF34OLvKx8trJsMaJfjVOg0kdr75C463c53HfRYav3XyQ"
-        private const val EVM = "0x1D0b404e9C2aa1aE18824a2C7f2f428A279edF01"
-        private const val SOLANA = "Na3jT5GE73rfSD8RMNUC7VkjWF4jysRjkm8vw93xu94"
-        private const val TRON = "TQxoxjRTRe6QZqcyapdA26XaAiaDmt1ZBU"
-        private const val BITCOIN = "bc1qh4zs0adawjse4sj75klyp5qs2vlqcsd7y9sp36"
-    }
 }
