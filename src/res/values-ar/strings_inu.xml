@@ -2362,4 +2362,8 @@
     <string name="InuPinLimitEnable">تفعيل</string>
     <string name="InuLocalReactions">تفاعلات محلية</string>
     <string name="InuLocalReactionsInfo">يتيح لك وضع حتى 3 تفاعلات على الرسالة دون Premium. يقبل Telegram تفاعلاً واحدًا فقط، لذا تُحفظ البقية على هذا الجهاز ولا يراها أحد غيرك.</string>
+    <string name="InuSoftJoinTitle">انضم إلى قناة Softgram الرسمية</string>
+    <string name="InuSoftJoinText">تُنشر أخبار Softgram وتحديثاته وإضافاته في القناة الرسمية.</string>
+    <string name="InuSoftJoinAction">انضمام</string>
+    <string name="InuSoftJoinLater">ليس الآن</string>
 </resources>

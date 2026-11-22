@@ -2376,4 +2376,8 @@
     <string name="InuSectionChatsMedia">Chats &amp; Media</string>
     <string name="InuSectionPrivacyAccount">Privacy &amp; Account</string>
     <string name="InuSectionGeneral">General</string>
+    <string name="InuSoftJoinTitle">Join the Softgram channel</string>
+    <string name="InuSoftJoinText">News, updates and plugins for Softgram are posted in the official channel.</string>
+    <string name="InuSoftJoinAction">Join</string>
+    <string name="InuSoftJoinLater">Not now</string>
 </resources>

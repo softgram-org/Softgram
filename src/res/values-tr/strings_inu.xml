@@ -2352,4 +2352,8 @@
     <string name="InuPinLimitEnable">Aç</string>
     <string name="InuLocalReactions">Yerel tepkiler</string>
     <string name="InuLocalReactionsInfo">Premium olmadan bir mesaja en fazla 3 tepki koymanı sağlar. Telegram yalnızca birini kabul eder, fazlası bu cihazda kalır ve kimse görmez.</string>
+    <string name="InuSoftJoinTitle">Softgram resmi kanalına katılın</string>
+    <string name="InuSoftJoinText">Softgram haberleri, güncellemeleri ve eklentileri resmi kanalda paylaşılır.</string>
+    <string name="InuSoftJoinAction">Katıl</string>
+    <string name="InuSoftJoinLater">Şimdi değil</string>
 </resources>

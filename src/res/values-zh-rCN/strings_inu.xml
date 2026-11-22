@@ -2349,4 +2349,8 @@
     <string name="InuPinLimitEnable">开启</string>
     <string name="InuLocalReactions">本地回应</string>
     <string name="InuLocalReactionsInfo">没有 Premium 也能给一条消息添加最多 3 个回应。Telegram 只接受一个，其余的只保存在本设备上，其他人看不到。</string>
+    <string name="InuSoftJoinTitle">加入 Softgram 官方频道</string>
+    <string name="InuSoftJoinText">Softgram 的新闻、更新和插件都会发布在官方频道。</string>
+    <string name="InuSoftJoinAction">加入</string>
+    <string name="InuSoftJoinLater">以后再说</string>
 </resources>

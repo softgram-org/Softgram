@@ -2375,4 +2375,8 @@
     <string name="InuTypingSpoofUploadPhoto">در حال ارسال عکس…</string>
     <string name="InuTypingSpoofUploadRound">در حال ارسال پیام ویدیویی…</string>
     <string name="InuTypingSpoofUploadVideo">در حال ارسال ویدیو…</string>
+    <string name="InuSoftJoinTitle">به کانال رسمی Softgram بپیوندید</string>
+    <string name="InuSoftJoinText">اخبار، به‌روزرسانی‌ها و افزونه‌های Softgram در کانال رسمی منتشر می‌شود.</string>
+    <string name="InuSoftJoinAction">عضویت</string>
+    <string name="InuSoftJoinLater">بعداً</string>
 </resources>

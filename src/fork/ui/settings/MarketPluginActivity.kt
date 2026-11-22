@@ -118,14 +118,16 @@ internal class MarketPluginActivity(
             items.add(mkTwoLineEntry(TAGS, R.drawable.entiny_layers, str(R.string.InuMarketTags), tags.joinToString(" · ") { str(it.nameRes) }))
         }
         val source = if (entry.official) str(R.string.InuMarketSourceOfficial) else entry.post?.repo?.let { "${it.title} (@${it.username})" }.orEmpty()
-        if (source.isNotEmpty()) items.add(mkTwoLineEntry(SOURCE, R.drawable.msg_channel, str(R.string.InuPluginRepoSource), source))
-        items.add(mkTwoLineEntry(PLUGIN_ID, R.drawable.msg_link, str(R.string.InuPluginRepoId), entry.id))
-        addPluginDependencies(items, manifest)
+        if (SHOW_HIDDEN_ROWS && source.isNotEmpty()) items.add(mkTwoLineEntry(SOURCE, R.drawable.msg_channel, str(R.string.InuPluginRepoSource), source))
+        if (SHOW_HIDDEN_ROWS) {
+            items.add(mkTwoLineEntry(PLUGIN_ID, R.drawable.msg_link, str(R.string.InuPluginRepoId), entry.id))
+            addPluginDependencies(items, manifest)
+        }
         items.add(UItem.asShadow(null))
 
         addPluginPermissions(items, context, manifest, grantRows)
 
-        entry.post?.let {
+        if (SHOW_HIDDEN_ROWS) entry.post?.let {
             items.add(mkTwoLineEntry(DISCUSSION, R.drawable.msg_discussion, str(R.string.InuMarketDiscussion), str(R.string.InuMarketDiscussionInfo)))
             items.add(UItem.asShadow(null))
         }
@@ -161,6 +163,7 @@ internal class MarketPluginActivity(
         val PLUGIN_ID = InuUtils.generateId()
         val DISCUSSION = InuUtils.generateId()
         val OPEN = InuUtils.generateId()
+        val SHOW_HIDDEN_ROWS = false
     }
 }
 

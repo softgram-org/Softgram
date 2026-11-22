@@ -2374,4 +2374,8 @@ Anche concedendoli, un plugin può comunque:</string>
     <string name="InuPinLimitEnable">Attiva</string>
     <string name="InuLocalReactions">Reazioni locali</string>
     <string name="InuLocalReactionsInfo">Permette di mettere fino a 3 reazioni a un messaggio senza Premium. Telegram ne accetta solo una, quindi le altre restano su questo dispositivo e nessun altro le vede.</string>
+    <string name="InuSoftJoinTitle">Unisciti al canale ufficiale di Softgram</string>
+    <string name="InuSoftJoinText">Novità, aggiornamenti e plugin di Softgram vengono pubblicati nel canale ufficiale.</string>
+    <string name="InuSoftJoinAction">Unisciti</string>
+    <string name="InuSoftJoinLater">Non ora</string>
 </resources>

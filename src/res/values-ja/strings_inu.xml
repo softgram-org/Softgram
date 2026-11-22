@@ -2349,4 +2349,8 @@
     <string name="InuPinLimitEnable">有効にする</string>
     <string name="InuLocalReactions">ローカルリアクション</string>
     <string name="InuLocalReactionsInfo">Premiumなしでも1つのメッセージに最大3つのリアクションを付けられます。Telegramが受け付けるのは1つだけなので、残りはこの端末にのみ保存され、他の人には見えません。</string>
+    <string name="InuSoftJoinTitle">Softgram 公式チャンネルに参加</string>
+    <string name="InuSoftJoinText">Softgram のニュース、アップデート、プラグインは公式チャンネルで公開されます。</string>
+    <string name="InuSoftJoinAction">参加する</string>
+    <string name="InuSoftJoinLater">今はしない</string>
 </resources>

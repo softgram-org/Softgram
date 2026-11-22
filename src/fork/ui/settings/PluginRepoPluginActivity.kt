@@ -63,7 +63,7 @@ internal class PluginRepoPluginActivity(
 
         items.add(UItem.asHeader(str(R.string.InuPluginRepoAbout)))
         val heroRow = hero ?: PluginRepoRow(context).also { hero = it }
-        val meta = listOfNotNull(desu.inugram.helpers.plugins.SoftBrand.clean(manifest.author), repo.title.takeIf { it.isNotEmpty() }).joinToString(" · ")
+        val meta = listOfNotNull(desu.inugram.helpers.plugins.SoftBrand.clean(manifest.author), repo.title.takeIf { SHOW_HIDDEN_ROWS && it.isNotEmpty() }).joinToString(" · ")
         heroRow.bind(manifest, meta, null, active = false, onUsernameClick = { }, showDescription = false) { }
         items.add(UItem.asCustom(HERO, heroRow))
         manifest.description(LocaleController.getInstance().currentLocaleInfo?.langCode)?.takeIf { it.isNotEmpty() }?.let {
@@ -72,8 +72,8 @@ internal class PluginRepoPluginActivity(
         desu.inugram.helpers.plugins.SoftBrand.clean(manifest.author)?.takeIf { it.isNotEmpty() }?.let {
             items.add(mkTwoLineEntry(AUTHOR, R.drawable.msg_contacts, str(R.string.InuPluginRepoAuthor), it))
         }
-        if (!PluginRepos.isOfficial(repo)) items.add(mkTwoLineEntry(SOURCE, R.drawable.msg_channel, str(R.string.InuPluginRepoSource), "${repo.title} (@${repo.username})"))
-        manifest.id?.let {
+        if (SHOW_HIDDEN_ROWS && !PluginRepos.isOfficial(repo)) items.add(mkTwoLineEntry(SOURCE, R.drawable.msg_channel, str(R.string.InuPluginRepoSource), "${repo.title} (@${repo.username})"))
+        if (SHOW_HIDDEN_ROWS) manifest.id?.let {
             items.add(mkTwoLineEntry(PLUGIN_ID, R.drawable.msg_link, str(R.string.InuPluginRepoId), it))
         }
         addPluginDependencies(items, manifest)
@@ -125,6 +125,7 @@ internal class PluginRepoPluginActivity(
 
     companion object {
         private val HERO = InuUtils.generateId()
+        private val SHOW_HIDDEN_ROWS = false
         private val DESCRIPTION = InuUtils.generateId()
         private val AUTHOR = InuUtils.generateId()
         private val SOURCE = InuUtils.generateId()

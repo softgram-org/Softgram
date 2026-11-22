@@ -2375,4 +2375,8 @@
     <string name="InuPinLimitEnable">Увімкнути</string>
     <string name="InuLocalReactions">Локальні реакції</string>
     <string name="InuLocalReactionsInfo">Дає змогу поставити до 3 реакцій на повідомлення без Premium. Telegram приймає лише одну, тож решта зберігаються на цьому пристрої, і ніхто інший їх не бачить.</string>
+    <string name="InuSoftJoinTitle">Приєднуйтесь до каналу Softgram</string>
+    <string name="InuSoftJoinText">Новини, оновлення та плагіни Softgram публікуються в офіційному каналі.</string>
+    <string name="InuSoftJoinAction">Приєднатися</string>
+    <string name="InuSoftJoinLater">Не зараз</string>
 </resources>

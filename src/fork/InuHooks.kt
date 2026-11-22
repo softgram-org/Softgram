@@ -7,6 +7,7 @@ import desu.inugram.helpers.CrashReporter
 import desu.inugram.helpers.LoginHelper
 import desu.inugram.helpers.ProxyVpnHelper
 import desu.inugram.helpers.ShortcutHelper
+import desu.inugram.helpers.SoftJoinPrompt
 import desu.inugram.helpers.SplashScreenHelper
 import desu.inugram.helpers.TabletModeHelper
 import desu.inugram.helpers.UrlCleanerHelper
@@ -244,6 +245,7 @@ object InuHooks {
     fun onAuthSuccess(account: Int) {
         PasscodeHelper.removeForAccount(account)
         desu.inugram.helpers.accounts.BotAccountHelper.ensurePolling()
+        SoftJoinPrompt.scheduleAfterLogin()
     }
 
     @JvmStatic
@@ -256,6 +258,7 @@ object InuHooks {
         val bg = Theme.getColor(Theme.key_windowBackgroundWhite)
         launchActivity.window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(bg))
         CrashReporter.maybeShowReportSheet(launchActivity)
+        SoftJoinPrompt.maybeShow(launchActivity)
         desu.inugram.helpers.accounts.BotAccountHelper.ensurePolling()
         desu.inugram.helpers.LogsHelper.trimIfNeeded()
         ProxyVpnHelper.reconcile()
