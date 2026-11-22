@@ -1,0 +1,290 @@
+name: Soft Design 5 - Polish (exact logo, coin logos, plugins cleanup, ephemeral ring)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 5
+        env:
+          RING_B64: |
+            ZGlmZiAtLWdpdCBhL1RNZXNzYWdlc1Byb2ovc3JjL21haW4vamF2YS9vcmcvdGVsZWdyYW0vdWkvQ29tcG9uZW50cy9DaGF0QWN0
+            aXZpdHlFbnRlclZpZXcuamF2YSBiL1RNZXNzYWdlc1Byb2ovc3JjL21haW4vamF2YS9vcmcvdGVsZWdyYW0vdWkvQ29tcG9uZW50
+            cy9DaGF0QWN0aXZpdHlFbnRlclZpZXcuamF2YQppbmRleCAyMzg1MWEwLi4zNjcwZmM0IDEwMDY0NAotLS0gYS9UTWVzc2FnZXNQ
+            cm9qL3NyYy9tYWluL2phdmEvb3JnL3RlbGVncmFtL3VpL0NvbXBvbmVudHMvQ2hhdEFjdGl2aXR5RW50ZXJWaWV3LmphdmEKKysr
+            IGIvVE1lc3NhZ2VzUHJvai9zcmMvbWFpbi9qYXZhL29yZy90ZWxlZ3JhbS91aS9Db21wb25lbnRzL0NoYXRBY3Rpdml0eUVudGVy
+            Vmlldy5qYXZhCkBAIC0zMTMxLDcgKzMxMzEsNyBAQCBwdWJsaWMgY2xhc3MgQ2hhdEFjdGl2aXR5RW50ZXJWaWV3IGV4dGVuZHMg
+            RnJhbWVMYXlvdXQgaW1wbGVtZW50cwogICAgICAgICAgICAgICAgICAgICAgICAgICAgIGlzU2VuZEJ1YmJsZURpc21pc3NlZCA9
+            IGZhbHNlOwogICAgICAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgICAgICAgICAgaWYgKGNoaWxkLmdldFZp
+            c2liaWxpdHkoKSA9PSBWSVNJQkxFICYmICFpc1NlbmRCdWJibGVEaXNtaXNzZWQpIHsKLSAgICAgICAgICAgICAgICAgICAgICAg
+            ICAgICBkZXN1LmludWdyYW0uaGVscGVycy5jaGF0Lklvc0lucHV0R2xhc3MuZHJhd0Nvcm5lcihjYW52YXMsIGludV9nbGFzcy5z
+            ZW5kLCBjaGlsZC5nZXRSaWdodCgpLCBjaGlsZC5nZXRCb3R0b20oKSwgREVGQVVMVF9IRUlHSFQsIHNlbmRCdXR0b25BbHBoYSwg
+            Y2hpbGQuZ2V0U2NhbGVYKCkpOworICAgICAgICAgICAgICAgICAgICAgICAgICAgIGRlc3UuaW51Z3JhbS5oZWxwZXJzLmNoYXQu
+            SW9zSW5wdXRHbGFzcy5kcmF3Q29ybmVyKGNhbnZhcywgaW51X2dsYXNzLnNlbmQsIGNoaWxkLmdldFJpZ2h0KCksIGNoaWxkLmdl
+            dEJvdHRvbSgpLCBERUZBVUxUX0hFSUdIVCwgc2VuZEJ1dHRvbkFscGhhLCBjaGlsZC5nZXRTY2FsZVgoKSAqICgxZiAtIDAuMjFm
+            ICogc2VuZEJ1dHRvbi5nZXRFcGhlbWVyYWxGYWN0b3IoKSkpOwogICAgICAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAg
+            ICAgICAgICAgICAgICAgc2VuZEJ1dHRvbkxhc3REcmF3QWxwaGEgPSBzZW5kQnV0dG9uQWxwaGE7CiAgICAgICAgICAgICAgICAg
+            ICAgIH0gZWxzZSBpZiAoY2hpbGQgPT0gZXhwYW5kU3RpY2tlcnNCdXR0b24pIHsKQEAgLTE1NjQ3LDYgKzE1NjQ3LDEwIEBAIHB1
+            YmxpYyBjbGFzcyBDaGF0QWN0aXZpdHlFbnRlclZpZXcgZXh0ZW5kcyBGcmFtZUxheW91dCBpbXBsZW1lbnRzCiAgICAgICAgICAg
+            ICB0aGlzKGNvbnRleHQsIHJlc0lkLCByZXNvdXJjZXNQcm92aWRlciwgZmFsc2UpOwogICAgICAgICB9CiAKKyAgICAgICAgcHVi
+            bGljIGZsb2F0IGdldEVwaGVtZXJhbEZhY3RvcigpIHsKKyAgICAgICAgICAgIHJldHVybiBlcGhlbWVyYWxGYWN0b3I7CisgICAg
+            ICAgIH0KKwogICAgICAgICBwdWJsaWMgdm9pZCBzZXRFcGhlbWVyYWxGYWN0b3IoZmxvYXQgZmFjdG9yKSB7CiAgICAgICAgICAg
+            ICBpZiAoZXBoZW1lcmFsRmFjdG9yICE9IGZhY3RvcikgewogICAgICAgICAgICAgICAgIGVwaGVtZXJhbEZhY3RvciA9IGZhY3Rv
+            cjsKQEAgLTE1OTg2LDcgKzE1OTkwLDEwIEBAIHB1YmxpYyBjbGFzcyBDaGF0QWN0aXZpdHlFbnRlclZpZXcgZXh0ZW5kcyBGcmFt
+            ZUxheW91dCBpbXBsZW1lbnRzCiAgICAgICAgICAgICAgICAgICAgICAgICBlcGhlbWVyYWxPdXRsaW5lRHJhd2FibGUgPSBnZXRD
+            b250ZXh0KCkuZ2V0UmVzb3VyY2VzKCkuZ2V0RHJhd2FibGUoUi5kcmF3YWJsZS5zZW5kX291dGxpbmUpOwogICAgICAgICAgICAg
+            ICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgIGVwaGVtZXJhbE91dGxpbmVEcmF3YWJsZS5zZXRDb2xvckZpbHRlcihiYWNr
+            Z3JvdW5kUGFpbnQuZ2V0Q29sb3IoKSwgUG9ydGVyRHVmZi5Nb2RlLk1VTFRJUExZKTsKLSAgICAgICAgICAgICAgICAgICAgRHJh
+            d2FibGVVdGlscy5zZXRCb3VuZHMoZXBoZW1lcmFsT3V0bGluZURyYXdhYmxlLCBiQ1gsIGJDWSwgR3Jhdml0eS5DRU5URVIpOwor
+            ICAgICAgICAgICAgICAgICAgICAvLyBzb2Z0Z3JhbTogc2l6ZSB0aGUgZG90dGVkIHJpbmcgZnJvbSB0aGUgcmVhbCBjaXJjbGUg
+            KHRoZSBnbGFzcyBidWJibGUgaXMgYmlnZ2VyIHRoYW4gdGhlIHN0b2NrIGNpcmNsZSkKKyAgICAgICAgICAgICAgICAgICAgZmlu
+            YWwgZmxvYXQgcmluZ0NpcmNsZSA9IHNob3VsZERyYXdJbnRlcm5hbENpcmNsZSgpID8gZ2V0Q2lyY2xlSGVpZ2h0KCkgOiBkcChE
+            RUZBVUxUX0hFSUdIVCkgLSAyZiAqIGRlc3UuaW51Z3JhbS5oZWxwZXJzLmNoYXQuSW9zSW5wdXRIZWxwZXIuYnViYmxlSW5zZXRQ
+            eCgpOworICAgICAgICAgICAgICAgICAgICBmaW5hbCBmbG9hdCByaW5nSGFsZiA9IChyaW5nQ2lyY2xlICogMC43OWYgKyBkcCgx
+            MC4zZikpIC8gMmY7CisgICAgICAgICAgICAgICAgICAgIGVwaGVtZXJhbE91dGxpbmVEcmF3YWJsZS5zZXRCb3VuZHMoKGludCkg
+            KGJDWCAtIHJpbmdIYWxmKSwgKGludCkgKGJDWSAtIHJpbmdIYWxmKSwgKGludCkgKGJDWCArIHJpbmdIYWxmKSwgKGludCkgKGJD
+            WSArIHJpbmdIYWxmKSk7CiAgICAgICAgICAgICAgICAgICAgIERyYXdhYmxlVXRpbHMuZHJhd1dpdGhTY2FsZShjYW52YXMsIGVw
+            aGVtZXJhbE91dGxpbmVEcmF3YWJsZSwgZXBoZW1lcmFsRmFjdG9yKTsKICAgICAgICAgICAgICAgICB9CiAK
+        run: |
+          python3 - <<'SDPY'
+          #!/usr/bin/env python3
+          """Soft Design 5: exact Softgram logo everywhere, real coin logos, plugin/entinyGram cleanup, ephemeral ring fix."""
+          import os, re, sys, base64
+
+          ROOT = os.getcwd()
+          FAILS = []
+
+          def P(p): return os.path.join(ROOT, p)
+          def rd(p): return open(P(p), encoding='utf-8').read()
+          def wr(p, s):
+              os.makedirs(os.path.dirname(P(p)), exist_ok=True)
+              open(P(p), 'w', encoding='utf-8').write(s)
+
+          def edit(p, pairs, required=False):
+              """pairs: (old, new) exact strings. A miss is a warning unless required."""
+              if not os.path.exists(P(p)):
+                  FAILS.append(('missing file', p)); print('WARN missing', p); return
+              s = rd(p); o = s
+              for old, new in pairs:
+                  if new in s and old not in s:
+                      continue  # already applied
+                  if old not in s:
+                      FAILS.append((p, old[:60])); print('WARN no match in', p, ':', old[:70].replace('\n', '\\n'))
+                      continue
+                  s = s.replace(old, new)
+              if s != o: wr(p, s); print('edited', p)
+
+          # ---------------------------------------------------------------- logo geometry (from the original Softgram logo)
+          BG = "M105,75 L87,92 L64,118 L48,141 L31,172 L18,204 L10,233 L7,253 L5,259 L3,284 L1,290 L1,300 L0,301 L0,960 L3,972 L4,988 L5,989 L5,995 L9,1016 L17,1046 L27,1072 L42,1102 L56,1124 L74,1147 L87,1161 L104,1177 L127,1195 L152,1211 L179,1225 L220,1240 L251,1247 L278,1250 L285,1253 L970,1253 L977,1250 L1003,1247 L1034,1240 L1071,1227 L1094,1216 L1116,1203 L1137,1188 L1156,1172 L1181,1146 L1196,1127 L1212,1102 L1223,1081 L1233,1057 L1242,1028 L1249,994 L1250,979 L1253,969 L1253,285 L1250,274 L1248,252 L1241,220 L1225,176 L1211,149 L1196,126 L1171,96 L1148,74 L1129,59 L1101,41 L1082,31 L1047,17 L1026,12 L1022,10 L990,4 L963,1 L962,0 L290,0 L279,3 L264,4 L263,5 L257,5 L251,7 L236,9 L207,17 L183,26 L162,36 L143,47 L128,57 Z"
+          BODY = "M1041,333 L1038,324 L1032,313 L1019,299 L1013,295 L1003,290 L993,287 L988,287 L987,286 L972,286 L971,287 L960,288 L813,337 L810,337 L758,355 L755,355 L706,372 L703,372 L651,390 L648,390 L605,405 L602,405 L544,425 L541,425 L507,437 L504,437 L492,442 L489,442 L416,467 L413,467 L395,474 L392,474 L343,491 L340,491 L337,493 L334,493 L274,513 L250,524 L236,534 L224,547 L220,554 L220,556 L233,545 L250,539 L260,539 L261,538 L264,538 L265,539 L277,539 L278,540 L284,540 L298,544 L302,544 L339,556 L352,562 L360,564 L374,571 L376,571 L413,589 L415,591 L426,596 L428,598 L453,612 L493,639 L517,657 L552,686 L583,714 L636,766 L702,835 L777,916 L803,941 L818,951 L830,956 L838,957 L839,958 L859,958 L860,957 L864,957 L878,951 L885,946 L893,938 L904,919 L910,901 L912,889 L915,880 L916,871 L918,866 L918,862 L920,857 L920,853 L923,844 L924,835 L926,830 L927,821 L930,812 L932,799 L933,798 L935,786 L939,773 L939,769 L942,760 L942,756 L946,743 L946,739 L947,738 L947,735 L955,706 L955,702 L956,701 L956,698 L957,697 L957,694 L958,693 L958,690 L959,689 L959,686 L960,685 L960,682 L961,681 L978,610 L980,606 L983,591 L985,587 L989,568 L991,564 L996,542 L998,538 L999,531 L1004,516 L1007,501 L1011,490 L1012,483 L1018,465 L1019,458 L1021,454 L1022,447 L1024,443 L1024,440 L1026,436 L1026,433 L1028,429 L1029,422 L1031,418 L1031,415 L1033,411 L1034,404 L1036,400 L1036,397 L1040,384 L1042,368 L1043,367 L1043,342 L1042,341 Z"
+          FOLD = "M230,548 L218,561 L215,568 L215,572 L213,575 L213,587 L214,588 L215,597 L218,606 L224,618 L261,667 L270,681 L285,701 L293,714 L303,725 L304,730 L307,733 L311,740 L318,747 L319,752 L333,770 L336,776 L351,797 L352,800 L383,847 L385,852 L392,861 L394,866 L418,902 L421,908 L429,915 L429,919 L431,923 L435,927 L440,927 L443,931 L443,936 L447,940 L452,943 L461,943 L465,947 L466,950 L472,952 L494,953 L511,948 L524,940 L532,933 L540,923 L548,916 L550,913 L550,910 L556,905 L577,873 L637,774 L637,769 L635,766 L603,734 L570,703 L517,658 L467,622 L464,621 L453,613 L433,601 L415,592 L413,590 L360,565 L352,563 L347,560 L331,555 L328,553 L325,553 L322,551 L319,551 L316,549 L313,549 L309,547 L306,547 L302,545 L298,545 L289,542 L278,541 L277,540 L250,540 L240,543 Z"
+          NS = 'xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt"'
+          GRAD_BG = '<aapt:attr name="android:fillColor"><gradient android:type="linear" android:startX="627" android:startY="0" android:endX="627" android:endY="1254"><item android:offset="0" android:color="#0094FF"/><item android:offset="1" android:color="#007AEB"/></gradient></aapt:attr>'
+          GRAD_FOLD = '<aapt:attr name="android:fillColor"><gradient android:type="linear" android:startX="640" android:startY="700" android:endX="400" android:endY="950"><item android:offset="0" android:color="#84ACE3"/><item android:offset="1" android:color="#E6F1FF"/></gradient></aapt:attr>'
+          FOLD_ALPHA = '#8CFFFFFF'   # fold shading for single-colour (tinted) icons: translucent white, so the curve stays visible
+
+          def vec(size, inner, vw=1254):
+              return f'<?xml version="1.0" encoding="utf-8"?>\n<vector {NS} android:width="{size}dp" android:height="{size}dp" android:viewportWidth="{vw}" android:viewportHeight="{vw}">\n{inner}</vector>\n'
+
+          def group(inner, s, tx, ty):
+              return f'<group android:scaleX="{s}" android:scaleY="{s}" android:translateX="{tx}" android:translateY="{ty}">\n{inner}</group>\n'
+
+          BODY_WHITE = f'<path android:pathData="{BODY}" android:fillColor="#FFFFFF"/>\n'
+          FOLD_COLOR = f'<path android:pathData="{FOLD}">{GRAD_FOLD}</path>\n'
+          BODY_MONO = f'<path android:pathData="{BODY}" android:fillColor="#FFFFFFFF"/>\n'
+          FOLD_MONO = f'<path android:pathData="{FOLD}" android:fillColor="{FOLD_ALPHA}"/>\n'
+          PLATE = f'<path android:pathData="{BG}">{GRAD_BG}</path>\n'
+          PLATE_SQ = f'<path android:pathData="M0,0H1254V1254H0Z">{GRAD_BG}</path>\n'
+
+          FULL = PLATE + BODY_WHITE + FOLD_COLOR
+          MONO = BODY_MONO + FOLD_MONO
+
+          def logos():
+              d = 'src/res/drawable/'
+              l = 'src/res/launcher/generated/drawable/'
+              wr(d + 'softgram_logo.xml', vec(108, FULL))
+              wr(d + 'inu_splash_320.xml', vec(320, group(FULL, 0.5, 313.5, 313.5)))
+              wr(d + 'inu_splash_old_320.xml', vec(320, group(FULL, 0.5, 313.5, 313.5)))
+              wr(d + 'inu_intro_logo.xml', vec(24, group(MONO, 1.1770, -112.8, -105.1)))
+              # plate icon used inside settings rows (white plane + shaded fold, on a brand-blue plate)
+              wr(d + 'softgram_plane.xml', vec(24, group(MONO, 1.1, -64.35, -57.2)))
+              # send button planes (same box as Telegram's own planes)
+              wr(d + 'softgram_send_24.xml', vec(24, group(MONO, 1.2274, -214.4, -93.7)))
+              wr(d + 'softgram_send_21.xml', vec(21, group(MONO, 1.509, -321.4, -311.6)))
+              for n in ('icon_background_inu', 'icon_background_old_inu'):
+                  wr(l + n + '.xml', vec(108, PLATE_SQ))
+              fg = vec(108, group(BODY_WHITE + FOLD_COLOR, 0.6942, 190.7, 195.2))
+              for n in ('icon_foreground_inu', 'icon_foreground_inu_round', 'icon_foreground_old_inu', 'icon_foreground_inu_debug', 'icon_foreground_old_inu_debug'):
+                  wr(l + n + '.xml', fg)
+              mono108 = vec(108, group(MONO, 0.6942, 190.7, 195.2))
+              for n in ('icon_plane_inu', 'icon_plane_old_inu'):
+                  wr(l + n + '.xml', mono108)
+              mono24 = vec(24, group(MONO, 1.2978, -188.6, -180.2))
+              for n in ('icon_notification_inu', 'icon_notification_old_inu', 'icon_settings_inu'):
+                  wr(l + n + '.xml', mono24)
+              print('logo vectors written')
+
+          # ---------------------------------------------------------------- real coin logos (white glyphs, tinted plates are added by SoftIcons)
+          COIN = {
+              'softgram_polygon': "m17.82 16.342 5.692-3.287A.98.98 0 0 0 24 12.21V5.635a.98.98 0 0 0-.488-.846l-5.693-3.286a.98.98 0 0 0-.977 0L11.15 4.789a.98.98 0 0 0-.489.846v11.747L6.67 19.686l-3.992-2.304v-4.61l3.992-2.304 2.633 1.52V8.896L7.158 7.658a.98.98 0 0 0-.977 0L.488 10.945a.98.98 0 0 0-.488.846v6.573a.98.98 0 0 0 .488.847l5.693 3.286a.981.981 0 0 0 .977 0l5.692-3.286a.98.98 0 0 0 .489-.846V6.618l.072-.041 3.92-2.263 3.99 2.305v4.609l-3.99 2.304-2.63-1.517v3.092l2.14 1.236a.981.981 0 0 0 .978 0v-.001Z",
+              'softgram_hyperliquid': "M21 11.937a9.4 9.4 0 0 1-.901 4.112c-.867 1.863-2.947 3.387-4.846 1.765-1.55-1.322-1.837-4.005-4.157-4.398-3.07-.361-3.145 3.092-5.15 3.482-2.236.44-2.978-3.206-2.945-4.862s.487-3.984 2.43-3.984c2.236 0 2.386 3.283 5.224 3.105 2.81-.186 2.86-3.602 4.696-5.064 1.585-1.264 3.448-.337 4.381 1.184.865 1.406 1.245 3.057 1.265 4.66z",
+              'softgram_dogecoin': "M12.288 7.908h-1.715v3.38h2.697v1.415h-2.697v3.38h1.799c.462 0 3.794.052 3.789-3.933-.005-3.984-3.232-4.242-3.873-4.242zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm.472 18.481H8.126v-5.778H6.594v-1.415h1.532V5.511h3.73c.882 0 6.727-.183 6.727 6.594-.001 6.888-6.111 6.376-6.111 6.376z",
+          }
+          def coins():
+              for name, path in COIN.items():
+                  wr(f'src/res/drawable/{name}.xml',
+                     f'<?xml version="1.0" encoding="utf-8"?>\n<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">\n<path android:pathData="{path}" android:fillColor="#FFFFFFFF"/>\n</vector>\n')
+              print('coin vectors written')
+
+          # ---------------------------------------------------------------- kotlin edits
+          def kotlin():
+              S = 'src/fork/ui/settings/'
+              # plate colours: Softgram brand gradient for the plane, real colours for the new coins
+              edit(S + 'SoftIcons.kt', [
+                  ('            R.drawable.entiny_tether to IconBackgroundColors.GREEN,\n',
+                   '            R.drawable.entiny_tether to IconBackgroundColors.GREEN,\n'
+                   '            R.drawable.softgram_polygon to IconBackgroundColors.PURPLE,\n'
+                   '            R.drawable.softgram_hyperliquid to IconBackgroundColors.CYAN,\n'
+                   '            R.drawable.softgram_dogecoin to IconBackgroundColors.ORANGE,\n'),
+                  ('    @JvmStatic\n    fun apply(cell: TextCell, res: Int) {\n        val c = colors(res)\n        cell.setColorfulIcon(c.top, c.bottom, res, true)\n    }',
+                   '    private val BRAND_TOP = 0xFF0094FF.toInt()\n    private val BRAND_BOTTOM = 0xFF007AEB.toInt()\n\n'
+                   '    private fun top(res: Int): Int = if (res == R.drawable.softgram_plane) BRAND_TOP else colors(res).top\n'
+                   '    private fun bottom(res: Int): Int = if (res == R.drawable.softgram_plane) BRAND_BOTTOM else colors(res).bottom\n\n'
+                   '    @JvmStatic\n    fun apply(cell: TextCell, res: Int) {\n        cell.setColorfulIcon(top(res), bottom(res), res, true)\n    }'),
+                  ('        val c = colors(res)\n        iv.background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(c.top, c.bottom)).apply {',
+                   '        iv.background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(top(res), bottom(res))).apply {'),
+              ])
+              # donate page: real logos, no footer line (with the heart)
+              edit(S + 'DonateActivity.kt', [
+                  ('Method(R.drawable.entiny_support, "Polygon · POL"', 'Method(R.drawable.softgram_polygon, "Polygon · POL"'),
+                  ('Method(R.drawable.entiny_support, "Hyperliquid · HYPE"', 'Method(R.drawable.softgram_hyperliquid, "Hyperliquid · HYPE"'),
+                  ('Method(R.drawable.entiny_support, "Dogecoin · DOGE"', 'Method(R.drawable.softgram_dogecoin, "Dogecoin · DOGE"'),
+                  ('        items.add(UItem.asShadow(str(R.string.InuDonateThanks)))\n', '        items.add(UItem.asShadow(null))\n'),
+              ])
+              # About: channel row gets the Softgram icon
+              edit(S + 'AdditionalSettingsActivity.kt', [
+                  ('                BUTTON_CHANNEL_LINK,\n                R.drawable.entiny_telegram,', '                BUTTON_CHANNEL_LINK,\n                R.drawable.softgram_plane,'),
+              ])
+              # send button: Softgram plane instead of the Telegram one
+              edit('src/fork/helpers/theme/NonIslandHelper.kt', [
+                  ('fun chatSendIcon(): Int = if (chatElements()) R.drawable.ic_send else R.drawable.send_plane_24',
+                   'fun chatSendIcon(): Int = if (chatElements()) R.drawable.softgram_send_21 else R.drawable.softgram_send_24'),
+              ])
+              # drop the "old" app icon and the "old" notification icon
+              edit('src/fork/ui/appicons/AppIcons.kt', [
+                  ('        ParanoiaHelper.filterLauncherIcons(icons)\n', '        ParanoiaHelper.filterLauncherIcons(icons)\n        icons.removeAll { it == LauncherIcon.OLD }\n'),
+              ])
+              edit(S + 'NotificationIconCell.kt', [
+                  ('            Triple(InuConfig.NotificationIconItem.OLD_ENTINYGRAM, R.drawable.icon_notification_old_inu, R.string.InuNotificationIconOldEntinygram),\n', ''),
+              ])
+              # no bundled third-party badges ("Official entinyGram channel", "entinyGram developer" ...)
+              edit('src/fork/helpers/badges/BadgeRegistry.kt', [
+                  ('        return json?.let { parse(it) }.orEmpty()', '        return emptyMap() // softgram: no bundled third-party badges'),
+              ])
+
+          def strings():
+              d = 'src/res'
+              for sub in sorted(os.listdir(P(d))):
+                  f = f'{d}/{sub}/strings_inu.xml'
+                  if not os.path.exists(P(f)): continue
+                  s = rd(f)
+                  n = re.sub(r'(<string name="InuMiscPreviewForwardedMessage"[^>]*>[^<]*?)inuGram', r'\1Telegram', s, flags=re.I)
+                  if n != s: wr(f, n); print('edited', f)
+
+          # ---------------------------------------------------------------- plugin section: no entinyGram anywhere visible
+          BRAND_KT = '''package desu.inugram.helpers.plugins
+
+          // Softgram: third-party plugin metadata may still carry the upstream brand; users only ever see "Softgram"
+          object SoftBrand {
+              private val RX = Regex("(entiny|inu)[\\\\s_-]*gram", RegexOption.IGNORE_CASE)
+
+              @JvmStatic
+              fun clean(text: String?): String? = text?.let { RX.replace(it, "Softgram") }
+          }
+          '''
+
+          def plugins():
+              wr('src/fork/helpers/plugins/SoftBrand.kt', BRAND_KT)
+              FQ = 'desu.inugram.helpers.plugins.SoftBrand.clean'
+              # authors are shown through SoftBrand.clean (the manifest itself is untouched: the plugin id is derived from it)
+              pat = re.compile(r'(?<![\w.])((?:[A-Za-z_]\w*\.)*manifest\.author)\b(?!\s*=[^=])')
+              for f in ('PluginRepoPluginActivity', 'PluginsActivity', 'MarketPluginActivity', 'PluginInfoActivity', 'PluginRepoActivity', 'MarketCells', 'MarketActivity'):
+                  p = f'src/fork/ui/settings/{f}.kt'
+                  if not os.path.exists(P(p)): print('skip', p); continue
+                  s = rd(p)
+                  if FQ in s: continue
+                  n = pat.sub(lambda m: f'{FQ}({m.group(1)})', s)
+                  if n != s: wr(p, n); print('authors cleaned in', p)
+              # repo titles
+              edit('src/fork/helpers/plugins/PluginRepos.kt', [
+                  ('class PluginRepo(val channelId: Long, val username: String, val title: String)',
+                   'class PluginRepo(val channelId: Long, val username: String, rawTitle: String) {\n    val title: String = desu.inugram.helpers.plugins.SoftBrand.clean(rawTitle).orEmpty()\n}'),
+              ])
+              R = 'src/fork/ui/settings/PluginReposActivity.kt'
+              edit(R, [
+                  ('title.text = chat?.title ?: repo.title', 'title.text = desu.inugram.helpers.plugins.SoftBrand.clean(chat?.title) ?: repo.title'),
+                  ('        subtitle.text = "@${repo.username}"\n',
+                   '        subtitle.text = if (PluginRepos.isOfficial(repo)) "" else "@${repo.username}"\n        subtitle.visibility = if (PluginRepos.isOfficial(repo)) GONE else VISIBLE\n        openChannelAction.visibility = if (PluginRepos.isOfficial(repo)) GONE else VISIBLE\n'),
+                  ('        description.text = if (about.isNullOrEmpty()) "" else InuUtils.linkUsernames(about, onUsernameClick)\n        description.visibility = if (about.isNullOrEmpty()) GONE else VISIBLE\n',
+                   '        val hideAbout = about.isNullOrEmpty() || PluginRepos.isOfficial(repo)\n        description.text = if (hideAbout) "" else InuUtils.linkUsernames(about, onUsernameClick)\n        description.visibility = if (hideAbout) GONE else VISIBLE\n'),
+                  ('        if (chat != null) {\n            avatarDrawable.setInfo(chat)',
+                   '        if (PluginRepos.isOfficial(repo)) {\n            avatar.setImageDrawable(context.getDrawable(R.drawable.softgram_logo))\n        } else if (chat != null) {\n            avatarDrawable.setInfo(chat)'),
+              ])
+              # no "source channel" row that sends users to the upstream channel (official repo only)
+              edit('src/fork/ui/settings/PluginRepoPluginActivity.kt', [
+                  ('        items.add(mkTwoLineEntry(SOURCE, R.drawable.msg_channel, str(R.string.InuPluginRepoSource), "${repo.title} (@${repo.username})"))\n',
+                   '        if (!PluginRepos.isOfficial(repo)) items.add(mkTwoLineEntry(SOURCE, R.drawable.msg_channel, str(R.string.InuPluginRepoSource), "${repo.title} (@${repo.username})"))\n'),
+              ])
+
+          def ring_patch():
+              b64 = open(P('.sg_ring.b64')).read() if os.path.exists(P('.sg_ring.b64')) else os.environ.get('RING_B64', '')
+              if not b64: print('WARN no ring patch'); return
+              wr('patches/softgram/ephemeral-ring.patch', base64.b64decode(b64).decode('utf-8'))
+              s = rd('series')
+              if 'softgram/ephemeral-ring.patch' not in s:
+                  wr('series', s.rstrip('\n') + '\nsoftgram/ephemeral-ring.patch\n')
+                  print('series updated')
+
+          if __name__ == '__main__':
+              logos(); coins(); kotlin(); strings(); plugins(); ring_patch()
+              print('--- misses:', len(FAILS))
+              for f in FAILS: print('   ', f)
+          SDPY
+
+      - name: Sanity check
+        run: |
+          for f in src/res/drawable/softgram_logo.xml src/res/drawable/softgram_plane.xml src/res/drawable/softgram_send_24.xml src/res/drawable/softgram_send_21.xml src/res/drawable/softgram_polygon.xml src/res/drawable/softgram_hyperliquid.xml src/res/drawable/softgram_dogecoin.xml src/res/launcher/generated/drawable/icon_notification_inu.xml; do
+            [ -s "$f" ] || { echo "::error::$f missing"; exit 1; }
+            python3 -c "import sys,xml.dom.minidom as m; m.parse(sys.argv[1])" "$f" || { echo "::error::$f is not valid XML"; exit 1; }
+          done
+          grep -qx 'softgram/ephemeral-ring.patch' series || { echo '::error::ring patch not in series'; exit 1; }
+          echo 'all files verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 5: exact logo everywhere, coin logos, plugin cleanup, ephemeral ring"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
