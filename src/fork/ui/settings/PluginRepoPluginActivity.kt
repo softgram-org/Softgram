@@ -63,16 +63,16 @@ internal class PluginRepoPluginActivity(
 
         items.add(UItem.asHeader(str(R.string.InuPluginRepoAbout)))
         val heroRow = hero ?: PluginRepoRow(context).also { hero = it }
-        val meta = listOfNotNull(manifest.author, repo.title.takeIf { it.isNotEmpty() }).joinToString(" · ")
+        val meta = listOfNotNull(desu.inugram.helpers.plugins.SoftBrand.clean(manifest.author), repo.title.takeIf { it.isNotEmpty() }).joinToString(" · ")
         heroRow.bind(manifest, meta, null, active = false, onUsernameClick = { }, showDescription = false) { }
         items.add(UItem.asCustom(HERO, heroRow))
         manifest.description(LocaleController.getInstance().currentLocaleInfo?.langCode)?.takeIf { it.isNotEmpty() }?.let {
             items.add(mkTwoLineEntry(DESCRIPTION, R.drawable.msg_info, str(R.string.InuPluginRepoDescription), it))
         }
-        manifest.author?.takeIf { it.isNotEmpty() }?.let {
+        desu.inugram.helpers.plugins.SoftBrand.clean(manifest.author)?.takeIf { it.isNotEmpty() }?.let {
             items.add(mkTwoLineEntry(AUTHOR, R.drawable.msg_contacts, str(R.string.InuPluginRepoAuthor), it))
         }
-        items.add(mkTwoLineEntry(SOURCE, R.drawable.msg_channel, str(R.string.InuPluginRepoSource), "${repo.title} (@${repo.username})"))
+        if (!PluginRepos.isOfficial(repo)) items.add(mkTwoLineEntry(SOURCE, R.drawable.msg_channel, str(R.string.InuPluginRepoSource), "${repo.title} (@${repo.username})"))
         manifest.id?.let {
             items.add(mkTwoLineEntry(PLUGIN_ID, R.drawable.msg_link, str(R.string.InuPluginRepoId), it))
         }

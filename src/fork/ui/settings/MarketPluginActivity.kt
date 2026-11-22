@@ -110,7 +110,7 @@ internal class MarketPluginActivity(
             val value = listOfNotNull("v$it", size?.let { s -> AndroidUtilities.formatFileSize(s) }).joinToString(" · ")
             items.add(mkTwoLineEntry(VERSION, R.drawable.msg_calendar, str(R.string.InuMarketVersion), value))
         }
-        manifest.author?.takeIf { it.isNotEmpty() }?.let {
+        desu.inugram.helpers.plugins.SoftBrand.clean(manifest.author)?.takeIf { it.isNotEmpty() }?.let {
             items.add(mkTwoLineEntry(AUTHOR, R.drawable.msg_contacts, str(R.string.InuPluginRepoAuthor), it))
         }
         val tags = entry.tags.mapNotNull { MarketTags.get(it) }
@@ -199,7 +199,7 @@ internal class MarketHeroCell(context: Context) : LinearLayout(context) {
     fun bind(entry: MarketEntry, action: MarketAction, onClick: () -> Unit) {
         PluginManifestIcons.bindIcon(icon, entry.manifest.icon, PluginManifestIcons.createPlaceholder(context))
         name.text = entry.name
-        meta.text = listOfNotNull(entry.manifest.author?.takeIf { it.isNotEmpty() }, entry.manifest.version?.let { "v$it" }).joinToString(" · ")
+        meta.text = listOfNotNull(desu.inugram.helpers.plugins.SoftBrand.clean(entry.manifest.author)?.takeIf { it.isNotEmpty() }, entry.manifest.version?.let { "v$it" }).joinToString(" · ")
         tags.bind(entry.tags)
         styleMarketAction(button, action, compact = false)
         button.textSize = 15f

@@ -1,0 +1,36 @@
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
+index 23851a0..3670fc4 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
+@@ -3131,7 +3131,7 @@ public class ChatActivityEnterView extends FrameLayout implements
+                             isSendBubbleDismissed = false;
+                         }
+                         if (child.getVisibility() == VISIBLE && !isSendBubbleDismissed) {
+-                            desu.inugram.helpers.chat.IosInputGlass.drawCorner(canvas, inu_glass.send, child.getRight(), child.getBottom(), DEFAULT_HEIGHT, sendButtonAlpha, child.getScaleX());
++                            desu.inugram.helpers.chat.IosInputGlass.drawCorner(canvas, inu_glass.send, child.getRight(), child.getBottom(), DEFAULT_HEIGHT, sendButtonAlpha, child.getScaleX() * (1f - 0.21f * sendButton.getEphemeralFactor()));
+                         }
+                         sendButtonLastDrawAlpha = sendButtonAlpha;
+                     } else if (child == expandStickersButton) {
+@@ -15647,6 +15647,10 @@ public class ChatActivityEnterView extends FrameLayout implements
+             this(context, resId, resourcesProvider, false);
+         }
+ 
++        public float getEphemeralFactor() {
++            return ephemeralFactor;
++        }
++
+         public void setEphemeralFactor(float factor) {
+             if (ephemeralFactor != factor) {
+                 ephemeralFactor = factor;
+@@ -15986,7 +15990,10 @@ public class ChatActivityEnterView extends FrameLayout implements
+                         ephemeralOutlineDrawable = getContext().getResources().getDrawable(R.drawable.send_outline);
+                     }
+                     ephemeralOutlineDrawable.setColorFilter(backgroundPaint.getColor(), PorterDuff.Mode.MULTIPLY);
+-                    DrawableUtils.setBounds(ephemeralOutlineDrawable, bCX, bCY, Gravity.CENTER);
++                    // softgram: size the dotted ring from the real circle (the glass bubble is bigger than the stock circle)
++                    final float ringCircle = shouldDrawInternalCircle() ? getCircleHeight() : dp(DEFAULT_HEIGHT) - 2f * desu.inugram.helpers.chat.IosInputHelper.bubbleInsetPx();
++                    final float ringHalf = (ringCircle * 0.79f + dp(10.3f)) / 2f;
++                    ephemeralOutlineDrawable.setBounds((int) (bCX - ringHalf), (int) (bCY - ringHalf), (int) (bCX + ringHalf), (int) (bCY + ringHalf));
+                     DrawableUtils.drawWithScale(canvas, ephemeralOutlineDrawable, ephemeralFactor);
+                 }
+ 

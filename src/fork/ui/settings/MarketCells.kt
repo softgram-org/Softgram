@@ -286,7 +286,7 @@ internal class MarketFeaturedCell(context: Context) : LinearLayout(context) {
         val tags = MarketTagPills(context).apply { bind(entry.tags) }
         card.addView(tags, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 4f, 0f, 0f))
         card.addView(TextView(context).apply {
-            text = entry.manifest.author.orEmpty()
+            text = desu.inugram.helpers.plugins.SoftBrand.clean(entry.manifest.author).orEmpty()
             visibility = if (tags.visibility == GONE && text.isNotEmpty()) VISIBLE else GONE
             textSize = 12.5f
             gravity = Gravity.CENTER
@@ -372,7 +372,7 @@ internal class MarketRow(context: Context) : LinearLayout(context) {
         val text = entry.manifest.description(LocaleController.getInstance().currentLocaleInfo?.langCode).orEmpty()
         description.text = text
         description.visibility = if (text.isEmpty()) GONE else VISIBLE
-        author.text = entry.manifest.author.orEmpty()
+        author.text = desu.inugram.helpers.plugins.SoftBrand.clean(entry.manifest.author).orEmpty()
         author.visibility = if (author.text.isBlank()) GONE else VISIBLE
         tags.bind(entry.tags)
         styleMarketAction(button, action)

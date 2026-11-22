@@ -54,7 +54,7 @@ class AdditionalSettingsActivity : SettingsPageActivity(), NotificationCenter.No
         items.add(
             SoftIcons.button(
                 BUTTON_CHANNEL_LINK,
-                R.drawable.entiny_telegram,
+                R.drawable.softgram_plane,
                 LocaleController.getString(R.string.InuAboutChannel),
                 "@Softgram_org"
             )

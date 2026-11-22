@@ -167,7 +167,7 @@ object NonIslandHelper {
         if (chatElements() || (InuConfig.IOS_INPUT_APPEARANCE.value && !InuConfig.COMPACT_INPUT_SIZE.value)) 48 else 44
 
     @JvmStatic
-    fun chatSendIcon(): Int = if (chatElements()) R.drawable.ic_send else R.drawable.send_plane_24
+    fun chatSendIcon(): Int = if (chatElements()) R.drawable.softgram_send_21 else R.drawable.softgram_send_24
 
     @JvmStatic
     fun createInputButtonSelector(color: Int): Drawable =

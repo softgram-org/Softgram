@@ -568,7 +568,7 @@ class PluginRow(context: Context, val compact: Boolean) : LinearLayout(context) 
             } else {
                 subtitle.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText))
                 subtitle.text = plugin.manifest.description(LocaleController.getInstance().currentLocaleInfo?.langCode)?.let(::formatDescription)
-                    ?: plugin.manifest.author?.let { linkUsernames(LocaleController.formatString(R.string.InuPluginsByAuthor, it)) }
+                    ?: desu.inugram.helpers.plugins.SoftBrand.clean(plugin.manifest.author)?.let { linkUsernames(LocaleController.formatString(R.string.InuPluginsByAuthor, it)) }
                     ?: ""
             }
         } else {
@@ -597,7 +597,7 @@ class PluginRow(context: Context, val compact: Boolean) : LinearLayout(context) 
     private fun buildMetaLine(plugin: Plugin): String {
         val parts = ArrayList<String>()
         plugin.manifest.version?.let { parts.add("v$it") }
-        plugin.manifest.author?.let { parts.add(LocaleController.formatString(R.string.InuPluginsByAuthor, it)) }
+        desu.inugram.helpers.plugins.SoftBrand.clean(plugin.manifest.author)?.let { parts.add(LocaleController.formatString(R.string.InuPluginsByAuthor, it)) }
         return parts.joinToString(" · ")
     }
 

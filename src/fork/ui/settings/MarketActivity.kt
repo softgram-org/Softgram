@@ -150,7 +150,7 @@ class MarketActivity(private val openSlug: String? = null, private val officialO
         if (query.isEmpty()) return true
         val lang = LocaleController.getInstance().currentLocaleInfo?.langCode
         return entry.name.lowercase(Locale.getDefault()).contains(query) ||
-            entry.manifest.author.orEmpty().lowercase(Locale.getDefault()).contains(query) ||
+            desu.inugram.helpers.plugins.SoftBrand.clean(entry.manifest.author).orEmpty().lowercase(Locale.getDefault()).contains(query) ||
             entry.id.contains(query) ||
             entry.manifest.description(lang).orEmpty().lowercase(Locale.getDefault()).contains(query)
     }

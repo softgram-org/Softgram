@@ -89,7 +89,6 @@ class NotificationIconCell(
         private val OPTIONS = listOf(
             Triple(InuConfig.NotificationIconItem.TELEGRAM, R.drawable.notification, R.string.InuNotificationIconTelegram),
             Triple(InuConfig.NotificationIconItem.INUGRAM, R.drawable.icon_notification_inu, R.string.InuNotificationIconInugram),
-            Triple(InuConfig.NotificationIconItem.OLD_ENTINYGRAM, R.drawable.icon_notification_old_inu, R.string.InuNotificationIconOldEntinygram),
         )
     }
 }

@@ -47,22 +47,29 @@ object SoftIcons {
             R.drawable.entiny_trx to IconBackgroundColors.RED,
             R.drawable.entiny_ton to IconBackgroundColors.BLUE,
             R.drawable.entiny_tether to IconBackgroundColors.GREEN,
+            R.drawable.softgram_polygon to IconBackgroundColors.PURPLE,
+            R.drawable.softgram_hyperliquid to IconBackgroundColors.CYAN,
+            R.drawable.softgram_dogecoin to IconBackgroundColors.ORANGE,
         )
     }
 
     @JvmStatic
     fun colors(res: Int): IconBackgroundColors = MAP[res] ?: FALLBACK[(res and 0x7fffffff) % FALLBACK.size]
 
+    private val BRAND_TOP = 0xFF0094FF.toInt()
+    private val BRAND_BOTTOM = 0xFF007AEB.toInt()
+
+    private fun top(res: Int): Int = if (res == R.drawable.softgram_plane) BRAND_TOP else colors(res).top
+    private fun bottom(res: Int): Int = if (res == R.drawable.softgram_plane) BRAND_BOTTOM else colors(res).bottom
+
     @JvmStatic
     fun apply(cell: TextCell, res: Int) {
-        val c = colors(res)
-        cell.setColorfulIcon(c.top, c.bottom, res, true)
+        cell.setColorfulIcon(top(res), bottom(res), res, true)
     }
 
     @JvmStatic
     fun plate(iv: ImageView, res: Int) {
-        val c = colors(res)
-        iv.background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(c.top, c.bottom)).apply {
+        iv.background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(top(res), bottom(res))).apply {
             cornerRadius = dp(7f).toFloat()
         }
         iv.setPadding(dp(4f), dp(4f), dp(4f), dp(4f))

@@ -86,6 +86,7 @@ object AppIcons {
     fun available(account: Int): List<LauncherIcon> {
         val icons = ArrayList(LauncherIcon.values().asList())
         ParanoiaHelper.filterLauncherIcons(icons)
+        icons.removeAll { it == LauncherIcon.OLD }
         if (MessagesController.getInstance(account).premiumFeaturesBlocked()) {
             icons.removeAll { it.premium }
         }

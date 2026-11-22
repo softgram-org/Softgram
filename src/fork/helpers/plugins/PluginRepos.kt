@@ -21,7 +21,9 @@ import org.telegram.tgnet.ConnectionsManager
 import org.telegram.tgnet.RequestDelegateTimestamp
 import org.telegram.tgnet.TLRPC
 
-class PluginRepo(val channelId: Long, val username: String, val title: String)
+class PluginRepo(val channelId: Long, val username: String, rawTitle: String) {
+    val title: String = desu.inugram.helpers.plugins.SoftBrand.clean(rawTitle).orEmpty()
+}
 
 /** [document] carries the file reference of the request that found it */
 class PluginRepoPost(val repo: PluginRepo, val messageId: Int, val document: TLRPC.Document, val text: String = "") {

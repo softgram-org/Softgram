@@ -281,19 +281,24 @@ private class RepoRow(context: Context) : LinearLayout(context) {
         onUsernameClick: (String) -> Unit,
         onRemove: () -> Unit,
     ) {
-        if (chat != null) {
+        if (PluginRepos.isOfficial(repo)) {
+            avatar.setImageDrawable(context.getDrawable(R.drawable.softgram_logo))
+        } else if (chat != null) {
             avatarDrawable.setInfo(chat)
             avatar.setForUserOrChat(chat, avatarDrawable)
         } else {
             avatarDrawable.setInfo(repo.channelId, repo.title, null)
             avatar.setImageDrawable(avatarDrawable)
         }
-        title.text = chat?.title ?: repo.title
+        title.text = desu.inugram.helpers.plugins.SoftBrand.clean(chat?.title) ?: repo.title
         officialPill.visibility = if (PluginRepos.isOfficial(repo)) VISIBLE else GONE
         title.setWarning(if (failed) tierColors(GrantTier.CAUTION).first else null)
-        subtitle.text = "@${repo.username}"
-        description.text = if (about.isNullOrEmpty()) "" else InuUtils.linkUsernames(about, onUsernameClick)
-        description.visibility = if (about.isNullOrEmpty()) GONE else VISIBLE
+        subtitle.text = if (PluginRepos.isOfficial(repo)) "" else "@${repo.username}"
+        subtitle.visibility = if (PluginRepos.isOfficial(repo)) GONE else VISIBLE
+        openChannelAction.visibility = if (PluginRepos.isOfficial(repo)) GONE else VISIBLE
+        val hideAbout = about.isNullOrEmpty() || PluginRepos.isOfficial(repo)
+        description.text = if (hideAbout) "" else InuUtils.linkUsernames(about, onUsernameClick)
+        description.visibility = if (hideAbout) GONE else VISIBLE
         setOnClickListener { onOpen() }
         openChannelAction.setOnClickListener { onOpenChannel() }
         removeAction.setOnClickListener { onRemove() }

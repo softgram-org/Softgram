@@ -93,7 +93,7 @@ class PluginRepoActivity(private val repo: PluginRepo) : SettingsPageActivity() 
     }
 
     private fun fromDeveloper(manifest: PluginManifest): Boolean =
-        manifest.id?.startsWith(MarketEntry.OFFICIAL_PREFIX) == true || manifest.author?.contains("Softgram", ignoreCase = true) == true
+        manifest.id?.startsWith(MarketEntry.OFFICIAL_PREFIX) == true || desu.inugram.helpers.plugins.SoftBrand.clean(manifest.author)?.contains("Softgram", ignoreCase = true) == true
 
     private fun sortLabel(): String = LocaleController.getString(
         when (InuConfig.PLUGIN_REPO_SORT.value) {
@@ -145,7 +145,7 @@ class PluginRepoActivity(private val repo: PluginRepo) : SettingsPageActivity() 
             update -> R.string.InuPluginRepoUpdate
             else -> R.string.InuPluginsInstalled
         }
-        val author = manifest.author?.let { LocaleController.formatString(R.string.InuPluginsByAuthor, it) }.orEmpty()
+        val author = desu.inugram.helpers.plugins.SoftBrand.clean(manifest.author)?.let { LocaleController.formatString(R.string.InuPluginsByAuthor, it) }.orEmpty()
         row.bind(
             manifest,
             author,

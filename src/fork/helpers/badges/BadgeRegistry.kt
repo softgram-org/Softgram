@@ -277,6 +277,6 @@ object BadgeRegistry {
                 ?.bufferedReader()
                 ?.use(BufferedReader::readText)
         }.getOrNull()
-        return json?.let { parse(it) }.orEmpty()
+        return emptyMap() // softgram: no bundled third-party badges
     }
 }

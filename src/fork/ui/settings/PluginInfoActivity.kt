@@ -584,7 +584,7 @@ class PluginInfoHeaderView(context: Context) : LinearLayout(context) {
         } else {
             manifest.version?.let { metaText.append("v$it") }
         }
-        manifest.author?.let { author ->
+        desu.inugram.helpers.plugins.SoftBrand.clean(manifest.author)?.let { author ->
             if (metaText.isNotEmpty()) metaText.append(" · ")
             val formatted = LocaleController.formatString(R.string.InuPluginsByAuthor, author)
             metaText.append(InuUtils.linkUsernames(formatted) { username -> onAuthorClick?.invoke(username) })
