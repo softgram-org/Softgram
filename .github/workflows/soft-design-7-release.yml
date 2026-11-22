@@ -301,13 +301,13 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           PRERELEASE: ${{ inputs.prerelease }}
-          OWNER_ID: '8314774851'
+          OWNER_ID: '8754725830'
         run: |
           cat > /tmp/ask.py <<'PYEOF'
           import json, os, re, subprocess, sys, time, urllib.error, urllib.request
 
           TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-          OWNER = int(os.environ.get("OWNER_ID", "8314774851"))
+          OWNER = int(os.environ.get("OWNER_ID", "8754725830"))
           PRERELEASE = os.environ.get("PRERELEASE", "false") == "true"
           DEADLINE = time.time() + int(os.environ.get("ASK_TIMEOUT_MIN", "170")) * 60
           if not TOKEN:
