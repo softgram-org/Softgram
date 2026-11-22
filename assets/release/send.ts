@@ -3,7 +3,7 @@ import fs from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { InputMedia, MemoryStorage, TelegramClient, type InputRichMessageMedia, type RichMediaUploadCache } from '@mtcute/node'
 import { flat, type Sections, type Track } from './lib'
-import { fitCaption, mainPost, noteLines, richApks, richCiPost, richMainPost, richSections, type PostInfo } from './post'
+import { fitCaption, mainPost, noteLines, richApks, richCiPost, richMainPost, richSections, softPost, type PostInfo } from './post'
 
 interface ApkFile { file: string }
 interface BuildInfo {
@@ -89,6 +89,55 @@ async function publishRich(post: PostInfo, files: string[]) {
   await tg.sendRichMessage(channelMain, { content: { type: 'markdown', content: main, attachments }, uploadCache })
 }
 
+interface SoftPost { createdAt: number, base: string, label: string, lines: string[] }
+const softPath = resolve('assets/release/softgram-post.json')
+const soft: SoftPost | null = await fs.readFile(softPath, 'utf8')
+  .then(text => JSON.parse(text) as SoftPost)
+  .then(p => (Date.now() - p.createdAt < 36 * 3600 * 1000 && p.lines?.length ? p : null))
+  .catch(() => null)
+const softRequired = true
+
+function git(...args: string[]) {
+  return new Promise<void>((res, rej) => {
+    const p = spawn('git', args, { stdio: 'inherit' })
+    p.on('error', rej)
+    p.on('exit', code => (code === 0 ? res() : rej(new Error(`git ${args[0]} exited ${code}`))))
+  })
+}
+
+async function consumeSoftPost() {
+  try {
+    await git('config', 'user.name', 'github-actions[bot]')
+    await git('config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com')
+    await git('rm', '-q', '-f', 'assets/release/softgram-post.json')
+    await git('commit', '-q', '-m', 'Softgram: release post published')
+    await git('pull', '--rebase', '-q')
+    await git('push', '-q')
+  } catch (e) {
+    console.warn('could not remove the used post file:', e)
+  }
+}
+
+async function publishSoft(files: string[]) {
+  const s = soft!
+  const post: PostInfo = { base: s.base, label: s.label, track: info.track, repo: info.repo }
+  const apks = richApks(files)
+  const attachments: Record<string, InputRichMessageMedia> = {}
+  for (const apk of apks) {
+    // @ts-expect-error mtcute 0.31 omits document inputs from its rich-media type
+    attachments[apk.id] = InputMedia.document(`file:${join(outDir, apk.file)}`, { fileName: apk.file, fileMime: APK_MIME })
+  }
+  const uploadCache: RichMediaUploadCache = new Map()
+  const content = { type: 'markdown' as const, content: softPost(post, s.lines, apks), attachments }
+  await tg.sendRichMessage(channelCI, { content, uploadCache })
+  if (ciOnly || info.track === 'beta') {
+    console.log('CI channel only: skipping the main channel post.')
+  } else {
+    await tg.sendRichMessage(channelMain, { content, uploadCache })
+  }
+  await consumeSoftPost()
+}
+
 try {
   const post: PostInfo = {
     base: info.base,
@@ -102,7 +151,12 @@ try {
   // display order: with plugins first
   const files = [info.pluginsApk?.file, info.pluginsArm7Apk?.file, info.apkFiles[0]?.file, info.apkFiles[1]?.file].filter((f): f is string => !!f)
 
-  if (richMode) {
+  if (soft) {
+    await publishSoft(files)
+  } else if (softRequired) {
+    console.error('No fresh What\'s new text found. Start the build from the "Softgram Release" workflow so the bot can ask for it. Nothing was posted.')
+    process.exitCode = 1
+  } else if (richMode) {
     await publishRich(post, files)
   } else {
     // beta shows the commit list, release the written notes

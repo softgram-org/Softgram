@@ -209,6 +209,7 @@ object SettingsBackupHelper {
                 }
             }
         }
+        org.telegram.messenger.ApplicationLoader.applicationContext?.let { desu.inugram.helpers.SoftgramDefaults.reapplyAfterReset(it) }
         return toRemove.size + stockReset
     }
 
@@ -231,7 +232,7 @@ object SettingsBackupHelper {
         }.show()
     }
 
-    const val FILENAME_SUFFIX = ".entiny-settings.json"
+    const val FILENAME_SUFFIX = "Softgram-settings.json"
 
     fun startImportFromFile(fragment: BaseFragment, file: File) {
         Utilities.globalQueue.postRunnable {

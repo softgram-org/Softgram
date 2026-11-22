@@ -177,3 +177,9 @@ export function richMainPost(info: PostInfo, notes: Sections, apks: RichApk[], e
     richDiff(info),
   ].filter(Boolean).join('\n\n'), longestOf(uk, en), limit)
 }
+
+/** Softgram post: title, channel, files, then the owner's own What's new text in a collapsed block. */
+export function softPost(info: PostInfo, lines: string[], apks: RichApk[]): string {
+  const items = lines.map(l => `- ${mdEsc(l)}`).join('\n')
+  return [richTitle(info), '@Softgram_org', richFiles(apks), `<details><summary>What's new</summary>\n\n${items}\n\n</details>`].filter(Boolean).join('\n\n')
+}

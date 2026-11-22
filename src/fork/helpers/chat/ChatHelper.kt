@@ -2074,7 +2074,7 @@ object ChatHelper {
     }
 
     private fun isRecognizedFileName(name: String): Boolean =
-        name.endsWith(SettingsBackupHelper.FILENAME_SUFFIX) ||
+        name.endsWith(SettingsBackupHelper.FILENAME_SUFFIX) || name.endsWith(".entiny-settings.json") ||
             name.endsWith(".inu.js", ignoreCase = true) ||
             FontImportHelper.isFontFileName(name)
 
@@ -2096,7 +2096,7 @@ object ChatHelper {
         fontAlbum: List<MessageObject> = emptyList(),
         resolveFile: () -> File?,
     ): Boolean {
-        val isSettings = name.endsWith(SettingsBackupHelper.FILENAME_SUFFIX)
+        val isSettings = name.endsWith(SettingsBackupHelper.FILENAME_SUFFIX) || name.endsWith(".entiny-settings.json")
         val isPlugin = !isSettings && name.endsWith(".inu.js", ignoreCase = true)
         val isFont = !isSettings && !isPlugin && FontImportHelper.isFontFileName(name)
         val isIconPack = !isSettings && !isPlugin && !isFont && IconPackHelper.isIconPackFileName(name)

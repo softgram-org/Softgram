@@ -53,7 +53,9 @@ object InuHooks {
     @JvmStatic
     fun preInit(context: Context) {
         CrashReporter.install()
+        val softFresh = desu.inugram.helpers.SoftgramDefaults.isFreshInstall(context)
         InuConfig.load(context)
+        if (softFresh) desu.inugram.helpers.SoftgramDefaults.seed(context)
         // entiny: isTablet is read from AndroidUtilities' static block before the config exists, so re-apply it after loading
         TabletModeHelper.sync()
         AndroidUtilities.inu_resetTabletCache()
