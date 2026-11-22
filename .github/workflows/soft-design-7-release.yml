@@ -38,6 +38,21 @@ on:
         required: false
         default: false
         type: boolean
+      version:
+        description: 'Version shown in the post, like 13.2.2 (empty = automatic)'
+        required: false
+        default: ''
+        type: string
+      number:
+        description: 'Release number, like 1 (empty = automatic)'
+        required: false
+        default: ''
+        type: string
+      whats_new:
+        description: "What's new. Separate several lines with ; (empty = Improvements and bug fixes)"
+        required: false
+        default: ''
+        type: string
   push:
     paths:
       - '.github/workflows/soft-design-7-release.yml'
@@ -267,6 +282,35 @@ jobs:
           PYEOF
           python3 /tmp/step.py
 
+      - name: Release post without waiting for the owner
+        run: |
+          cat > /tmp/nomsg.py <<'PYEOF'
+          import re, sys
+
+          p = "assets/release/send.ts"
+          s = open(p, encoding="utf-8", newline="").read()
+          if "soft ?? {" in s:
+              print("Already applied.")
+              sys.exit(0)
+
+          old1 = "  const s = soft!\n  const post: PostInfo = { base: s.base, label: s.label, track: info.track, repo: info.repo }\n"
+          new1 = ("  const s = soft ?? { createdAt: Date.now(), base: '', label: '', lines: ['Improvements and bug fixes'] }\n"
+                  "  const post: PostInfo = { base: s.base || info.base, label: s.label || info.label, track: info.track, repo: info.repo }\n")
+          if s.count(old1) != 1:
+              print("ERROR: publishSoft anchor not found")
+              sys.exit(1)
+          s = s.replace(old1, new1)
+
+          pat = r"  \} else if \(softRequired\) \{\n    console\.error\([^\n]*\n    process\.exitCode = 1\n"
+          s, n = re.subn(pat, "  } else if (softRequired) {\n    await publishSoft(files)\n", s, count=1)
+          if n != 1:
+              print("ERROR: softRequired branch not found")
+              sys.exit(1)
+          open(p, "w", encoding="utf-8", newline="").write(s)
+          print("OK: the release post no longer needs the owner message")
+          PYEOF
+          python3 /tmp/nomsg.py
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
@@ -297,118 +341,45 @@ jobs:
             exit 1
           fi
 
-      - name: Ask for version, release number and What's new
+      - name: Prepare the What's new text
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           PRERELEASE: ${{ inputs.prerelease }}
-          OWNER_ID: '8754725830'
+          IN_VERSION: ${{ inputs.version }}
+          IN_NUMBER: ${{ inputs.number }}
+          IN_WHATS_NEW: ${{ inputs.whats_new }}
         run: |
-          cat > /tmp/ask.py <<'PYEOF'
-          import json, os, re, subprocess, sys, time, urllib.error, urllib.request
+          cat > /tmp/post.py <<'PYEOF'
+          import json, os, re, sys, time
 
-          TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-          OWNER = int(os.environ.get("OWNER_ID", "8754725830"))
-          PRERELEASE = os.environ.get("PRERELEASE", "false") == "true"
-          DEADLINE = time.time() + int(os.environ.get("ASK_TIMEOUT_MIN", "170")) * 60
-          if not TOKEN:
-              print("ERROR: secret TELEGRAM_BOT_TOKEN is not set")
+          version = os.environ.get("IN_VERSION", "").strip()
+          number = os.environ.get("IN_NUMBER", "").strip()
+          raw = os.environ.get("IN_WHATS_NEW", "").strip() or "Improvements and bug fixes"
+          if version and not re.fullmatch(r"\d+(\.\d+){1,3}", version):
+              print("ERROR: version must look like 13.2.2")
               sys.exit(1)
-
-
-          def api(method, payload, timeout=30):
-              req = urllib.request.Request(
-                  "https://api.telegram.org/bot%s/%s" % (TOKEN, method),
-                  data=json.dumps(payload).encode("utf-8"),
-                  headers={"Content-Type": "application/json"},
-              )
-              try:
-                  with urllib.request.urlopen(req, timeout=timeout) as r:
-                      return json.loads(r.read().decode("utf-8"))
-              except urllib.error.HTTPError as e:
-                  try:
-                      return json.loads(e.read().decode("utf-8"))
-                  except Exception:
-                      return {"ok": False, "description": "HTTP %s" % e.code}
-              except Exception as e:
-                  return {"ok": False, "description": type(e).__name__}
-
-
-          def say(text):
-              r = api("sendMessage", {"chat_id": OWNER, "text": text, "disable_web_page_preview": True})
-              if not r.get("ok"):
-                  print("ERROR: cannot message the owner: %s" % r.get("description"))
-                  print("Open the bot in Telegram, press Start, then run this workflow again.")
-                  sys.exit(1)
-
-
-          # skip anything that was sent before this run started
-          offset = 0
-          r = api("getUpdates", {"offset": -1, "timeout": 0})
-          if not r.get("ok") and "webhook" in str(r.get("description", "")).lower():
-              api("deleteWebhook", {"drop_pending_updates": False})
-              r = api("getUpdates", {"offset": -1, "timeout": 0})
-          if r.get("ok") and r.get("result"):
-              offset = r["result"][-1]["update_id"] + 1
-
-
-          def wait_text():
-              global offset
-              while time.time() < DEADLINE:
-                  r = api("getUpdates", {"offset": offset, "timeout": 50, "allowed_updates": ["message"]}, timeout=70)
-                  if not r.get("ok"):
-                      time.sleep(5)
-                      continue
-                  for u in r["result"]:
-                      offset = u["update_id"] + 1
-                      m = u.get("message") or {}
-                      if (m.get("from") or {}).get("id") != OWNER or (m.get("chat") or {}).get("id") != OWNER:
-                          continue
-                      t = (m.get("text") or "").strip()
-                      if not t:
-                          continue
-                      if t.lower().startswith("/cancel"):
-                          say("Cancelled. Nothing was built or published.")
-                          print("Cancelled by the owner.")
-                          sys.exit(1)
-                      return t
-              print("ERROR: no answer before the deadline")
+          if number and not re.fullmatch(r"\d+", number):
+              print("ERROR: release number must be digits only")
               sys.exit(1)
-
-
-          def ask(question, pattern, hint):
-              say(question)
-              while True:
-                  t = wait_text()
-                  if re.fullmatch(pattern, t):
-                      return t
-                  say(hint)
-
-
-          say("Softgram release is starting. Send /cancel at any time to stop.")
-          version = ask("Which version? Send only the number, like 13.2.2", r"\d+(\.\d+){1,3}", "Send only the version, like 13.2.2")
-          number = ask("Which release number? Send only the number, like 1", r"\d+", "Send only the number, like 1")
-          say("Now send the What's new text in ONE message. One change per line. It goes into the What's new drawer exactly as you send it.")
 
           lines = []
-          while not lines:
-              raw = wait_text()
-              for ln in raw.splitlines():
-                  ln = re.sub(r"^\s*(?:[-*\u2022\u2013\u2014]+\s+)", "", ln).strip()
-                  if ln:
-                      lines.append(ln)
-              if not lines:
-                  say("That was empty. Send the What's new text again.")
+          for part in re.split(r"[;\n]", raw):
+              ln = re.sub(r"^\s*(?:[-*\u2022\u2013\u2014]+\s+)", "", part).strip()
+              if ln:
+                  lines.append(ln)
+          if not lines:
+              lines = ["Improvements and bug fixes"]
 
-          label = ("pre-release " if PRERELEASE else "release ") + number
+          label = ""
+          if number:
+              label = ("pre-release " if os.environ.get("PRERELEASE") == "true" else "release ") + number
           post = {"createdAt": int(time.time() * 1000), "base": version, "label": label, "lines": lines}
           os.makedirs("assets/release", exist_ok=True)
           with open("assets/release/softgram-post.json", "w", encoding="utf-8") as f:
               json.dump(post, f, ensure_ascii=False, indent=2)
               f.write("\n")
-          say("Saved. Building Softgram %s \u00b7 %s now, and I will publish it when the build is ready." % (version, label))
-          print("OK: Softgram %s - %s, %d lines" % (version, label, len(lines)))
+          print("OK: %d What's new line(s)" % len(lines))
           PYEOF
-          python3 /tmp/ask.py
+          python3 /tmp/post.py
 
       - name: Save the text and start the build
         env:
