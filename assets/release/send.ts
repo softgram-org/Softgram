@@ -119,8 +119,8 @@ async function consumeSoftPost() {
 }
 
 async function publishSoft(files: string[]) {
-  const s = soft!
-  const post: PostInfo = { base: s.base, label: s.label, track: info.track, repo: info.repo }
+  const s = soft ?? { createdAt: Date.now(), base: '', label: '', lines: ['Improvements and bug fixes'] }
+  const post: PostInfo = { base: s.base || info.base, label: s.label || info.label, track: info.track, repo: info.repo }
   const apks = richApks(files)
   const attachments: Record<string, InputRichMessageMedia> = {}
   for (const apk of apks) {
@@ -154,8 +154,7 @@ try {
   if (soft) {
     await publishSoft(files)
   } else if (softRequired) {
-    console.error('No fresh What\'s new text found. Start the build from the "Softgram Release" workflow so the bot can ask for it. Nothing was posted.')
-    process.exitCode = 1
+    await publishSoft(files)
   } else if (richMode) {
     await publishRich(post, files)
   } else {
