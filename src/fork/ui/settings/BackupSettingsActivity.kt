@@ -134,23 +134,17 @@ class BackupSettingsActivity : SettingsPageActivity() {
 
         val opsEnabled = syncAccount >= 0 && hasBackup && !loading
         items.add(
-            UItem.asButton(
-                BUTTON_SYNC_NOW,
-                R.drawable.msg_retry,
+            SoftIcons.button(BUTTON_SYNC_NOW, R.drawable.msg_retry,
                 LocaleController.getString(R.string.InuCloudSyncNow),
             ).setEnabled(syncAccount >= 0 && !loading)
         )
         items.add(
-            UItem.asButton(
-                BUTTON_RESTORE,
-                R.drawable.entiny_backup_restore,
+            SoftIcons.button(BUTTON_RESTORE, R.drawable.entiny_backup_restore,
                 LocaleController.getString(R.string.InuCloudRestore),
             ).setEnabled(opsEnabled)
         )
         items.add(
-            UItem.asButton(
-                BUTTON_DELETE,
-                R.drawable.entiny_cloud_off,
+            SoftIcons.button(BUTTON_DELETE, R.drawable.entiny_cloud_off,
                 LocaleController.getString(R.string.InuCloudDelete),
             ).red().setEnabled(opsEnabled)
         )
@@ -163,23 +157,17 @@ class BackupSettingsActivity : SettingsPageActivity() {
         )
 
         items.add(
-            UItem.asButton(
-                BUTTON_EXPORT,
-                R.drawable.msg_shareout,
+            SoftIcons.button(BUTTON_EXPORT, R.drawable.msg_shareout,
                 LocaleController.getString(R.string.InuBackupExport)
             )
         )
         items.add(
-            UItem.asButton(
-                BUTTON_IMPORT,
-                R.drawable.msg_download,
+            SoftIcons.button(BUTTON_IMPORT, R.drawable.msg_download,
                 LocaleController.getString(R.string.InuBackupImport)
             )
         )
         items.add(
-            UItem.asButton(
-                BUTTON_RESET,
-                R.drawable.msg_reset_solar,
+            SoftIcons.button(BUTTON_RESET, R.drawable.msg_reset_solar,
                 LocaleController.getString(R.string.InuBackupReset)
             ).red()
         )

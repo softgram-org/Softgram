@@ -54,25 +54,19 @@ class TranslatorSettingsActivity : SettingsPageActivity() {
 
         items.add(UItem.asHeader(LocaleController.getString(R.string.InuLanguages)))
         items.add(
-            UItem.asButton(
-                BUTTON_TARGET_LANG,
-                R.drawable.entiny_translation_target,
+            SoftIcons.button(BUTTON_TARGET_LANG, R.drawable.entiny_translation_target,
                 LocaleController.getString(R.string.InuTranslationTarget),
                 targetLangLabel(),
             )
         )
         items.add(
-            UItem.asButton(
-                BUTTON_OUTGOING_LANG,
-                R.drawable.entiny_translation_outgoing,
+            SoftIcons.button(BUTTON_OUTGOING_LANG, R.drawable.entiny_translation_outgoing,
                 LocaleController.getString(R.string.InuTranslationTargetOutgoing),
                 outgoingLangLabel(),
             )
         )
         items.add(
-            UItem.asButton(
-                BUTTON_DO_NOT_TRANSLATE,
-                R.drawable.entiny_translation_exclude,
+            SoftIcons.button(BUTTON_DO_NOT_TRANSLATE, R.drawable.entiny_translation_exclude,
                 LocaleController.getString(R.string.DoNotTranslate),
                 doNotTranslateLabel(),
             )
@@ -92,9 +86,7 @@ class TranslatorSettingsActivity : SettingsPageActivity() {
 
         items.add(UItem.asHeader(LocaleController.getString(R.string.InuTranslateSectionEngine)))
         items.add(
-            UItem.asButton(
-                BUTTON_PROVIDER,
-                R.drawable.entiny_translation_provider,
+            SoftIcons.button(BUTTON_PROVIDER, R.drawable.entiny_translation_provider,
                 LocaleController.getString(R.string.InuTranslateProvider),
                 EntinyTranslate.currentProviderName()
             )

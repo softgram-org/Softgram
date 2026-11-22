@@ -33,8 +33,7 @@ class TwoLineEntryCell(context: Context) : LinearLayout(context) {
         layoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT)
         gravity = Gravity.CENTER_VERTICAL
         setPadding(dp(22f), dp(10f), dp(18f), dp(10f))
-        icon.setColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon))
-        addView(icon, LayoutHelper.createLinear(24, 24, 0f, 0f, 18f, 0f))
+        addView(icon, LayoutHelper.createLinear(28, 28, 0f, 0f, 16f, 0f))
         val texts = LinearLayout(context).apply { orientation = VERTICAL }
         title.textSize = 16f
         title.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText))
@@ -55,6 +54,7 @@ class TwoLineEntryCell(context: Context) : LinearLayout(context) {
     fun set(iconRes: Int, titleText: CharSequence?, subtitleText: CharSequence?, showChevron: Boolean) {
         chevron.visibility = if (showChevron) VISIBLE else GONE
         icon.setImageResource(iconRes)
+        SoftIcons.plate(icon, iconRes)
         title.text = titleText
         subtitle.text = subtitleText
     }

@@ -79,7 +79,7 @@ class RatePairEditActivity(private val instanceId: Int = -1) : SettingsPageActiv
         )
         if (editId != -1) {
             items.add(
-                UItem.asButton(BUTTON_DELETE, R.drawable.msg_delete, LocaleController.getString(R.string.Delete))
+                SoftIcons.button(BUTTON_DELETE, R.drawable.msg_delete, LocaleController.getString(R.string.Delete))
             )
         }
         items.add(UItem.asShadow(null))

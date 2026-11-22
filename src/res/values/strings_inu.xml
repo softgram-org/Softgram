@@ -1657,7 +1657,7 @@
     <string name="InuPluginRepoVersions">Version history</string>
     <string name="InuPluginRewriteRevert">Revert ></string>
     <string name="InuPluginRewrittenBy">Rewritten by %1$s.</string>
-    <string name="InuPlugins">Plugins</string>
+    <string name="InuPlugins">Plugin</string>
     <string name="InuPluginsByAuthor">by %1$s</string>
     <string name="InuPluginsCompactView">Compact view</string>
     <string name="InuPluginScopeAccountRead">read %1$s</string>
@@ -2372,4 +2372,8 @@
     <string name="InuPinLimitEnable">Enable</string>
     <string name="InuLocalReactions">Local reactions</string>
     <string name="InuLocalReactionsInfo">Lets you put up to 3 reactions on a message without Premium. Telegram only accepts one, so the extra ones are kept on this device and nobody else sees them.</string>
+    <string name="InuSectionAppearance">Appearance</string>
+    <string name="InuSectionChatsMedia">Chats &amp; Media</string>
+    <string name="InuSectionPrivacyAccount">Privacy &amp; Account</string>
+    <string name="InuSectionGeneral">General</string>
 </resources>

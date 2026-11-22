@@ -2351,4 +2351,8 @@
     <string name="InuPinLimitEnable">روشن کردن</string>
     <string name="InuLocalReactions">واکنش‌های محلی</string>
     <string name="InuLocalReactionsInfo">بدون Premium تا ۳ واکنش روی یک پیام می‌گذارید. تلگرام فقط یکی را می‌پذیرد، پس بقیه روی همین دستگاه می‌مانند و کسی آن‌ها را نمی‌بیند.</string>
+    <string name="InuSectionAppearance">ظاهر</string>
+    <string name="InuSectionChatsMedia">گفتگوها و رسانه</string>
+    <string name="InuSectionPrivacyAccount">حریم خصوصی و حساب</string>
+    <string name="InuSectionGeneral">عمومی</string>
 </resources>

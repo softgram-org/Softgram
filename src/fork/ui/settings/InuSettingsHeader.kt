@@ -24,14 +24,7 @@ class InuSettingsHeader(context: Context) : LinearLayout(context) {
     }
 
     private val icon = ImageView(context).apply {
-        setImageResource(R.drawable.icon_settings_inu)
-        background = iconBg
-        setPadding(
-            AndroidUtilities.dp(13f),
-            AndroidUtilities.dp(13f),
-            AndroidUtilities.dp(13f),
-            AndroidUtilities.dp(13f)
-        )
+        setImageResource(R.drawable.softgram_logo)
     }
 
     private val title = TextView(context).apply {
@@ -100,10 +93,6 @@ class InuSettingsHeader(context: Context) : LinearLayout(context) {
     }
 
     fun updateColors() {
-        val dark = Theme.isCurrentThemeDark()
-        val (container, onContainer) = iconColors(dark)
-        iconBg.setColor(container)
-        icon.setColorFilter(onContainer)
         title.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText))
         subtitle.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2))
     }

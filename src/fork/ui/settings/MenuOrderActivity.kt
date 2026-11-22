@@ -180,9 +180,7 @@ abstract class MenuOrderActivity<I : MenuOrderItem> : SettingsPageActivity() {
     protected fun fillResetSection(items: ArrayList<UItem>, adapter: UniversalAdapter) {
         items.add(UItem.asShadow(SHADOW_END, null))
         items.add(
-            UItem.asButton(
-                BUTTON_RESET,
-                R.drawable.msg_reset,
+            SoftIcons.button(BUTTON_RESET, R.drawable.msg_reset,
                 LocaleController.getString(resetStringRes)
             )
         )

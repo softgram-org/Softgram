@@ -24,9 +24,7 @@ class AiSettingsActivity : SettingsPageActivity() {
 
     override fun fillItems(items: ArrayList<UItem>, adapter: UniversalAdapter) {
         items.add(
-            UItem.asButton(
-                BUTTON_PROVIDERS,
-                R.drawable.entiny_ai_providers,
+            SoftIcons.button(BUTTON_PROVIDERS, R.drawable.entiny_ai_providers,
                 LocaleController.getString(R.string.InuAiProvidersTitle),
                 providersSummary(),
             )

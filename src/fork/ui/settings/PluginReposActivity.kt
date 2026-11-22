@@ -148,7 +148,7 @@ class PluginReposActivity : SettingsPageActivity(), NotificationCenter.Notificat
             row.setDivider(classic)
             items.add(UItem.asCustom(row).apply { id = REPO_BASE + (repo.channelId.hashCode() and 0xffff) })
         }
-        items.add(UItem.asButton(BUTTON_ADD, R.drawable.msg_add, LocaleController.getString(R.string.InuPluginReposAdd)))
+        items.add(SoftIcons.button(BUTTON_ADD, R.drawable.msg_add, LocaleController.getString(R.string.InuPluginReposAdd)))
         items.add(UItem.asShadow(LocaleController.getString(R.string.InuPluginReposInfo)))
     }
 

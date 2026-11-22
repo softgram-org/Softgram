@@ -31,9 +31,7 @@ class CameraSoundSettingsActivity : SettingsPageActivity() {
 
         items.add(UItem.asHeader(LocaleController.getString(R.string.InuRoundVideos)))
         items.add(
-            UItem.asButton(
-                BUTTON_ROUND_DEFAULT_CAMERA,
-                R.drawable.entiny_camera,
+            SoftIcons.button(BUTTON_ROUND_DEFAULT_CAMERA, R.drawable.entiny_camera,
                 LocaleController.getString(R.string.InuRoundDefaultCamera),
                 when (InuConfig.ROUND_DEFAULT_CAMERA.value) {
                     2 -> LocaleController.getString(R.string.InuRoundCameraRear)

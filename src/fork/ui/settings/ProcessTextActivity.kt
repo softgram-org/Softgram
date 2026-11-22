@@ -52,9 +52,7 @@ class ProcessTextActivity : SettingsPageActivity() {
         items.add(UItem.asShadow(null))
 
         items.add(
-            UItem.asButton(
-                BUTTON_RESET,
-                R.drawable.msg_reset,
+            SoftIcons.button(BUTTON_RESET, R.drawable.msg_reset,
                 LocaleController.getString(R.string.InuSelectionProcessTextReset)
             )
         )

@@ -26,7 +26,7 @@ class ArchiveScopeActivity(private val kind: ArchiveScope.Kind) : SettingsPageAc
 
         val entry = ArchiveScope.entry(kind, never)
         items.add(UItem.asHeader(LocaleController.getString(if (never) R.string.InuArchiveScopeNever else R.string.InuArchiveScopeAlways)))
-        items.add(UItem.asButton(BUTTON_ADD, R.drawable.msg2_chats_add, LocaleController.getString(R.string.InuArchiveScopeAdd)))
+        items.add(SoftIcons.button(BUTTON_ADD, R.drawable.msg2_chats_add, LocaleController.getString(R.string.InuArchiveScopeAdd)))
         for ((flag, type, label) in typeRows()) {
             if (entry.flags and flag != 0) items.add(UItem.asFilterChat(true, label, type, flag))
         }

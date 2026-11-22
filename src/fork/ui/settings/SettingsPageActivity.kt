@@ -335,6 +335,7 @@ abstract class SettingsPageActivity : UniversalFragment() {
                     PorterDuff.Mode.MULTIPLY,
                 )
                 iv.visibility = View.VISIBLE
+                SoftIcons.apply(cell, iconRes)
             }
         }
     }

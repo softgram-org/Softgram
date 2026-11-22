@@ -72,19 +72,27 @@ class InuSettingsActivity : SettingsPageActivity() {
         items.add(UItem.asCustomShadow(createHeaderView()))
         items.add(UItem.asShadow(null))
 
+        items.add(UItem.asHeader(LocaleController.getString(R.string.InuSectionAppearance)))
         items.add(mkSubPageButton(CAT_APPEARANCE, R.drawable.entiny_appearance, LocaleController.getString(R.string.InuCategoryAppearance)))
         items.add(mkSubPageButton(CAT_HOME, R.drawable.entiny_home, LocaleController.getString(R.string.InuHomeAndChatList)))
+        items.add(mkSubPageButton(CAT_ANNOYANCES, R.drawable.entiny_hide_clutter, LocaleController.getString(R.string.InuAnnoyances)))
+        items.add(UItem.asShadow(null))
+
+        items.add(UItem.asHeader(LocaleController.getString(R.string.InuSectionChatsMedia)))
         items.add(mkSubPageButton(CAT_CHATS, R.drawable.entiny_message_menu, LocaleController.getString(R.string.InuChatsAndMessages)))
         items.add(mkSubPageButton(CAT_MEDIA, R.drawable.entiny_phone, LocaleController.getString(R.string.InuMediaAndCalls)))
+        items.add(mkSubPageButton(CAT_NETWORK, R.drawable.entiny_network_notifications, LocaleController.getString(R.string.InuNetworkAndNotifications)))
+        items.add(UItem.asShadow(null))
+
+        items.add(UItem.asHeader(LocaleController.getString(R.string.InuSectionPrivacyAccount)))
         items.add(mkSubPageButton(CAT_PROFILE_ACCOUNTS, R.drawable.entiny_profile_accounts, LocaleController.getString(R.string.InuProfileAndAccounts)))
         items.add(mkSubPageButton(CAT_PRIVACY, R.drawable.entiny_privacy, LocaleController.getString(R.string.InuPrivacyAndFreedom)))
         items.add(mkSubPageButton(CAT_RESTRICTED, R.drawable.entiny_ghost, LocaleController.getString(R.string.InuRestrictedFeatures)))
-        items.add(mkSubPageButton(CAT_ANNOYANCES, R.drawable.entiny_hide_clutter, LocaleController.getString(R.string.InuAnnoyances)))
-        items.add(mkSubPageButton(CAT_NETWORK, R.drawable.entiny_network_notifications, LocaleController.getString(R.string.InuNetworkAndNotifications)))
-        items.add(mkSubPageButton(CAT_PROXY, R.drawable.entiny_proxy, addExperimentalSpan(LocaleController.getString(R.string.InuProxyPage))))
-        items.add(mkSubPageButton(BUTTON_AI, R.drawable.entiny_ai_translation, LocaleController.getString(R.string.InuAiAndTranslator)))
         items.add(UItem.asShadow(null))
 
+        items.add(UItem.asHeader(LocaleController.getString(R.string.InuSectionGeneral)))
+        items.add(mkSubPageButton(CAT_PROXY, R.drawable.entiny_proxy, addExperimentalSpan(LocaleController.getString(R.string.InuProxyPage))))
+        items.add(mkSubPageButton(BUTTON_AI, R.drawable.entiny_ai_translation, LocaleController.getString(R.string.InuAiAndTranslator)))
         items.add(mkSubPageButton(CAT_SYSTEM, R.drawable.entiny_app_controls, LocaleController.getString(R.string.InuRootSystem)))
         // #if PLUGINS
         items.add(mkSubPageButton(BUTTON_PLUGINS, R.drawable.entiny_plugins, addExperimentalSpan(LocaleController.getString(R.string.InuPlugins))))

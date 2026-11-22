@@ -32,9 +32,7 @@ class ParanoiaActivity : SettingsPageActivity() {
         val count = ParanoiaHelper.getHidden(currentAccount).size
         val whitelist = ParanoiaHelper.whitelist
         items.add(
-            UItem.asButton(
-                SET_CODE,
-                R.drawable.entiny_exit_code,
+            SoftIcons.button(SET_CODE, R.drawable.entiny_exit_code,
                 LocaleController.getString(
                     if (ParanoiaHelper.hasExitCode()) R.string.InuParanoiaExitCodeChange
                     else R.string.InuParanoiaExitCodeSet
@@ -50,9 +48,7 @@ class ParanoiaActivity : SettingsPageActivity() {
             ).setChecked(whitelist)
         )
         items.add(
-            UItem.asButton(
-                SELECT_CHATS,
-                R.drawable.entiny_hidden_chats,
+            SoftIcons.button(SELECT_CHATS, R.drawable.entiny_hidden_chats,
                 LocaleController.getString(
                     if (whitelist) R.string.InuParanoiaSelectWhitelist
                     else R.string.InuParanoiaSelect

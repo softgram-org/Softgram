@@ -160,18 +160,18 @@ class PluginInfoActivity(private val plugin: Plugin) : SettingsPageActivity() {
         }
 
         if (plugin.settingsPageId != null) {
-            items.add(UItem.asButton(BUTTON_SETTINGS, R.drawable.msg_settings, LocaleController.getString(R.string.Settings)))
+            items.add(SoftIcons.button(BUTTON_SETTINGS, R.drawable.msg_settings, LocaleController.getString(R.string.Settings)))
         }
         if (assets.isNotEmpty()) {
-            items.add(UItem.asButton(BUTTON_ASSETS, R.drawable.msg_media, LocaleController.getString(R.string.InuPluginAssets), PluginAssetsSheet.describeAssets(assets)))
+            items.add(SoftIcons.button(BUTTON_ASSETS, R.drawable.msg_media, LocaleController.getString(R.string.InuPluginAssets), PluginAssetsSheet.describeAssets(assets)))
         }
-        items.add(UItem.asButton(BUTTON_SOURCE, R.drawable.entiny_code, LocaleController.getString(R.string.InuPluginsViewSource)))
-        items.add(UItem.asButton(BUTTON_SHARE, R.drawable.msg_share, LocaleController.getString(R.string.ShareFile)))
+        items.add(SoftIcons.button(BUTTON_SOURCE, R.drawable.entiny_code, LocaleController.getString(R.string.InuPluginsViewSource)))
+        items.add(SoftIcons.button(BUTTON_SHARE, R.drawable.msg_share, LocaleController.getString(R.string.ShareFile)))
         // a reload only re-reads the file for a plugin that is going to run it
         if (plugin.enabled) {
-            items.add(UItem.asButton(BUTTON_RELOAD, R.drawable.msg_reset, LocaleController.getString(R.string.InuPluginsReload)))
+            items.add(SoftIcons.button(BUTTON_RELOAD, R.drawable.msg_reset, LocaleController.getString(R.string.InuPluginsReload)))
         }
-        items.add(UItem.asButton(BUTTON_REMOVE, R.drawable.msg_delete, LocaleController.getString(R.string.InuPluginsRemove)).red())
+        items.add(SoftIcons.button(BUTTON_REMOVE, R.drawable.msg_delete, LocaleController.getString(R.string.InuPluginsRemove)).red())
         items.add(UItem.asShadow(null))
     }
 

@@ -59,4 +59,4 @@ index 0000000..0000000 100644
 +        // (ported from inugram PR #34, made unconditional)
  
          if (!desu.inugram.helpers.security.ParanoiaHelper.shouldHideSettings()) {
-             items.add(SettingCell.Factory.of(99, IconBackgroundColors.ENTINY.top, IconBackgroundColors.ENTINY.bottom, R.drawable.icon_settings_inu, getString(R.string.InuSettings), getString(R.string.InuSettingsInfo)));
+             items.add(SettingCell.Factory.of(99, 0, 0, R.drawable.softgram_logo, getString(R.string.InuSettings), getString(R.string.InuSettingsInfo)));

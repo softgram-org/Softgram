@@ -46,11 +46,9 @@ class WebPreviewReplacementsActivity : SettingsPageActivity() {
         }
 
         items.add(UItem.asShadow(null))
-        items.add(UItem.asButton(BUTTON_ADD, R.drawable.msg_add, LocaleController.getString(R.string.InuWebPreviewAdd)))
+        items.add(SoftIcons.button(BUTTON_ADD, R.drawable.msg_add, LocaleController.getString(R.string.InuWebPreviewAdd)))
         items.add(
-            UItem.asButton(
-                BUTTON_RESET,
-                R.drawable.msg_reset,
+            SoftIcons.button(BUTTON_RESET, R.drawable.msg_reset,
                 LocaleController.getString(R.string.InuWebPreviewReset)
             )
         )

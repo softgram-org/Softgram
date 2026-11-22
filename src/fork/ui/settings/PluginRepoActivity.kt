@@ -106,7 +106,7 @@ class PluginRepoActivity(private val repo: PluginRepo) : SettingsPageActivity() 
     override fun fillItems(items: ArrayList<UItem>, adapter: UniversalAdapter) {
         val latest = sorted(PluginRepos.pickLatest(posts))
         if (latest.isNotEmpty()) {
-            items.add(UItem.asButton(BUTTON_SORT, R.drawable.msg_recent, LocaleController.getString(R.string.InuPluginRepoSort), sortLabel()))
+            items.add(SoftIcons.button(BUTTON_SORT, R.drawable.msg_recent, LocaleController.getString(R.string.InuPluginRepoSort), sortLabel()))
             items.add(UItem.asShadow(null))
             val sections = if (PluginRepos.isOfficial(repo)) {
                 val (mine, others) = latest.partition { fromDeveloper(it.second) }
@@ -125,11 +125,11 @@ class PluginRepoActivity(private val repo: PluginRepo) : SettingsPageActivity() 
         when {
             loading -> items.add(UItem.asShadow(LocaleController.getString(R.string.Loading)))
             failed -> {
-                items.add(UItem.asButton(BUTTON_MORE, R.drawable.msg_retry, LocaleController.getString(R.string.InuPluginRepoRetry)))
+                items.add(SoftIcons.button(BUTTON_MORE, R.drawable.msg_retry, LocaleController.getString(R.string.InuPluginRepoRetry)))
                 items.add(UItem.asShadow(LocaleController.getString(R.string.InuPluginRepoErrorLoad)))
             }
             !exhausted -> {
-                items.add(UItem.asButton(BUTTON_MORE, R.drawable.arrow_more, LocaleController.getString(R.string.ShowMore)))
+                items.add(SoftIcons.button(BUTTON_MORE, R.drawable.arrow_more, LocaleController.getString(R.string.ShowMore)))
                 items.add(UItem.asShadow(null))
             }
             latest.isNotEmpty() -> items.add(UItem.asShadow(null))

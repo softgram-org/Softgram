@@ -26,7 +26,7 @@ class AiRolesSettingsActivity : SettingsPageActivity() {
                 "📝",
             )
         )
-        items.add(UItem.asButton(BUTTON_ADD, R.drawable.entiny_add_ai_role, LocaleController.getString(R.string.InuAiRoleAdd)))
+        items.add(SoftIcons.button(BUTTON_ADD, R.drawable.entiny_add_ai_role, LocaleController.getString(R.string.InuAiRoleAdd)))
         items.add(UItem.asShadow(null))
 
         val activeId = AiRolesHelper.activeRole()?.id

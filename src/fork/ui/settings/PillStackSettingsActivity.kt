@@ -105,9 +105,7 @@ class PillStackSettingsActivity : SettingsPageActivity() {
                 items.add(buildPillRow(hidden[i], isActive = false, divider = i != hidden.size - 1 || canAddRate))
             }
             if (canAddRate) {
-                val addRateItem = UItem.asButton(
-                    BUTTON_ADD_RATE,
-                    R.drawable.msg_add,
+                val addRateItem = SoftIcons.button(BUTTON_ADD_RATE, R.drawable.msg_add,
                     LocaleController.getString(R.string.InuPillStackAddRate)
                 )
                 addRateItem.accent = true
@@ -117,9 +115,7 @@ class PillStackSettingsActivity : SettingsPageActivity() {
         items.add(UItem.asShadow(LocaleController.getString(R.string.InuPillStackPillsSettingsInfo)))
 
         if (active.contains(PillType.WEATHER.id)) {
-            val weatherItem = UItem.asButton(
-                BUTTON_WEATHER_LOCATION,
-                R.drawable.entiny_cloud,
+            val weatherItem = SoftIcons.button(BUTTON_WEATHER_LOCATION, R.drawable.entiny_cloud,
                 LocaleController.getString(R.string.InuPillStackWeather),
                 WeatherLocationHelper.label()
             )
@@ -133,9 +129,7 @@ class PillStackSettingsActivity : SettingsPageActivity() {
             items.add(UItem.asShadow(null))
         }
 
-        val resetItem = UItem.asButton(
-            BUTTON_RESET,
-            R.drawable.msg_reset,
+        val resetItem = SoftIcons.button(BUTTON_RESET, R.drawable.msg_reset,
             LocaleController.getString(R.string.InuPillStackReset)
         )
         resetItem.red = true

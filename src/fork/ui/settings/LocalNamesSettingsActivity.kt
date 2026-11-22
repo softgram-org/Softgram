@@ -45,7 +45,7 @@ class LocalNamesSettingsActivity : SettingsPageActivity() {
             )
         )
         if (LocalEditHelper.count() > 0) {
-            items.add(UItem.asButton(BUTTON_CLEAR_EDITS, R.drawable.msg_delete, LocaleController.getString(R.string.InuLocalEditsClear)))
+            items.add(SoftIcons.button(BUTTON_CLEAR_EDITS, R.drawable.msg_delete, LocaleController.getString(R.string.InuLocalEditsClear)))
         }
         items.add(UItem.asShadow(null))
 
@@ -63,11 +63,11 @@ class LocalNamesSettingsActivity : SettingsPageActivity() {
             }
             items.add(UItem.asShadow(null))
         }
-        items.add(UItem.asButton(BUTTON_ADD, R.drawable.msg_add, LocaleController.getString(R.string.InuLocalNamesAdd)))
-        items.add(UItem.asButton(BUTTON_EXPORT, R.drawable.msg_share, LocaleController.getString(R.string.InuLocalNamesExport)))
-        items.add(UItem.asButton(BUTTON_IMPORT, R.drawable.msg_copy, LocaleController.getString(R.string.InuLocalNamesImport)))
+        items.add(SoftIcons.button(BUTTON_ADD, R.drawable.msg_add, LocaleController.getString(R.string.InuLocalNamesAdd)))
+        items.add(SoftIcons.button(BUTTON_EXPORT, R.drawable.msg_share, LocaleController.getString(R.string.InuLocalNamesExport)))
+        items.add(SoftIcons.button(BUTTON_IMPORT, R.drawable.msg_copy, LocaleController.getString(R.string.InuLocalNamesImport)))
         if (ids.isNotEmpty()) {
-            items.add(UItem.asButton(BUTTON_CLEAR, R.drawable.msg_delete, LocaleController.getString(R.string.InuLocalNamesClear)))
+            items.add(SoftIcons.button(BUTTON_CLEAR, R.drawable.msg_delete, LocaleController.getString(R.string.InuLocalNamesClear)))
         }
     }
 

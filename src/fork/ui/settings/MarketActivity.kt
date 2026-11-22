@@ -193,7 +193,7 @@ class MarketActivity(private val openSlug: String? = null, private val officialO
                 return
             }
             MarketStore.State.FAILED -> if (all.isEmpty()) {
-                items.add(UItem.asButton(BUTTON_RETRY, R.drawable.msg_retry, str(R.string.InuMarketRetry)))
+                items.add(SoftIcons.button(BUTTON_RETRY, R.drawable.msg_retry, str(R.string.InuMarketRetry)))
                 items.add(UItem.asShadow(str(R.string.InuMarketFailed)))
                 return
             }

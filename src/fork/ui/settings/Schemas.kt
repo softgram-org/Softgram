@@ -313,9 +313,7 @@ object Schemas {
                 "blocked-messages-extra", R.string.InuBlockedMessagesExtra,
                 visible = { BlockedMessagesHelper.isEnabled() },
                 build = { page, id ->
-                    UItem.asButton(
-                        id,
-                        R.drawable.entiny_user_x,
+                    SoftIcons.button(id, R.drawable.entiny_user_x,
                         LocaleController.getString(R.string.InuBlockedMessagesExtra),
                         LocaleController.formatString(R.string.InuBlockedMessagesExtraCount, BlockedMessagesHelper.getExtraHidden(page.currentAccount).size),
                     )
@@ -725,9 +723,7 @@ object Schemas {
             custom(
                 "community-display-mode", R.string.InuCommunityDisplayMode,
                 build = { _, id ->
-                    UItem.asButton(
-                        id,
-                        R.drawable.entiny_profile_accounts,
+                    SoftIcons.button(id, R.drawable.entiny_profile_accounts,
                         LocaleController.getString(R.string.InuCommunityDisplayMode),
                         DialogsSettingsHelper.communityDisplayModeLabel(InuConfig.COMMUNITY_DISPLAY_MODE.value),
                     )
@@ -741,7 +737,7 @@ object Schemas {
                 build = { _, id ->
                     val mode = if (InuConfig.HIDE_DOWNLOADS_BUTTON.value) 2 else if (InuConfig.ALWAYS_SHOW_DOWNLOADS.value) 1 else 0
                     val labels = listOf(R.string.InuMonetThemeAuto, R.string.InuAlwaysShowDownloadsInfo, R.string.InuHideDownloadsButtonInfo)
-                    UItem.asButton(id, R.drawable.inu_download_arrow, LocaleController.getString(R.string.InuAlwaysShowDownloads), LocaleController.getString(labels[mode]))
+                    SoftIcons.button(id, R.drawable.inu_download_arrow, LocaleController.getString(R.string.InuAlwaysShowDownloads), LocaleController.getString(labels[mode]))
                 },
                 click = { page, view ->
                     val mode = if (InuConfig.HIDE_DOWNLOADS_BUTTON.value) 2 else if (InuConfig.ALWAYS_SHOW_DOWNLOADS.value) 1 else 0
@@ -829,7 +825,7 @@ object Schemas {
             custom(
                 "bottom-tabs-reset", R.string.InuMainTabsCustomizeReset,
                 visible = { !InuConfig.BOTTOM_TABS_HIDE.value },
-                build = { _, id -> UItem.asButton(id, R.drawable.entiny_backup_reset, LocaleController.getString(R.string.InuMainTabsCustomizeReset)) },
+                build = { _, id -> SoftIcons.button(id, R.drawable.entiny_backup_reset, LocaleController.getString(R.string.InuMainTabsCustomizeReset)) },
                 click = { page, _ -> DialogsSettingsHelper.resetMainTabs(page) },
             )
             toggle(
@@ -842,9 +838,7 @@ object Schemas {
             custom(
                 "fab-main-action", R.string.InuDialogsFabMainAction,
                 build = { _, id ->
-                    UItem.asButton(
-                        id,
-                        R.drawable.entiny_add,
+                    SoftIcons.button(id, R.drawable.entiny_add,
                         LocaleController.getString(R.string.InuDialogsFabMainAction),
                         DialogsFabHelper.Action.fromValue(InuConfig.DIALOGS_FAB_MAIN_ACTION.value).label(),
                     )
@@ -925,7 +919,7 @@ object Schemas {
                 "clear-recent-chats", R.string.InuClearRecentChats,
                 visible = { InuConfig.RECENT_CHATS_ENABLED.value },
                 build = { _, id ->
-                    UItem.asButton(id, R.drawable.entiny_clear_recent_chats, LocaleController.getString(R.string.InuClearRecentChats)).also { it.red = true }
+                    SoftIcons.button(id, R.drawable.entiny_clear_recent_chats, LocaleController.getString(R.string.InuClearRecentChats)).also { it.red = true }
                 },
                 click = { page, _ ->
                     val ctx = page.parentActivity
@@ -1071,9 +1065,7 @@ object Schemas {
                 "background-service-channel", R.string.InuBackgroundServiceHideNotification,
                 visible = { InuConfig.FOREGROUND_PUSH_SERVICE.value && Build.VERSION.SDK_INT >= 26 },
                 build = { _, id ->
-                    UItem.asButton(
-                        id,
-                        R.drawable.entiny_service_notification,
+                    SoftIcons.button(id, R.drawable.entiny_service_notification,
                         LocaleController.getString(R.string.InuBackgroundServiceHideNotification),
                         LocaleController.getString(R.string.InuBackgroundServiceHideNotificationInfo),
                     )
@@ -1084,9 +1076,7 @@ object Schemas {
                 "unified-push-distributor", R.string.InuUnifiedPushDistributor,
                 visible = { UnifiedPushHelper.isEnabled() },
                 build = { _, id ->
-                    UItem.asButton(
-                        id,
-                        R.drawable.entiny_push_distributor,
+                    SoftIcons.button(id, R.drawable.entiny_push_distributor,
                         LocaleController.getString(R.string.InuUnifiedPushDistributor),
                         UnifiedPushHelper.currentDistributor()?.let(PushSettingsHelper::appLabel)
                             ?: LocaleController.getString(R.string.InuUnifiedPushNoDistributor),
@@ -1104,7 +1094,7 @@ object Schemas {
                         gw == UnifiedPushHelper.DEFAULT_GATEWAY -> "${LocaleController.getString(R.string.InuUnifiedPushGatewayDefault)} ($gw)"
                         else -> gw
                     }
-                    UItem.asButton(id, R.drawable.entiny_push_gateway, LocaleController.getString(R.string.InuUnifiedPushGateway), subtitle)
+                    SoftIcons.button(id, R.drawable.entiny_push_gateway, LocaleController.getString(R.string.InuUnifiedPushGateway), subtitle)
                 },
                 click = { page, _ -> PushSettingsHelper.editGateway(page) },
             )
@@ -1123,7 +1113,7 @@ object Schemas {
             custom(
                 "download-directory", R.string.InuDownloadDirectory,
                 build = { _, id ->
-                    UItem.asButton(id, R.drawable.entiny_download_folder, LocaleController.getString(R.string.InuDownloadDirectory), InuConfig.DOWNLOAD_DIRECTORY.value)
+                    SoftIcons.button(id, R.drawable.entiny_download_folder, LocaleController.getString(R.string.InuDownloadDirectory), InuConfig.DOWNLOAD_DIRECTORY.value)
                 },
                 click = { page, view ->
                     RadioItemOptions.show(
@@ -1171,7 +1161,7 @@ object Schemas {
         section(R.string.InuProxyRelatedHeader) {
             custom(
                 "", R.string.ProxySettings,
-                build = { _, id -> UItem.asButton(id, R.drawable.entiny_proxy_list, LocaleController.getString(R.string.ProxySettings)) },
+                build = { _, id -> SoftIcons.button(id, R.drawable.entiny_proxy_list, LocaleController.getString(R.string.ProxySettings)) },
                 click = { page, _ -> page.presentFragment(ProxyListActivity()) },
             )
             link(R.string.InuAutoDisableProxyOnVpn, R.drawable.entiny_proxy_vpn) {

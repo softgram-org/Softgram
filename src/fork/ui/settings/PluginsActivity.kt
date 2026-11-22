@@ -171,9 +171,7 @@ class PluginsActivity : SettingsPageActivity() {
         items.add(UItem.asShadow(null))
         items.add(mkSubPageButton(BUTTON_REPOS, R.drawable.msg_channel, LocaleController.getString(R.string.InuMarket)))
         items.add(
-            UItem.asButton(
-                BUTTON_LOAD,
-                R.drawable.msg_download,
+            SoftIcons.button(BUTTON_LOAD, R.drawable.msg_download,
                 LocaleController.getString(R.string.InuPluginsLoadFromDisk),
             )
         )

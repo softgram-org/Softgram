@@ -228,15 +228,13 @@ class PluginInstallSheet(
         }
         if (content.assets.isNotEmpty()) {
             items.add(
-                UItem.asButton(
-                    BUTTON_ASSETS,
-                    R.drawable.msg_media,
+                SoftIcons.button(BUTTON_ASSETS, R.drawable.msg_media,
                     LocaleController.getString(R.string.InuPluginAssets),
                     PluginAssetsSheet.describeAssets(content.assets),
                 ),
             )
         }
-        items.add(UItem.asButton(BUTTON_SOURCE, R.drawable.entiny_code, LocaleController.getString(R.string.InuPluginsViewSource)))
+        items.add(SoftIcons.button(BUTTON_SOURCE, R.drawable.entiny_code, LocaleController.getString(R.string.InuPluginsViewSource)))
         items.add(UItem.asShadow(null))
     }
 
@@ -281,9 +279,7 @@ class PluginInstallSheet(
         }
         if (!showKeptGrants) {
             items.add(
-                UItem.asButton(
-                    BUTTON_KEPT_GRANTS,
-                    R.drawable.msg_message,
+                SoftIcons.button(BUTTON_KEPT_GRANTS, R.drawable.msg_message,
                     LocaleController.formatPluralString("InuPluginUpdatePermissionsKept", kept.size),
                 ),
             )

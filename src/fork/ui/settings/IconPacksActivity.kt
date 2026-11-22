@@ -91,7 +91,7 @@ class IconPacksActivity : SettingsPageActivity() {
         items.add(UItem.asCustom(telegramRow, IconPackRow.HEIGHT_DP))
         items.add(UItem.asShadow(LocaleController.getString(R.string.InuIconPacksOrderInfo)))
 
-        items.add(UItem.asButton(BUTTON_LOAD, R.drawable.msg_download, LocaleController.getString(R.string.InuIconPackLoadFromFile)))
+        items.add(SoftIcons.button(BUTTON_LOAD, R.drawable.msg_download, LocaleController.getString(R.string.InuIconPackLoadFromFile)))
         items.add(UItem.asShadow(null))
     }
 

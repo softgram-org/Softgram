@@ -28,7 +28,7 @@ class DrawerMenuOrderActivity : MenuOrderActivity<DrawerMenuConfig.Item>() {
     override fun fillItems(items: ArrayList<UItem>, adapter: UniversalAdapter) {
         fillMainSection(items, adapter)
         if (entries.any { it.item.isDivider && !it.enabled }) {
-            items.add(UItem.asButton(BUTTON_ADD_DIVIDER, R.drawable.msg_add, LocaleController.getString(R.string.InuDrawerMenuAddDivider)))
+            items.add(SoftIcons.button(BUTTON_ADD_DIVIDER, R.drawable.msg_add, LocaleController.getString(R.string.InuDrawerMenuAddDivider)))
         }
         fillResetSection(items, adapter)
     }

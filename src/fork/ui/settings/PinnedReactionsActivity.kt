@@ -100,17 +100,13 @@ class PinnedReactionsActivity : SettingsPageActivity() {
         items.add(UItem.asShadow(null))
 
         items.add(
-            UItem.asButton(
-                BUTTON_COPY_SERVER,
-                R.drawable.msg_download,
+            SoftIcons.button(BUTTON_COPY_SERVER, R.drawable.msg_download,
                 LocaleController.getString(R.string.InuPinnedReactionsCopyServer)
             )
         )
         if (pins.size > 1) {
             items.add(
-                UItem.asButton(
-                    BUTTON_REMOVE_ALL,
-                    R.drawable.msg_delete,
+                SoftIcons.button(BUTTON_REMOVE_ALL, R.drawable.msg_delete,
                     LocaleController.getString(R.string.InuPinnedReactionsRemoveAll)
                 ).red()
             )

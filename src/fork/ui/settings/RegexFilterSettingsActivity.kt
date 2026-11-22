@@ -86,16 +86,14 @@ class RegexFilterSettingsActivity : SettingsPageActivity(), NotificationCenter.N
 
         if (filters.isEmpty()) items.add(UItem.asHeader(LocaleController.getString(R.string.InuRegexFiltersList)))
         items.add(
-            UItem.asButton(
-                BUTTON_ADD_FILTER,
-                R.drawable.entiny_add_filter,
+            SoftIcons.button(BUTTON_ADD_FILTER, R.drawable.entiny_add_filter,
                 LocaleController.getString(R.string.InuRegexFilterAdd),
             )
         )
         items.add(UItem.asShadow(null))
 
-        items.add(UItem.asButton(BUTTON_EXPORT_FILTERS, R.drawable.entiny_export_filters, LocaleController.getString(R.string.InuRegexFilterExport)))
-        items.add(UItem.asButton(BUTTON_IMPORT_FILTERS, R.drawable.entiny_import_filters, LocaleController.getString(R.string.InuRegexFilterImport)))
+        items.add(SoftIcons.button(BUTTON_EXPORT_FILTERS, R.drawable.entiny_export_filters, LocaleController.getString(R.string.InuRegexFilterExport)))
+        items.add(SoftIcons.button(BUTTON_IMPORT_FILTERS, R.drawable.entiny_import_filters, LocaleController.getString(R.string.InuRegexFilterImport)))
         items.add(UItem.asShadow(LocaleController.getString(R.string.InuRegexFilterHint)))
     }
 
