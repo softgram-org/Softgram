@@ -1,0 +1,195 @@
+name: Soft Design 4 - About + donate wallets
+
+on:
+  workflow_dispatch:
+    inputs:
+      btc:
+        description: 'Bitcoin (BTC) wallet address (leave empty to skip)'
+        required: false
+        default: ''
+        type: string
+      eth:
+        description: 'Ethereum (ETH) wallet address (leave empty to skip)'
+        required: false
+        default: ''
+        type: string
+      bnb:
+        description: 'BNB (BSC) wallet address (leave empty to skip)'
+        required: false
+        default: ''
+        type: string
+      sol:
+        description: 'Solana (SOL) wallet address (leave empty to skip)'
+        required: false
+        default: ''
+        type: string
+      pol:
+        description: 'Polygon (POL) wallet address (leave empty to skip)'
+        required: false
+        default: ''
+        type: string
+      trx:
+        description: 'Tron (TRX) wallet address (leave empty to skip)'
+        required: false
+        default: ''
+        type: string
+      hype:
+        description: 'Hyperliquid (HYPE) wallet address (leave empty to skip)'
+        required: false
+        default: ''
+        type: string
+      ton:
+        description: 'TON wallet address (leave empty to skip)'
+        required: false
+        default: ''
+        type: string
+      doge:
+        description: 'Dogecoin (DOGE) wallet address (leave empty to skip)'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Trim About and write wallets
+        env:
+          WALLET_BTC: ${{ inputs.btc }}
+          WALLET_ETH: ${{ inputs.eth }}
+          WALLET_BNB: ${{ inputs.bnb }}
+          WALLET_SOL: ${{ inputs.sol }}
+          WALLET_POL: ${{ inputs.pol }}
+          WALLET_TRX: ${{ inputs.trx }}
+          WALLET_HYPE: ${{ inputs.hype }}
+          WALLET_TON: ${{ inputs.ton }}
+          WALLET_DOGE: ${{ inputs.doge }}
+        run: |
+          python3 - <<'SDPY'
+          #!/usr/bin/env python3
+          """Soft Design 4: About = channel + donate only; donate page = your own wallet addresses (from workflow inputs)."""
+          import os, re, sys
+
+          ROOT = os.getcwd()
+          def rd(p): return open(os.path.join(ROOT, p), encoding='utf-8').read()
+          def wr(p, s): open(os.path.join(ROOT, p), 'w', encoding='utf-8').write(s)
+
+          COINS = [  # env, title, drawable
+              ('BTC',  'Bitcoin · BTC',          'entiny_bitcoin'),
+              ('ETH',  'Ethereum · ETH',         'entiny_ethereum'),
+              ('BNB',  'BNB · BSC',              'entiny_bnb_chain'),
+              ('SOL',  'Solana · SOL',           'entiny_solana'),
+              ('POL',  'Polygon · POL',          'entiny_support'),
+              ('TRX',  'Tron · TRX',             'entiny_trx'),
+              ('HYPE', 'Hyperliquid · HYPE',     'entiny_support'),
+              ('TON',  'TON',                    'entiny_ton'),
+              ('DOGE', 'Dogecoin · DOGE',        'entiny_support'),
+          ]
+          OK = re.compile(r'^[A-Za-z0-9:_.\-]{10,120}$')
+
+          def donate():
+              rows = []
+              for key, title, icon in COINS:
+                  v = os.environ.get('WALLET_' + key, '').strip()
+                  if not v: continue
+                  if not OK.match(v):
+                      sys.exit(f'::error::Address for {key} looks invalid: {v!r}')
+                  rows.append(f'        Method(R.drawable.{icon}, "{title}", "{v}"),\n')
+              if not rows:
+                  sys.exit('::error::Enter at least one wallet address in the workflow inputs.')
+              src = '''package desu.inugram.ui.settings
+
+          import android.view.View
+          import desu.inugram.helpers.InuUtils
+          import org.telegram.messenger.AndroidUtilities
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.R
+          import org.telegram.ui.Components.BulletinFactory
+          import org.telegram.ui.Components.UItem
+          import org.telegram.ui.Components.UniversalAdapter
+
+          // Softgram: support page, crypto wallets only (tap to copy)
+          class DonateActivity : SettingsPageActivity() {
+
+              private class Method(val icon: Int, val title: String, val value: String) {
+                  val id = InuUtils.generateId()
+                  val shown get() = if (value.length <= 26) value else value.take(12) + "…" + value.takeLast(10)
+              }
+
+              private val coins = listOf(
+          ''' + ''.join(rows) + '''    )
+
+              override fun getTitle(): CharSequence = str(R.string.InuDonateSheetTitle)
+
+              override fun fillItems(items: ArrayList<UItem>, adapter: UniversalAdapter) {
+                  items.add(UItem.asShadow(str(R.string.InuDonateSheetInfo)))
+                  items.add(UItem.asHeader(str(R.string.InuDonateSectionCoins)))
+                  coins.forEach { items.add(mkTwoLineEntry(it.id, it.icon, it.title, it.shown)) }
+                  items.add(UItem.asShadow(str(R.string.InuDonateThanks)))
+              }
+
+              override fun onClick(item: UItem, view: View, position: Int, x: Float, y: Float) {
+                  val method = coins.firstOrNull { it.id == item.id } ?: return
+                  AndroidUtilities.addToClipboard(method.value)
+                  BulletinFactory.of(this).createCopyBulletin(str(R.string.InuDonateCopied)).show()
+              }
+
+              private fun str(res: Int) = LocaleController.getString(res)
+          }
+          '''
+              wr('src/fork/ui/settings/DonateActivity.kt', src)
+              print('donate rows:', len(rows))
+
+          def about():
+              p = 'src/fork/ui/settings/AdditionalSettingsActivity.kt'
+              s = rd(p)
+              s = s.replace('UItem.asButton(\n                BUTTON_CHANNEL_LINK,', 'SoftIcons.button(\n                BUTTON_CHANNEL_LINK,')
+              if 'BUTTON_GITHUB,' in s:
+                  s2 = re.sub(r'        items\.add\(\n            UItem\.asButton\(\n                BUTTON_GITHUB,.*?\n            \)\n        \)\n', '', s, count=1, flags=re.S)
+                  s = s2
+              a = s.find('        items.add(UItem.asShadow(null))\n        items.add(\n            mkTwoLineCheckItem(\n                TOGGLE_HIDE_DEV_BADGES')
+              marker = 'items.add(UItem.asButton(BUTTON_COPY_SYSINFO'
+              b = s.find(marker)
+              if a != -1 and b != -1:
+                  b_end = s.index('        items.add(UItem.asShadow(null))\n', b) + len('        items.add(UItem.asShadow(null))\n')
+                  s = s[:a] + '        items.add(UItem.asShadow(null))\n' + s[b_end:]
+              # search entries: keep only channel + donate
+              i = s.find('entries = listOf(', s.find('val PAGE'))
+              if i != -1:
+                  j = s.index('\n            ),', i)
+                  head, body, tail = s[:i + len('entries = listOf(')], s[i + len('entries = listOf('):j], s[j:]
+                  keep = [ln for ln in body.split('\n') if ln.strip() == '' or re.search(r'Entry\("(channel|additional-donate)"', ln)]
+                  s = head + '\n'.join(keep) + tail
+              wr(p, s)
+              print('about trimmed')
+
+          if __name__ == '__main__':
+              donate(); about()
+          SDPY
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 4: About (channel + donate), own wallets"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'

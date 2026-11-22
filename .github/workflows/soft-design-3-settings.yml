@@ -1,0 +1,259 @@
+name: Soft Design 3 - iOS-style settings + colorful icons
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Group settings and colorize icons
+        run: |
+          python3 - <<'SDPY'
+          #!/usr/bin/env python3
+          """Soft Design 3: iOS-style grouped settings root + colorful icons everywhere in settings pages."""
+          import os, re
+
+          ROOT = os.getcwd()
+          S = os.path.join(ROOT, 'src/fork/ui/settings')
+
+          def rd(p): return open(os.path.join(ROOT, p), encoding='utf-8').read()
+          def wr(p, s):
+              full = os.path.join(ROOT, p); os.makedirs(os.path.dirname(full), exist_ok=True)
+              open(full, 'w', encoding='utf-8').write(s)
+
+          SOFTICONS = '''package desu.inugram.ui.settings
+
+          import android.graphics.Color
+          import android.graphics.PorterDuff
+          import android.graphics.PorterDuffColorFilter
+          import android.graphics.drawable.GradientDrawable
+          import android.widget.ImageView
+          import org.telegram.messenger.AndroidUtilities.dp
+          import org.telegram.messenger.R
+          import org.telegram.ui.Cells.TextCell
+          import org.telegram.ui.Components.IconBackgroundColors
+          import org.telegram.ui.Components.UItem
+          import org.telegram.messenger.Utilities
+
+          // Softgram: colorful gradient plates behind settings icons, same look as the official Telegram settings
+          object SoftIcons {
+              private val FALLBACK = listOf(
+                  IconBackgroundColors.BLUE, IconBackgroundColors.GREEN, IconBackgroundColors.ORANGE,
+                  IconBackgroundColors.RED, IconBackgroundColors.CYAN, IconBackgroundColors.PURPLE,
+                  IconBackgroundColors.BLUE_DEEP, IconBackgroundColors.ORANGE_DEEP,
+              )
+
+              private val MAP: Map<Int, IconBackgroundColors> by lazy {
+                  mapOf(
+                      R.drawable.entiny_appearance to IconBackgroundColors.PURPLE,
+                      R.drawable.entiny_home to IconBackgroundColors.BLUE,
+                      R.drawable.entiny_hide_clutter to IconBackgroundColors.GRAY,
+                      R.drawable.entiny_message_menu to IconBackgroundColors.GREEN,
+                      R.drawable.entiny_phone to IconBackgroundColors.ORANGE,
+                      R.drawable.entiny_network_notifications to IconBackgroundColors.RED,
+                      R.drawable.entiny_profile_accounts to IconBackgroundColors.CYAN,
+                      R.drawable.entiny_privacy to IconBackgroundColors.BLUE_DEEP,
+                      R.drawable.entiny_ghost to IconBackgroundColors.ORANGE_DEEP,
+                      R.drawable.entiny_proxy to IconBackgroundColors.BLUE,
+                      R.drawable.entiny_ai_translation to IconBackgroundColors.PURPLE,
+                      R.drawable.entiny_app_controls to IconBackgroundColors.GRAY,
+                      R.drawable.entiny_plugins to IconBackgroundColors.GREEN,
+                      R.drawable.entiny_about to IconBackgroundColors.BLUE_ALT,
+                      R.drawable.entiny_trash to IconBackgroundColors.RED,
+                      R.drawable.msg_delete to IconBackgroundColors.RED,
+                      R.drawable.entiny_telegram to IconBackgroundColors.BLUE_LIGHT,
+                      R.drawable.entiny_support to IconBackgroundColors.RED,
+                      R.drawable.entiny_bitcoin to IconBackgroundColors.ORANGE,
+                      R.drawable.entiny_ethereum to IconBackgroundColors.BLUE_DEEP,
+                      R.drawable.entiny_bnb_chain to IconBackgroundColors.ORANGE_DEEP,
+                      R.drawable.entiny_solana to IconBackgroundColors.PURPLE,
+                      R.drawable.entiny_trx to IconBackgroundColors.RED,
+                      R.drawable.entiny_ton to IconBackgroundColors.BLUE,
+                      R.drawable.entiny_tether to IconBackgroundColors.GREEN,
+                  )
+              }
+
+              @JvmStatic
+              fun colors(res: Int): IconBackgroundColors = MAP[res] ?: FALLBACK[(res and 0x7fffffff) % FALLBACK.size]
+
+              @JvmStatic
+              fun apply(cell: TextCell, res: Int) {
+                  val c = colors(res)
+                  cell.setColorfulIcon(c.top, c.bottom, res, true)
+              }
+
+              @JvmStatic
+              fun plate(iv: ImageView, res: Int) {
+                  val c = colors(res)
+                  iv.background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(c.top, c.bottom)).apply {
+                      cornerRadius = dp(7f).toFloat()
+                  }
+                  iv.setPadding(dp(4f), dp(4f), dp(4f), dp(4f))
+                  iv.scaleType = ImageView.ScaleType.FIT_CENTER
+                  iv.colorFilter = PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN)
+              }
+
+              @JvmStatic
+              fun button(id: Int, iconRes: Int, text: CharSequence): UItem =
+                  UItem.asButton(id, iconRes, text).also { bindIcon(it, iconRes) }
+
+              @JvmStatic
+              fun button(id: Int, iconRes: Int, text: CharSequence, value: CharSequence?): UItem =
+                  UItem.asButton(id, iconRes, text, value).also { bindIcon(it, iconRes) }
+
+              private fun bindIcon(item: UItem, iconRes: Int) {
+                  item.bind = Utilities.Callback { view -> (view as? TextCell)?.let { apply(it, iconRes) } }
+              }
+          }
+          '''
+
+          def edit_page():
+              p = 'src/fork/ui/settings/SettingsPageActivity.kt'
+              s = rd(p)
+              if 'SoftIcons.apply' in s:
+                  return
+              # icon-version of mkSubPageButton: colorful plate after the default binding
+              m = re.search(r'protected fun mkSubPageButton\(id: Int, iconRes: Int, text: CharSequence\): UItem \{.*?\n    \}\n', s, re.S)
+              if not m:
+                  print('WARN mkSubPageButton(icon) not found'); return
+              block = m.group(0)
+              nb = block.replace('                iv.visibility = View.VISIBLE\n', '                iv.visibility = View.VISIBLE\n                SoftIcons.apply(cell, iconRes)\n', 1)
+              s = s.replace(block, nb)
+              wr(p, s)
+
+          def edit_two_line():
+              p = 'src/fork/ui/settings/TwoLineEntryCell.kt'
+              s = rd(p)
+              if 'SoftIcons.plate' in s: return
+              s = s.replace('        icon.setColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon))\n        addView(icon, LayoutHelper.createLinear(24, 24, 0f, 0f, 18f, 0f))',
+                            '        addView(icon, LayoutHelper.createLinear(28, 28, 0f, 0f, 16f, 0f))')
+              s = s.replace('        icon.setImageResource(iconRes)\n', '        icon.setImageResource(iconRes)\n        SoftIcons.plate(icon, iconRes)\n', 1)
+              wr(p, s)
+
+          def convert_buttons():
+              n = 0
+              pat = re.compile(r'UItem\.asButton\(\s*([A-Za-z_][\w.]*)\s*,\s*(R\.drawable\.\w+)\s*,')
+              for f in sorted(os.listdir(S)):
+                  if not f.endswith('.kt') or f in ('AdditionalSettingsActivity.kt', 'DonateActivity.kt', 'SoftIcons.kt'):
+                      continue
+                  s = rd('src/fork/ui/settings/' + f)
+                  new, c = pat.subn(r'SoftIcons.button(\1, \2,', s)
+                  if c:
+                      wr('src/fork/ui/settings/' + f, new); n += c
+              print('buttons converted:', n)
+
+          def edit_root():
+              p = 'src/fork/ui/settings/InuSettingsActivity.kt'
+              s = rd(p)
+              if 'InuSectionAppearance' in s: return
+              start = s.index('        items.add(mkSubPageButton(CAT_APPEARANCE')
+              end_marker = 'items.add(mkSubPageButton(CAT_ABOUT, R.drawable.entiny_about, LocaleController.getString(R.string.InuAbout)))\n'
+              end = s.index(end_marker) + len(end_marker)
+              def b(cat, icon, res, extra=''):
+                  return f'        items.add(mkSubPageButton({cat}, R.drawable.{icon}, {extra or "LocaleController.getString(R.string." + res + ")"}))\n'
+              new = (
+                  '        items.add(UItem.asHeader(LocaleController.getString(R.string.InuSectionAppearance)))\n'
+                  + b('CAT_APPEARANCE', 'entiny_appearance', 'InuCategoryAppearance')
+                  + b('CAT_HOME', 'entiny_home', 'InuHomeAndChatList')
+                  + b('CAT_ANNOYANCES', 'entiny_hide_clutter', 'InuAnnoyances')
+                  + '        items.add(UItem.asShadow(null))\n\n'
+                  + '        items.add(UItem.asHeader(LocaleController.getString(R.string.InuSectionChatsMedia)))\n'
+                  + b('CAT_CHATS', 'entiny_message_menu', 'InuChatsAndMessages')
+                  + b('CAT_MEDIA', 'entiny_phone', 'InuMediaAndCalls')
+                  + b('CAT_NETWORK', 'entiny_network_notifications', 'InuNetworkAndNotifications')
+                  + '        items.add(UItem.asShadow(null))\n\n'
+                  + '        items.add(UItem.asHeader(LocaleController.getString(R.string.InuSectionPrivacyAccount)))\n'
+                  + b('CAT_PROFILE_ACCOUNTS', 'entiny_profile_accounts', 'InuProfileAndAccounts')
+                  + b('CAT_PRIVACY', 'entiny_privacy', 'InuPrivacyAndFreedom')
+                  + b('CAT_RESTRICTED', 'entiny_ghost', 'InuRestrictedFeatures')
+                  + '        items.add(UItem.asShadow(null))\n\n'
+                  + '        items.add(UItem.asHeader(LocaleController.getString(R.string.InuSectionGeneral)))\n'
+                  + b('CAT_PROXY', 'entiny_proxy', 'InuProxyPage', 'addExperimentalSpan(LocaleController.getString(R.string.InuProxyPage))')
+                  + b('BUTTON_AI', 'entiny_ai_translation', 'InuAiAndTranslator')
+                  + b('CAT_SYSTEM', 'entiny_app_controls', 'InuRootSystem')
+                  + '        // #if PLUGINS\n'
+                  + b('BUTTON_PLUGINS', 'entiny_plugins', 'InuPlugins', 'addExperimentalSpan(LocaleController.getString(R.string.InuPlugins))')
+                  + '        // #endif\n'
+                  + b('CAT_ABOUT', 'entiny_about', 'InuAbout')
+              )
+              s = s[:start] + new + s[end:]
+              s = s.replace('        items.add(UItem.asShadow(null))\n\n        items.add(UItem.asHeader(LocaleController.getString(R.string.InuSectionAppearance)))',
+                            '        items.add(UItem.asHeader(LocaleController.getString(R.string.InuSectionAppearance)))', 1) if False else s
+              wr(p, s)
+
+          def edit_header():
+              p = 'src/fork/ui/settings/InuSettingsHeader.kt'
+              s = rd(p)
+              if 'softgram_logo' in s: return
+              s = re.sub(r'setImageResource\(R\.drawable\.icon_settings_inu\)\n\s*background = iconBg\n\s*setPadding\(.*?\n\s*\)\n', 'setImageResource(R.drawable.softgram_logo)\n', s, flags=re.S)
+              s = s.replace('        iconBg.setColor(container)\n', '').replace('        icon.setColorFilter(onContainer)\n', '')
+              s = s.replace('        val dark = Theme.isCurrentThemeDark()\n        val (container, onContainer) = iconColors(dark)\n        title.setTextColor', '        title.setTextColor', 1)
+              wr(p, s)
+
+          def edit_strings():
+              vals = {
+                  'values': ('Appearance', 'Chats &amp; Media', 'Privacy &amp; Account', 'General'),
+                  'values-fa': ('ظاهر', 'گفتگوها و رسانه', 'حریم خصوصی و حساب', 'عمومی'),
+              }
+              names = ('InuSectionAppearance', 'InuSectionChatsMedia', 'InuSectionPrivacyAccount', 'InuSectionGeneral')
+              for d, tr in vals.items():
+                  p = f'src/res/{d}/strings_inu.xml'
+                  if not os.path.exists(os.path.join(ROOT, p)): continue
+                  s = rd(p)
+                  if names[0] in s: continue
+                  add = ''.join(f'    <string name="{n}">{t}</string>\n' for n, t in zip(names, tr))
+                  s = s.replace('</resources>', add + '</resources>')
+                  wr(p, s)
+              p = 'src/res/values/strings_inu.xml'
+              s = rd(p)
+              s = re.sub(r'(<string name="InuPlugins">)[^<]*(</string>)', r'\1Plugin\2', s)
+              wr(p, s)
+
+          def edit_main_row():
+              # row in Telegram's own Settings screen: show the full round logo, no gradient plate
+              n = 0
+              d = os.path.join(ROOT, 'patches')
+              pat = re.compile(r'IconBackgroundColors\.ENTINY\.top,\s*IconBackgroundColors\.ENTINY\.bottom,\s*R\.drawable\.icon_settings_inu')
+              for dp_, _, fs in os.walk(d):
+                  for f in fs:
+                      if not f.endswith('.patch'): continue
+                      p = os.path.join(dp_, f)
+                      s = open(p, encoding='utf-8').read()
+                      ns, c = pat.subn('0, 0, R.drawable.softgram_logo', s)
+                      if c:
+                          open(p, 'w', encoding='utf-8').write(ns); n += c
+              print('main row edits:', n)
+
+          if __name__ == '__main__':
+              wr('src/fork/ui/settings/SoftIcons.kt', SOFTICONS)
+              edit_page(); edit_two_line(); convert_buttons(); edit_root(); edit_header(); edit_strings(); edit_main_row()
+              print('settings done')
+          SDPY
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 3: iOS-style grouped settings, colorful icons"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'

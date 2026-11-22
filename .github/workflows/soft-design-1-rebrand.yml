@@ -1,0 +1,138 @@
+name: Soft Design 1 - Rebrand (name, package, links)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Rename entinyGram to Softgram
+        run: |
+          python3 - <<'SDPY'
+          #!/usr/bin/env python3
+          """Soft Design 1: entinyGram -> Softgram (name, package id, links, colors, tagline)."""
+          import os, re, sys
+
+          ROOT = os.getcwd()
+          TEXT_EXT = {'.kt', '.java', '.xml', '.patch', '.ts', '.json', '.md', '.gradle', '.kts', '.pro', '.txt', '.yml', '.properties', ''}
+          SKIP_DIRS = {'.git', 'node_modules', '.github'}
+          SKIP_FILES = {'inu_badges_bundled.json'}
+
+          # (regex, replacement) applied in order. Protected tokens first.
+          PROTECT = ['https://github.com/entinyGram/plugins', 'entinyGramPlugins']
+          RULES = [
+              (r'ua\.entaytion\.entinygram', 'org.softgram.messenger'),
+              (r'https://raw\.githubusercontent\.com/entaytion/entinyGram/main/changelogs/', ''),
+              (r'https://github\.com/[Ee]ntaytion/[Ee]ntiny[Gg]ram', 'https://t.me/Softgram_org'),
+              (r'https://t\.me/entinyGram(?:CI|Chat)?\b', 'https://t.me/Softgram_org'),
+              (r'@entinyGram(?:CI|Chat)?\b', '@Softgram_org'),
+              (r'\bentinyGramCI\b', 'Softgram_org'),
+              (r'(?<![A-Za-z])[Ee]ntiny[Gg]ram', 'Softgram'),
+              (r'entinygram', 'softgram'),
+              # brand colors (same length, so patch hunks stay valid)
+              (r'0xFFF20C3C', '0xFF0A84F0'),
+              (r'0xFFFF4A66', '0xFF2AA3FF'),
+              (r'0xFFE80A38', '0xFF0078EA'),
+              (r'#FFF20C3C', '#FF0A84F0'),
+          ]
+          TAGLINE = 'Yours. By design Softgram'
+
+          def is_text(path):
+              ext = os.path.splitext(path)[1]
+              return ext in TEXT_EXT
+
+          def keep_email_lines(text):
+              return text  # author lines hold e-mail only, no brand word, nothing to guard
+
+          def process(path):
+              try:
+                  raw = open(path, encoding='utf-8').read()
+              except Exception:
+                  return False
+              text = raw
+              holders = {}
+              for i, tok in enumerate(PROTECT):
+                  key = f'\u0001P{i}\u0001'
+                  if tok in text:
+                      text = text.replace(tok, key); holders[key] = tok
+              for pat, rep in RULES:
+                  text = re.sub(pat, rep, text)
+              # tagline string in every locale
+              text = re.sub(r'(<string name="InuSettingsInfo"[^>]*>)[^<]*(</string>)', lambda m: m.group(1) + TAGLINE + m.group(2), text)
+              for key, tok in holders.items():
+                  text = text.replace(key, tok)
+              if text != raw:
+                  open(path, 'w', encoding='utf-8').write(text)
+                  return True
+              return False
+
+          def patch_file(rel, subs):
+              p = os.path.join(ROOT, rel)
+              if not os.path.exists(p):
+                  print('  skip (missing):', rel); return
+              s = open(p, encoding='utf-8').read(); o = s
+              for old, new in subs:
+                  if old in s:
+                      s = s.replace(old, new, 1)
+              if s != o:
+                  open(p, 'w', encoding='utf-8').write(s); print('  edited', rel)
+
+          def main():
+              changed = 0
+              targets = ['src', 'patches', 'assets/scripts', 'assets/release', 'package.json']
+              for t in targets:
+                  base = os.path.join(ROOT, t)
+                  if os.path.isfile(base):
+                      changed += process(base); continue
+                  for d, dirs, files in os.walk(base):
+                      dirs[:] = [x for x in dirs if x not in SKIP_DIRS]
+                      for f in files:
+                          if f in SKIP_FILES: continue
+                          p = os.path.join(d, f)
+                          if is_text(p) and process(p):
+                              changed += 1
+              print('files changed:', changed)
+
+              # No outbound calls to entinyGram servers
+              patch_file('src/fork/helpers/badges/BadgeRegistry.kt', [
+                  ('private const val ENDPOINT = "https://entaytion.is-a.dev/api/entinygram/badges"', 'private const val ENDPOINT = ""'),
+                  ('private const val ENDPOINT = "https://entaytion.is-a.dev/api/softgram/badges"', 'private const val ENDPOINT = ""'),
+                  ('        val connection = URL(ENDPOINT).openConnection() as HttpURLConnection\n',
+                   '        if (ENDPOINT.isEmpty()) return Triple(404, null, null)\n        val connection = URL(ENDPOINT).openConnection() as HttpURLConnection\n'),
+              ])
+              # donate links to entaytion are removed together with the About rewrite (Soft Design 4)
+              print('done')
+
+          if __name__ == '__main__':
+              main()
+          SDPY
+          echo '--- leftovers (should be only identifiers/plugin catalog) ---'
+          grep -rIio 'entinygram[A-Za-z_./-]*' src patches assets package.json | sort | uniq -c | sort -rn | head -20 || true
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 1: rebrand entinyGram to Softgram"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
