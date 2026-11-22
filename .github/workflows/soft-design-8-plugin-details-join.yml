@@ -1,0 +1,215 @@
+name: Soft Design 8 - Plugin details, channel invitation
+
+# Uploading this file applies the changes by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-8-plugin-details-join.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 8
+        run: |
+          cat > /tmp/step.py <<'PYEOF'
+          import os, re, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              d = os.path.dirname(p)
+              if d:
+                  os.makedirs(d, exist_ok=True)
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def die(msg):
+              print("ERROR: " + msg)
+              sys.exit(1)
+
+          def rep(p, old, new):
+              if not os.path.isfile(p):
+                  die("missing file " + p)
+              s = rd(p)
+              if new in s and old not in s:
+                  print("already done: " + p)
+                  return
+              if s.count(old) != 1:
+                  die("anchor found %d times (need exactly 1) in %s: %r" % (s.count(old), p, old[:100]))
+              wr(p, s.replace(old, new, 1))
+              print("edited " + p)
+
+          if not os.path.isdir("src/res") or not os.path.isfile("series"):
+              die("run from the repository root")
+          MARK = ".softgram/8-plugin-details-join.done"
+          if os.path.exists(MARK):
+              print("Already applied.")
+              sys.exit(0)
+
+          ST = "src/fork/ui/settings/"
+
+          # ---------- 1. plugin pages: hide Source, Plugin ID, Discussion (and Dependencies in the Details card) in the UI only
+          M = ST + "MarketPluginActivity.kt"
+          rep(M,
+              "        if (source.isNotEmpty()) items.add(mkTwoLineEntry(SOURCE,",
+              "        if (SHOW_HIDDEN_ROWS && source.isNotEmpty()) items.add(mkTwoLineEntry(SOURCE,")
+          rep(M,
+              "        items.add(mkTwoLineEntry(PLUGIN_ID, R.drawable.msg_link, str(R.string.InuPluginRepoId), entry.id))\n"
+              "        addPluginDependencies(items, manifest)\n",
+              "        if (SHOW_HIDDEN_ROWS) {\n"
+              "            items.add(mkTwoLineEntry(PLUGIN_ID, R.drawable.msg_link, str(R.string.InuPluginRepoId), entry.id))\n"
+              "            addPluginDependencies(items, manifest)\n"
+              "        }\n")
+          rep(M,
+              "        entry.post?.let {\n            items.add(mkTwoLineEntry(DISCUSSION,",
+              "        if (SHOW_HIDDEN_ROWS) entry.post?.let {\n            items.add(mkTwoLineEntry(DISCUSSION,")
+          rep(M,
+              "        val OPEN = InuUtils.generateId()\n    }\n",
+              "        val OPEN = InuUtils.generateId()\n        val SHOW_HIDDEN_ROWS = false\n    }\n")
+
+          R = ST + "PluginRepoPluginActivity.kt"
+          rep(R,
+              "repo.title.takeIf { it.isNotEmpty() }).joinToString",
+              "repo.title.takeIf { SHOW_HIDDEN_ROWS && it.isNotEmpty() }).joinToString")
+          rep(R,
+              "        if (!PluginRepos.isOfficial(repo)) items.add(mkTwoLineEntry(SOURCE,",
+              "        if (SHOW_HIDDEN_ROWS && !PluginRepos.isOfficial(repo)) items.add(mkTwoLineEntry(SOURCE,")
+          rep(R,
+              "        manifest.id?.let {\n            items.add(mkTwoLineEntry(PLUGIN_ID,",
+              "        if (SHOW_HIDDEN_ROWS) manifest.id?.let {\n            items.add(mkTwoLineEntry(PLUGIN_ID,")
+          rep(R,
+              "        private val HERO = InuUtils.generateId()\n",
+              "        private val HERO = InuUtils.generateId()\n        private val SHOW_HIDDEN_ROWS = false\n")
+
+          # ---------- 2. one-time invitation to the official channel
+          wr("src/fork/helpers/SoftJoinPrompt.kt", '''package desu.inugram.helpers
+
+          import android.content.Context
+          import org.telegram.messenger.AndroidUtilities
+          import org.telegram.messenger.ApplicationLoader
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.R
+          import org.telegram.messenger.UserConfig
+          import org.telegram.messenger.browser.Browser
+          import org.telegram.ui.ActionBar.AlertDialog
+          import org.telegram.ui.LaunchActivity
+
+          object SoftJoinPrompt {
+              private const val PREFS = "softgram_join_prompt"
+              private const val KEY_SHOWN = "shown"
+              private const val CHANNEL_URL = "https://t.me/Softgram_org"
+
+              @JvmStatic
+              fun maybeShow(activity: LaunchActivity) {
+                  if (activity.isFinishing || activity.isDestroyed) return
+                  val prefs = ApplicationLoader.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                  if (prefs.getBoolean(KEY_SHOWN, false)) return
+                  if (!UserConfig.getInstance(UserConfig.selectedAccount).isClientActivated) return
+                  prefs.edit().putBoolean(KEY_SHOWN, true).apply()
+                  AlertDialog.Builder(activity)
+                      .setTitle(LocaleController.getString(R.string.InuSoftJoinTitle))
+                      .setMessage(LocaleController.getString(R.string.InuSoftJoinText))
+                      .setPositiveButton(LocaleController.getString(R.string.InuSoftJoinAction)) { _, _ -> Browser.openUrl(activity, CHANNEL_URL) }
+                      .setNegativeButton(LocaleController.getString(R.string.InuSoftJoinLater), null)
+                      .show()
+              }
+
+              @JvmStatic
+              fun scheduleAfterLogin() {
+                  AndroidUtilities.runOnUIThread({ LaunchActivity.instance?.let { maybeShow(it) } }, 2500)
+              }
+          }
+          ''')
+
+          H = "src/fork/InuHooks.kt"
+          rep(H,
+              "        CrashReporter.maybeShowReportSheet(launchActivity)\n",
+              "        CrashReporter.maybeShowReportSheet(launchActivity)\n        SoftJoinPrompt.maybeShow(launchActivity)\n")
+          rep(H,
+              "        PasscodeHelper.removeForAccount(account)\n        desu.inugram.helpers.accounts.BotAccountHelper.ensurePolling()\n    }\n",
+              "        PasscodeHelper.removeForAccount(account)\n        desu.inugram.helpers.accounts.BotAccountHelper.ensurePolling()\n        SoftJoinPrompt.scheduleAfterLogin()\n    }\n")
+          rep(H,
+              "import desu.inugram.helpers.ShortcutHelper\n",
+              "import desu.inugram.helpers.ShortcutHelper\nimport desu.inugram.helpers.SoftJoinPrompt\n")
+
+          TEXT = {
+              "values": ("Join the Softgram channel", "News, updates and plugins for Softgram are posted in the official channel.", "Join", "Not now"),
+              "values-fa": ("به کانال رسمی Softgram بپیوندید", "اخبار، به‌روزرسانی‌ها و افزونه‌های Softgram در کانال رسمی منتشر می‌شود.", "عضویت", "بعداً"),
+              "values-ru": ("Присоединяйтесь к каналу Softgram", "Новости, обновления и плагины Softgram публикуются в официальном канале.", "Вступить", "Не сейчас"),
+              "values-uk": ("Приєднуйтесь до каналу Softgram", "Новини, оновлення та плагіни Softgram публікуються в офіційному каналі.", "Приєднатися", "Не зараз"),
+              "values-ja": ("Softgram 公式チャンネルに参加", "Softgram のニュース、アップデート、プラグインは公式チャンネルで公開されます。", "参加する", "今はしない"),
+              "values-zh-rCN": ("加入 Softgram 官方频道", "Softgram 的新闻、更新和插件都会发布在官方频道。", "加入", "以后再说"),
+              "values-tr": ("Softgram resmi kanalına katılın", "Softgram haberleri, güncellemeleri ve eklentileri resmi kanalda paylaşılır.", "Katıl", "Şimdi değil"),
+              "values-ar": ("انضم إلى قناة Softgram الرسمية", "تُنشر أخبار Softgram وتحديثاته وإضافاته في القناة الرسمية.", "انضمام", "ليس الآن"),
+              "values-es": ("Únete al canal oficial de Softgram", "Las noticias, actualizaciones y plugins de Softgram se publican en el canal oficial.", "Unirme", "Ahora no"),
+              "values-it": ("Unisciti al canale ufficiale di Softgram", "Novità, aggiornamenti e plugin di Softgram vengono pubblicati nel canale ufficiale.", "Unisciti", "Non ora"),
+          }
+          KEYS = ("InuSoftJoinTitle", "InuSoftJoinText", "InuSoftJoinAction", "InuSoftJoinLater")
+
+          def esc(t):
+              return t.replace("&", "&amp;").replace("<", "&lt;").replace("'", "\\'")
+
+          for d, vals in TEXT.items():
+              p = "src/res/%s/strings_inu.xml" % d
+              if not os.path.isfile(p):
+                  die("missing " + p)
+              s = rd(p)
+              eol = "\r\n" if "\r\n" in s else "\n"
+              lines = s.replace("\r\n", "\n").split("\n")
+              for key, val in zip(KEYS, vals):
+                  if any(('name="%s"' % key) in l for l in lines):
+                      continue
+                  new = '    <string name="%s">%s</string>' % (key, esc(val))
+                  idx = max(i for i, l in enumerate(lines) if l.strip() == "</resources>")
+                  lines.insert(idx, new)
+              wr(p, eol.join(lines))
+              print("strings added: " + p)
+
+          wr(MARK, "plugin details hidden, channel invitation added\n")
+          print("OK")
+          PYEOF
+          python3 /tmp/step.py
+
+      - name: Sanity check
+        run: |
+          [ -s src/fork/helpers/SoftJoinPrompt.kt ] || { echo "::error::SoftJoinPrompt.kt missing"; exit 1; }
+          grep -q 'SHOW_HIDDEN_ROWS' src/fork/ui/settings/MarketPluginActivity.kt || { echo "::error::Market page not changed"; exit 1; }
+          grep -q 'SHOW_HIDDEN_ROWS' src/fork/ui/settings/PluginRepoPluginActivity.kt || { echo "::error::Repo page not changed"; exit 1; }
+          grep -q 'SoftJoinPrompt.maybeShow' src/fork/InuHooks.kt || { echo "::error::hook missing"; exit 1; }
+          for f in src/res/values*/strings_inu.xml; do
+            grep -q 'InuSoftJoinTitle' "$f" || { echo "::error::$f has no invitation text"; exit 1; }
+            python3 -c "import sys,xml.dom.minidom as m; m.parse(sys.argv[1])" "$f" || { echo "::error::$f is not valid XML"; exit 1; }
+          done
+          echo 'all files verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 8: hide plugin source/id/discussion, one-time channel invitation"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
