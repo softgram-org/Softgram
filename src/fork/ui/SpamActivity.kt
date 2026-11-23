@@ -137,7 +137,7 @@ class SpamActivity : BaseFragment(), NotificationCenter.NotificationCenterDelega
         override fun getItemCount(): Int = items.size
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            val cell = DialogCell(this@SpamActivity, context, true, false, currentAccount, resourceProvider)
+            val cell = DialogCell(null, context, true, false, currentAccount, resourceProvider)
             cell.layoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT)
             return RecyclerListView.Holder(cell)
         }

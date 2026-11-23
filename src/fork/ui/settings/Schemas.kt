@@ -641,7 +641,11 @@ object Schemas {
                 InuConfig.SPAM_FOLDER, R.string.InuSpamFolder, R.string.InuSpamFolderInfo,
                 onChange = { _, _ -> desu.inugram.helpers.dialogs.SpamFolderHelper.onFeatureChanged() },
             )
-            link(R.string.InuSpamTitle, R.drawable.msg_report) { desu.inugram.ui.SpamActivity() }
+            custom(
+                "spam-folder-open", R.string.InuSpamTitle,
+                build = { _, id -> SoftIcons.button(id, R.drawable.msg_report, LocaleController.getString(R.string.InuSpamTitle)) },
+                click = { page, _ -> page.presentFragment(desu.inugram.ui.SpamActivity()) },
+            )
         }
         section(R.string.InuAdBlockSection) {
             toggle(InuConfig.HIDE_SPONSORED_MESSAGES, R.string.InuHideSponsoredMessages, R.string.InuHideSponsoredMessagesInfo)
