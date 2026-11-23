@@ -207,15 +207,15 @@ index 0000000..0000000 100644
 +    }
 +
 +    private void inu_captureChatHeader(ChatAvatarContainer header) {
-+        if (header == null || !header.inu_isCenteredCandidate() || !header.isLaidOut() || header.getVisibility() != View.VISIBLE) return;
++        if (header == null || !header.isLaidOut() || header.getVisibility() != View.VISIBLE) return;
 +        final View root = getPreviousTransitionRoot();
 +        if (root == null) return;
 +        final SimpleTextView title = header.getTitleTextView();
-+        if (title != null && ViewPositionWatcher.computeRectInParent(title, root, previousAvatarRect)) {
++        if (header.inu_isCenteredCandidate() && title != null && ViewPositionWatcher.computeRectInParent(title, root, previousAvatarRect)) {
 +            prevTitleTranslation = previousAvatarRect.left + title.getTextStartX() - title.getX();
 +        }
 +        final View subtitle = header.getSubtitleTextView();
-+        if (subtitle != null && subtitle.getVisibility() == View.VISIBLE && ViewPositionWatcher.computeRectInParent(subtitle, root, previousAvatarRect)) {
++        if (header.inu_isCenteredCandidate() && subtitle != null && subtitle.getVisibility() == View.VISIBLE && ViewPositionWatcher.computeRectInParent(subtitle, root, previousAvatarRect)) {
 +            if (subtitle instanceof SimpleTextView) {
 +                prevSubtitleTranslation = previousAvatarRect.left + ((SimpleTextView) subtitle).getTextStartX() - subtitle.getX();
 +            } else if (subtitle instanceof AnimatedTextView) {
