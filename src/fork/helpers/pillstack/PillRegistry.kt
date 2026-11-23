@@ -11,6 +11,7 @@ import desu.inugram.helpers.pillstack.pills.LastSeenPill
 import desu.inugram.helpers.pillstack.pills.NetSpeedPill
 import desu.inugram.helpers.pillstack.pills.ProxyPill
 import desu.inugram.helpers.pillstack.pills.RamPill
+import desu.inugram.helpers.pillstack.pills.SpamPill
 import desu.inugram.helpers.pillstack.pills.StoragePill
 import desu.inugram.helpers.pillstack.pills.WeatherPill
 import org.telegram.messenger.FileLog
@@ -39,6 +40,7 @@ object PillRegistry {
         register(PillInfo(PillType.BATTERY.id, PillType.BATTERY.iconRes) { c, r -> BatteryPill(c, r) })
         register(PillInfo(PillType.STORAGE.id, PillType.STORAGE.iconRes) { c, r -> StoragePill(c, r) })
         register(PillInfo(PillType.LAST_SEEN.id, PillType.LAST_SEEN.iconRes) { c, r -> LastSeenPill(c, r) })
+        register(PillInfo(PillType.SPAM.id, PillType.SPAM.iconRes) { c, r -> SpamPill(c, r) })
     }
 
     fun register(info: PillInfo) {
@@ -62,5 +64,5 @@ object PillRegistry {
 
     fun getIconRes(id: Int): Int? = registry[id]?.iconRes
 
-    fun activePillIds(): List<Int> = PillStackLayout.getActivePills()
+    fun activePillIds(): List<Int> = PillStackLayout.getActivePills().filter { it != PillType.SPAM.id || desu.inugram.InuConfig.SPAM_FOLDER.value }
 }

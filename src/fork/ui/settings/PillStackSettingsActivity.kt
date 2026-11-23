@@ -279,6 +279,7 @@ class PillStackSettingsActivity : SettingsPageActivity() {
                 PillType.BATTERY -> IconBackgroundColors.GREEN
                 PillType.STORAGE -> IconBackgroundColors.BLUE_DEEP
                 PillType.LAST_SEEN -> IconBackgroundColors.PURPLE
+                PillType.SPAM -> IconBackgroundColors.ORANGE
             }
             return PillMeta(
                 id = id,

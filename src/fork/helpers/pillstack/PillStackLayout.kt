@@ -13,6 +13,7 @@ object PillStackLayout {
     private val DEFAULT_ACTIVE = listOf(
         PillType.CACHE.id,
         PillType.PROXY.id,
+        PillType.SPAM.id,
         PillType.CLOCK.id,
         RateInstances.FIRST_ID,
     )
@@ -68,7 +69,8 @@ object PillStackLayout {
         hiddenPills.retainAll { allKnown.contains(it) && !activePills.contains(it) }
         for (id in allKnown) {
             if (!activePills.contains(id) && !hiddenPills.contains(id)) {
-                hiddenPills.add(id)
+                // entiny: a pill that did not exist yet joins the active row when it is on by default
+                if (id == PillType.SPAM.id) activePills.add(id) else hiddenPills.add(id)
             }
         }
     }

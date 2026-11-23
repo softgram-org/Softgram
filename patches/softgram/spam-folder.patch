@@ -1,0 +1,47 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: softgram ci <ci@softgram>
+Date: Mon, 23 Nov 2026 12:55:46 +0000
+Subject: Spam folder: strangers go silently to a Spam tab, with swipe actions
+ and notification silencing.
+
+---
+ .../org/telegram/messenger/MessagesController.java    |  3 +++
+ .../telegram/messenger/NotificationsController.java   | 11 +++++++++++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/MessagesController.java b/TMessagesProj/src/main/java/org/telegram/messenger/MessagesController.java
+index 0000000..0000000 100644
+--- a/TMessagesProj/src/main/java/org/telegram/messenger/MessagesController.java
++++ b/TMessagesProj/src/main/java/org/telegram/messenger/MessagesController.java
+@@ -1328,6 +1328,9 @@ public class MessagesController extends BaseController implements NotificationCe
+             if (alwaysShow.contains(dialogId)) {
+                 return true;
+             }
++            if (desu.inugram.helpers.dialogs.SpamFolderHelper.contains(accountInstance.getCurrentAccount(), dialogId)) {
++                return false;
++            }
+             if (desu.inugram.helpers.dialogs.FolderMembershipHelper.isLocallyIncluded(accountInstance.getCurrentAccount(), id, dialogId)) {
+                 return true;
+             }
+diff --git a/TMessagesProj/src/main/java/org/telegram/messenger/NotificationsController.java b/TMessagesProj/src/main/java/org/telegram/messenger/NotificationsController.java
+index 0000000..0000000 100644
+--- a/TMessagesProj/src/main/java/org/telegram/messenger/NotificationsController.java
++++ b/TMessagesProj/src/main/java/org/telegram/messenger/NotificationsController.java
+@@ -1167,6 +1167,17 @@ public class NotificationsController extends BaseController implements Notificat
+     }
+ 
+     public void processNewMessages(ArrayList<MessageObject> messageObjects, boolean isLast, boolean isFcm, CountDownLatch countDownLatch) {
++        ArrayList<MessageObject> inu_kept = desu.inugram.helpers.dialogs.SpamFolderHelper.filterNotifications(currentAccount, messageObjects);
++        if (inu_kept != null && inu_kept != messageObjects && inu_kept.isEmpty()) {
++            if (countDownLatch != null) {
++                countDownLatch.countDown();
++            }
++            return;
++        }
++        inu_processNewMessages(inu_kept != null ? inu_kept : messageObjects, isLast, isFcm, countDownLatch);
++    }
++
++    public void inu_processNewMessages(ArrayList<MessageObject> messageObjects, boolean isLast, boolean isFcm, CountDownLatch countDownLatch) {
+         if (BuildVars.LOGS_ENABLED) {
+             FileLog.d("NotificationsController: processNewMessages msgs.size()=" + (messageObjects == null ? "null" : messageObjects.size()) + " isLast=" + isLast + " isFcm=" + isFcm + ")");
+         }

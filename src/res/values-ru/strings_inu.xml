@@ -1548,6 +1548,7 @@
     <string name="InuPillStackRemoveRate">Удалить этот виджет курса?</string>
     <string name="InuPillStackReset">Сбросить пилюли к стандартным</string>
     <string name="InuPillStackResetDone">Раскладка виджетов сброшена</string>
+    <string name="InuPillStackSpam">Спам</string>
     <string name="InuPillStackStorage">Свободное место</string>
     <string name="InuPillStackVisibleCount">Видно одновременно</string>
     <string name="InuPillStackWeather">Погода</string>
@@ -1849,6 +1850,12 @@
     <string name="InuProxyAggressiveRotation">Агрессивная ротация</string>
     <string name="InuProxyAggressiveRotationInfo">Пока идёт подключение, переключает на следующий прокси по каждому таймауту ротации, не дожидаясь проверок. Нужна включённая ротация в списке прокси</string>
     <string name="InuProxyTunnelHeader">Туннель</string>
+    <string name="InuSpamBlock">Заблокировать</string>
+    <string name="InuSpamEmpty">Нет сообщений от незнакомцев</string>
+    <string name="InuSpamFolder">Пилюля «Спам»</string>
+    <string name="InuSpamFolderInfo">Чаты людей, которых нет в ваших контактах и которым вы никогда не писали, бесшумно попадают за пилюлю «Спам» со счётчиком непрочитанных. Свайп вправо вынимает чат из спама, свайп влево блокирует пользователя и удаляет чат у обоих</string>
+    <string name="InuSpamRestore">Не спам</string>
+    <string name="InuSpamTitle">Спам</string>
     <string name="InuWsTunnel">WebSocket-туннель</string>
     <string name="InuWsTunnelInfo">Подключается через узлы Telegram Web, без сторонних серверов. Заменяет ваш прокси, пока включено</string>
     <string name="InuLeakGuard">Блокировать прямые соединения</string>

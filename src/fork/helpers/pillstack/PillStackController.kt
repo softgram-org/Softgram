@@ -228,6 +228,7 @@ class PillStackController(
     companion object {
         private val REFRESH_KEYS = setOf(
             InuConfig.PILL_STACK_ENABLED.key,
+            InuConfig.SPAM_FOLDER.key,
             InuConfig.PILL_STACK_VISIBLE_COUNT.key,
             InuConfig.PILL_STACK_LAYOUT.key,
             InuConfig.PILL_STACK_ACTIVE_PILLS.key,

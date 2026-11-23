@@ -134,6 +134,7 @@ Softgram is built on top of [inugram](https://github.com/teidesu/inugram). for t
 - **local folders** once the server limit is reached, folder icon picker, the list opens on the folder you used last
 - **add to folder from any folder** — the chat selection menu offers "add to folder" inside folders too, so a chat moves between folders without the All chats tab; off by default
 - **unread chats first** — unread chats, muted ones too, go above read ones in every folder; pinned chats stay on top
+- **spam folder** — chats from people who are not in your contacts and whom you never wrote to arrive silently behind a Spam pill with an unread counter; swipe right to take a chat out, swipe left to block the user and delete the chat for both sides; on by default, switch it off under folders
 - **tap avatar** to open the profile from the chat list
 - **keep three-dot menu** — keep the chats menu button when the side menu is on
 

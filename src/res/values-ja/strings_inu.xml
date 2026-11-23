@@ -1540,6 +1540,7 @@
     <string name="InuPillStackRemoveRate">このレートピルを削除しますか？</string>
     <string name="InuPillStackReset">ピルをデフォルトにリセット</string>
     <string name="InuPillStackResetDone">ピルの配置がリセットされました</string>
+    <string name="InuPillStackSpam">スパム</string>
     <string name="InuPillStackStorage">空き容量</string>
     <string name="InuPillStackVisibleCount">一度に表示</string>
     <string name="InuPillStackWeather">天気</string>
@@ -1836,6 +1837,12 @@
     <string name="InuProxyAggressiveRotation">積極的なローテーション</string>
     <string name="InuProxyAggressiveRotationInfo">接続中はチェックの完了を待たず、ローテーションのタイムアウトごとに次のプロキシへ切り替えます。プロキシ一覧でローテーションをオンにする必要があります</string>
     <string name="InuProxyTunnelHeader">トンネル</string>
+    <string name="InuSpamBlock">ブロック</string>
+    <string name="InuSpamEmpty">知らない人からのメッセージはありません</string>
+    <string name="InuSpamFolder">スパムピル</string>
+    <string name="InuSpamFolderInfo">連絡先にいない人、これまでメッセージを送ったことがない人とのチャットは、未読数付きの「スパム」ピルの奥に通知なしで入ります。右にスワイプでスパムから外し、左にスワイプでブロックして双方のチャットを削除します</string>
+    <string name="InuSpamRestore">スパムではない</string>
+    <string name="InuSpamTitle">スパム</string>
     <string name="InuWsTunnel">WebSocketトンネル</string>
     <string name="InuWsTunnelInfo">Telegram Webのエンドポイント経由で接続します。外部サーバーは使いません。有効中はプロキシの代わりに使われます。</string>
     <string name="InuLeakGuard">直接接続をブロック</string>

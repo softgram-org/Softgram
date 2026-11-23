@@ -1542,6 +1542,7 @@
     <string name="InuPillStackRemoveRate">Bu kur hapı kaldırılsın mı?</string>
     <string name="InuPillStackReset">Pilleri varsayılana sıfırla</string>
     <string name="InuPillStackResetDone">Hap düzeni sıfırlandı</string>
+    <string name="InuPillStackSpam">İstenmeyen</string>
     <string name="InuPillStackStorage">Boş depolama</string>
     <string name="InuPillStackVisibleCount">Aynı anda görünen</string>
     <string name="InuPillStackWeather">Hava durumu</string>
@@ -1839,6 +1840,12 @@
     <string name="InuProxyAggressiveRotation">Agresif rotasyon</string>
     <string name="InuProxyAggressiveRotationInfo">Bağlanırken, kontroller bitmeden bile her rotasyon zaman aşımında sonraki proxy\'ye geçer. Proxy listesinde rotasyonun açık olması gerekir</string>
     <string name="InuProxyTunnelHeader">Tünel</string>
+    <string name="InuSpamBlock">Engelle</string>
+    <string name="InuSpamEmpty">Tanımadığınız kişilerden mesaj yok</string>
+    <string name="InuSpamFolder">Spam hapı</string>
+    <string name="InuSpamFolderInfo">Kişilerinizde olmayan ve hiç yazmadığınız kişilerin sohbetleri okunmamış sayısıyla birlikte sessizce İstenmeyen hapının arkasına düşer. Sohbeti sağa kaydırarak çıkarın, sola kaydırarak kullanıcıyı engelleyin ve sohbeti iki taraftan silin</string>
+    <string name="InuSpamRestore">Spam değil</string>
+    <string name="InuSpamTitle">İstenmeyen</string>
     <string name="InuWsTunnel">WebSocket tüneli</string>
     <string name="InuWsTunnelInfo">Telegram Web uç noktaları üzerinden bağlanır, üçüncü taraf sunucu yok. Açıkken proxy\'nizin yerine geçer</string>
     <string name="InuLeakGuard">Doğrudan bağlantıları engelle</string>

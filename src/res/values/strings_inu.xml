@@ -1549,6 +1549,7 @@
     <string name="InuPillStackRemoveRate">Remove this rate pill?</string>
     <string name="InuPillStackReset">Reset pills to default</string>
     <string name="InuPillStackResetDone">Pill layout has been reset</string>
+    <string name="InuPillStackSpam">Spam</string>
     <string name="InuPillStackStorage">Free storage</string>
     <string name="InuPillStackVisibleCount">Visible at once</string>
     <string name="InuPillStackWeather">Weather</string>
@@ -1846,6 +1847,12 @@
     <string name="InuProxyAggressiveRotation">Aggressive rotation</string>
     <string name="InuProxyAggressiveRotationInfo">While connecting, switches to the next proxy on every rotation timeout, even before checks finish. Needs proxy rotation on in the proxy list</string>
     <string name="InuProxyTunnelHeader">Tunnel</string>
+    <string name="InuSpamBlock">Block</string>
+    <string name="InuSpamEmpty">No messages from strangers</string>
+    <string name="InuSpamFolder">Spam pill</string>
+    <string name="InuSpamFolderInfo">Chats from people who are not in your contacts and whom you never wrote to arrive silently behind the Spam pill, which shows how many are unread. Swipe a chat right to take it out of Spam, swipe left to block the user and delete the chat for both sides</string>
+    <string name="InuSpamRestore">Not spam</string>
+    <string name="InuSpamTitle">Spam</string>
     <string name="InuWsTunnel">WebSocket tunnel</string>
     <string name="InuWsTunnelInfo">Connects through Telegram Web endpoints, no third-party servers. Replaces your proxy while on</string>
     <string name="InuLeakGuard">Block direct connections</string>

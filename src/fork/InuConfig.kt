@@ -524,6 +524,9 @@ object InuConfig {
     val SYSTEM_FOLDERS_STATE = StringItem("system_folders_state", "")
 
     @JvmField
+    val SPAM_FOLDER = BoolItem("spam_folder", true)
+
+    @JvmField
     val LOCAL_FOLDERS = BoolItem("local_folders", false)
 
     @JvmField

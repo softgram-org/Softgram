@@ -1549,6 +1549,7 @@
     <string name="InuPillStackRemoveRate">إزالة كبسولة هذا السعر؟</string>
     <string name="InuPillStackReset">إعادة الكبسولات إلى الافتراضي</string>
     <string name="InuPillStackResetDone">تمت إعادة تعيين تخطيط الكبسولات</string>
+    <string name="InuPillStackSpam">الرسائل المزعجة</string>
     <string name="InuPillStackStorage">المساحة الحرة</string>
     <string name="InuPillStackVisibleCount">المعروض دفعة واحدة</string>
     <string name="InuPillStackWeather">الطقس</string>
@@ -1849,6 +1850,12 @@
     <string name="InuProxyAggressiveRotation">تدوير قوي</string>
     <string name="InuProxyAggressiveRotationInfo">أثناء الاتصال ينتقل إلى البروكسي التالي عند كل مهلة تدوير حتى قبل انتهاء الفحص. يتطلب تفعيل تدوير البروكسي في قائمة البروكسي</string>
     <string name="InuProxyTunnelHeader">النفق</string>
+    <string name="InuSpamBlock">حظر</string>
+    <string name="InuSpamEmpty">لا توجد رسائل من غرباء</string>
+    <string name="InuSpamFolder">كبسولة الرسائل المزعجة</string>
+    <string name="InuSpamFolderInfo">المحادثات من أشخاص ليسوا في جهات اتصالك ولم تراسلهم من قبل تصل بصمت خلف كبسولة الرسائل المزعجة مع عدد غير المقروء. اسحب المحادثة لليمين لإخراجها، ولليسار لحظر المستخدم وحذف المحادثة للطرفين</string>
+    <string name="InuSpamRestore">ليست مزعجة</string>
+    <string name="InuSpamTitle">الرسائل المزعجة</string>
     <string name="InuWsTunnel">نفق WebSocket</string>
     <string name="InuWsTunnelInfo">يتصل عبر نقاط نهاية Telegram Web، بلا خوادم طرف ثالث. يحل محل البروكسي الخاص بك أثناء التشغيل</string>
     <string name="InuLeakGuard">حظر الاتصالات المباشرة</string>

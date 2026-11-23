@@ -637,6 +637,11 @@ object Schemas {
             toggle(InuConfig.UNLIMITED_FAVORITE_STICKERS, R.string.InuUnlimitedFavoriteStickers, R.string.InuUnlimitedFavoriteStickersInfo)
             toggle(InuConfig.UNLIMITED_FOLDER_CHATS, R.string.InuUnlimitedFolderChats, R.string.InuUnlimitedFolderChatsInfo)
             toggle(InuConfig.LOCAL_FOLDERS, R.string.InuLocalFolders, R.string.InuLocalFoldersInfo)
+            toggle(
+                InuConfig.SPAM_FOLDER, R.string.InuSpamFolder, R.string.InuSpamFolderInfo,
+                onChange = { _, _ -> desu.inugram.helpers.dialogs.SpamFolderHelper.onFeatureChanged() },
+            )
+            link(R.string.InuSpamTitle, R.drawable.msg_report) { desu.inugram.ui.SpamActivity() }
         }
         section(R.string.InuAdBlockSection) {
             toggle(InuConfig.HIDE_SPONSORED_MESSAGES, R.string.InuHideSponsoredMessages, R.string.InuHideSponsoredMessagesInfo)

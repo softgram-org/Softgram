@@ -164,6 +164,7 @@ object InuHooks {
     fun onNewMessage(message: MessageObject, account: Int) {
         if (message.messageOwner != null) UpdateHelper.onNewMessage(message.messageOwner)
         desu.inugram.helpers.dialogs.HiddenDialogsHelper.unhide(account, message.dialogId)
+        desu.inugram.helpers.dialogs.SpamFolderHelper.onNewMessage(account, message)
         desu.inugram.helpers.security.LastSeenHelper.onMessage(account, message.messageOwner)
     }
 

@@ -165,6 +165,7 @@ object PinHelper {
     @JvmStatic
     fun reorderLocalPins(controller: MessagesController, account: Int) {
         HiddenDialogsHelper.filter(controller, account)
+        SpamFolderHelper.filter(controller, account)
         val unlimited = InuConfig.UNLIMITED_PINNED_CHATS.value
         for (i in 0 until controller.dialogsByFolder.size()) {
             val folderId = controller.dialogsByFolder.keyAt(i)

@@ -1556,6 +1556,7 @@ Probabilmente ci sono diversi difetti grafici, quindi tienilo presente.</string>
     <string name="InuPillStackRemoveRate">Rimuovere questa pillola di cambio?</string>
     <string name="InuPillStackReset">Ripristina le pillole predefinite</string>
     <string name="InuPillStackResetDone">Il layout delle pillole è stato ripristinato</string>
+    <string name="InuPillStackSpam">Indesiderati</string>
     <string name="InuPillStackStorage">Spazio libero</string>
     <string name="InuPillStackVisibleCount">Visibili contemporaneamente</string>
     <string name="InuPillStackWeather">Meteo</string>
@@ -1859,6 +1860,12 @@ Anche concedendoli, un plugin può comunque:</string>
     <string name="InuProxyAggressiveRotation">Rotazione aggressiva</string>
     <string name="InuProxyAggressiveRotationInfo">Durante la connessione passa al proxy successivo a ogni timeout di rotazione, anche prima della fine dei controlli. Richiede la rotazione dei proxy attiva nell\'elenco proxy</string>
     <string name="InuProxyTunnelHeader">Tunnel e protezione</string>
+    <string name="InuSpamBlock">Blocca</string>
+    <string name="InuSpamEmpty">Nessun messaggio da sconosciuti</string>
+    <string name="InuSpamFolder">Pillola spam</string>
+    <string name="InuSpamFolderInfo">Le chat di persone che non sono nei tuoi contatti e a cui non hai mai scritto arrivano in silenzio dietro la pillola Indesiderati, con il conteggio dei non letti. Scorri a destra per togliere la chat, a sinistra per bloccare l\'utente ed eliminare la chat per entrambi</string>
+    <string name="InuSpamRestore">Non è spam</string>
+    <string name="InuSpamTitle">Indesiderati</string>
     <string name="InuWsTunnel">Tunnel WebSocket</string>
     <string name="InuWsTunnelInfo">Si connette tramite gli endpoint di Telegram Web, senza server di terze parti. Sostituisce il tuo proxy mentre è attivo</string>
     <string name="InuLeakGuard">Blocca le connessioni dirette</string>

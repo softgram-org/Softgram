@@ -21,4 +21,5 @@ enum class PillType(
     BATTERY(10, "battery", R.string.InuPillStackBattery, R.drawable.entiny_battery_charging),
     STORAGE(11, "storage", R.string.InuPillStackStorage, R.drawable.entiny_server),
     LAST_SEEN(12, "last_seen", R.string.InuPillStackLastSeen, R.drawable.entiny_eye),
+    SPAM(13, "spam", R.string.InuPillStackSpam, R.drawable.msg_report),
 }
