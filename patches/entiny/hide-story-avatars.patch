@@ -57,7 +57,7 @@ index 0000000..0000000 100644
  
      public boolean hasStories() {
 -        if (desu.inugram.InuConfig.HIDE_STORIES.getValue()) return false;
-+        if (desu.inugram.InuConfig.HIDE_STORIES.getValue() || desu.inugram.InuConfig.HIDE_STORY_AVATARS.getValue()) return false;
++        if (desu.inugram.InuConfig.HIDE_STORIES.getValue()) return false;
          return (dialogListStories != null && dialogListStories.size() > 0) || hasSelfStories();
      }
  
