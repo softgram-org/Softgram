@@ -170,9 +170,15 @@ object ParanoiaHelper {
     @JvmStatic
     fun isDisguised(): Boolean = disguisedCache ?: (isParanoia() && disguiseIcon).also { disguisedCache = it }
 
+    // entiny: sessions created with an older api_id keep that app's title on the server, always show our own name for them
+    private val LEGACY_APP_NAMES = Regex("entiny|inugram", RegexOption.IGNORE_CASE)
+
     // entiny: Telegram server reports client by registered api_id title; mask with AppName in session list
     @JvmStatic
     fun getSessionAppName(serverName: String): String {
+        if (LEGACY_APP_NAMES.containsMatchIn(serverName)) {
+            return runCatching { LocaleController.getString(R.string.AppName) }.getOrElse { serverName }
+        }
         if (!InuConfig.MASK_SERVER_APP_NAME.value) return serverName
         if (serverName.contains("inugram", ignoreCase = true) || serverName.contains("Softgram", ignoreCase = true)) {
             return runCatching { LocaleController.getString(R.string.AppName) }.getOrElse { serverName }
