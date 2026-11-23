@@ -1,0 +1,100 @@
+name: Soft Design 9 - Profile avatar opening fix
+
+# Uploading this file applies the fix by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-9-profile-avatar-fix.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 9
+        run: |
+          cat > /tmp/step.py <<'PYEOF'
+          import os, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def die(msg):
+              print("ERROR: " + msg)
+              sys.exit(1)
+
+          if not os.path.isdir("src/res") or not os.path.isfile("series"):
+              die("run from the repository root")
+          MARK = ".softgram/9-profile-avatar-fix.done"
+          if os.path.exists(MARK):
+              print("Already applied.")
+              sys.exit(0)
+
+          P = "patches/entiny/ios-header-alignment.patch"
+          if not os.path.isfile(P):
+              die("missing " + P)
+          s = rd(P)
+
+          # The chat header is captured for the profile opening animation only when the centered title is on.
+          # With it off nothing was captured, the avatar start stayed at x = 0 and the circle flew in from the far left.
+          # Now the avatar position is always captured; only the title and subtitle capture stays tied to the centered title.
+          edits = [
+              ("+        if (header == null || !header.inu_isCenteredCandidate() || !header.isLaidOut() || header.getVisibility() != View.VISIBLE) return;\n",
+               "+        if (header == null || !header.isLaidOut() || header.getVisibility() != View.VISIBLE) return;\n"),
+              ("+        if (title != null && ViewPositionWatcher.computeRectInParent(title, root, previousAvatarRect)) {\n",
+               "+        if (header.inu_isCenteredCandidate() && title != null && ViewPositionWatcher.computeRectInParent(title, root, previousAvatarRect)) {\n"),
+              ("+        if (subtitle != null && subtitle.getVisibility() == View.VISIBLE && ViewPositionWatcher.computeRectInParent(subtitle, root, previousAvatarRect)) {\n",
+               "+        if (header.inu_isCenteredCandidate() && subtitle != null && subtitle.getVisibility() == View.VISIBLE && ViewPositionWatcher.computeRectInParent(subtitle, root, previousAvatarRect)) {\n"),
+          ]
+          for old, new in edits:
+              if s.count(old) != 1:
+                  die("anchor found %d times (need 1): %r" % (s.count(old), old[:90]))
+              s = s.replace(old, new)
+          wr(P, s)
+
+          os.makedirs(".softgram", exist_ok=True)
+          wr(MARK, "profile opening animation: avatar start position always captured\n")
+          print("OK: patched " + P)
+          PYEOF
+          python3 /tmp/step.py
+
+      - name: Sanity check
+        run: |
+          P=patches/entiny/ios-header-alignment.patch
+          grep -q '+        if (header == null || !header.isLaidOut() || header.getVisibility() != View.VISIBLE) return;' "$P" || { echo "::error::guard not fixed"; exit 1; }
+          if grep -q '!header.inu_isCenteredCandidate() || !header.isLaidOut()' "$P"; then echo "::error::old guard still there"; exit 1; fi
+          grep -q 'prevAvatarTranslation = computePreviousAvatarX(header);' "$P" || { echo "::error::avatar capture line missing"; exit 1; }
+          echo 'patch verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 9: profile opening animation starts from the real avatar position"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'

@@ -1,0 +1,92 @@
+name: Soft Design 10 - Stories bar fix
+
+# Uploading this file applies the fix by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-10-stories-bar-fix.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 10
+        run: |
+          cat > /tmp/step.py <<'PYEOF'
+          import os, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def die(msg):
+              print("ERROR: " + msg)
+              sys.exit(1)
+
+          if not os.path.isdir("src/res") or not os.path.isfile("series"):
+              die("run from the repository root")
+          MARK = ".softgram/10-stories-bar-fix.done"
+          if os.path.exists(MARK):
+              print("Already applied.")
+              sys.exit(0)
+
+          P = "patches/entiny/hide-story-avatars.patch"
+          if not os.path.isfile(P):
+              die("missing " + P)
+          s = rd(P)
+
+          # "Story rings" (hide the coloured ring around avatars) also made StoriesController.hasStories() return false.
+          # That function decides whether the stories bar exists at all, so with the rings hidden the pull-down never
+          # revealed the stories and went straight to the archive. The rings are already hidden by the other hunks of
+          # this patch, so the stories bar only has to follow its own "Stories bar" setting.
+          old = "+        if (desu.inugram.InuConfig.HIDE_STORIES.getValue() || desu.inugram.InuConfig.HIDE_STORY_AVATARS.getValue()) return false;\n"
+          new = "+        if (desu.inugram.InuConfig.HIDE_STORIES.getValue()) return false;\n"
+          if s.count(old) != 1:
+              die("anchor found %d times (need 1)" % s.count(old))
+          wr(P, s.replace(old, new))
+
+          os.makedirs(".softgram", exist_ok=True)
+          wr(MARK, "stories bar no longer disabled by the story rings setting\n")
+          print("OK: patched " + P)
+          PYEOF
+          python3 /tmp/step.py
+
+      - name: Sanity check
+        run: |
+          P=patches/entiny/hide-story-avatars.patch
+          if grep -q 'HIDE_STORIES.getValue() || desu.inugram.InuConfig.HIDE_STORY_AVATARS.getValue()) return false;' "$P"; then echo "::error::old condition still there"; exit 1; fi
+          grep -q '^+        if (desu.inugram.InuConfig.HIDE_STORIES.getValue()) return false;$' "$P" || { echo "::error::new condition missing"; exit 1; }
+          echo 'patch verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 10: hiding story rings no longer disables the stories bar"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
