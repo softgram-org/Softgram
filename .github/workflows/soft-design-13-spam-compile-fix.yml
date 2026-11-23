@@ -1,0 +1,101 @@
+name: Soft Design 13 - Spam compile fix
+
+# Uploading this file applies the change by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-13-spam-compile-fix.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 13
+        run: |
+          cat > /tmp/step.py <<'PYEOF'
+          import os, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def die(m):
+              print("ERROR: " + m)
+              sys.exit(1)
+
+          if not os.path.isdir("src/res") or not os.path.isfile("series"):
+              die("run from the repository root")
+
+          # DialogCell wants a DialogsActivity as parent, SpamActivity is a plain fragment: pass no parent
+          P = "src/fork/ui/SpamActivity.kt"
+          if not os.path.isfile(P):
+              die(P + " missing, apply Soft Design 12 first")
+          s = rd(P)
+          old = "DialogCell(this@SpamActivity, context, true, false, currentAccount, resourceProvider)"
+          new = "DialogCell(null, context, true, false, currentAccount, resourceProvider)"
+          if old in s:
+              if s.count(old) != 1:
+                  die("DialogCell anchor found %d times" % s.count(old))
+              s = s.replace(old, new)
+              wr(P, s)
+
+          # link() only accepts settings pages, a plain fragment is opened through a custom row (same way as the proxy list)
+          S = "src/fork/ui/settings/Schemas.kt"
+          s = rd(S)
+          old = "            link(R.string.InuSpamTitle, R.drawable.msg_report) { desu.inugram.ui.SpamActivity() }\n"
+          new = (
+              "            custom(\n"
+              "                \"spam-folder-open\", R.string.InuSpamTitle,\n"
+              "                build = { _, id -> SoftIcons.button(id, R.drawable.msg_report, LocaleController.getString(R.string.InuSpamTitle)) },\n"
+              "                click = { page, _ -> page.presentFragment(desu.inugram.ui.SpamActivity()) },\n"
+              "            )\n"
+          )
+          if old in s:
+              if s.count(old) != 1:
+                  die("Schemas anchor found %d times" % s.count(old))
+              s = s.replace(old, new)
+              wr(S, s)
+          elif "spam-folder-open" not in s:
+              die("Schemas spam link not found")
+          print("OK: spam compile fix applied")
+          PYEOF
+          python3 /tmp/step.py
+
+      - name: Sanity check
+        run: |
+          grep -q 'DialogCell(null, context, true, false, currentAccount, resourceProvider)' src/fork/ui/SpamActivity.kt
+          grep -q 'spam-folder-open' src/fork/ui/settings/Schemas.kt
+          echo 'verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 13: fix Spam compile errors"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
