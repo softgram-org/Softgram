@@ -1853,7 +1853,7 @@
     <string name="InuSpamBlock">Заблокировать</string>
     <string name="InuSpamEmpty">Нет сообщений от незнакомцев</string>
     <string name="InuSpamFolder">Пилюля «Спам»</string>
-    <string name="InuSpamFolderInfo">Чаты людей, которых нет в ваших контактах и которым вы никогда не писали, бесшумно попадают за пилюлю «Спам» со счётчиком непрочитанных. Свайп вправо вынимает чат из спама, свайп влево блокирует пользователя и удаляет чат у обоих</string>
+    <string name="InuSpamFolderInfo">Чаты людей, которых нет в ваших контактах и которым вы никогда не писали, бесшумно попадают за пилюлю «Спам» со счётчиком непрочитанных. Свайп вправо блокирует пользователя и удаляет чат у обоих, свайп влево вынимает чат из спама</string>
     <string name="InuSpamRestore">Не спам</string>
     <string name="InuSpamTitle">Спам</string>
     <string name="InuWsTunnel">WebSocket-туннель</string>

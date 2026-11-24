@@ -57,7 +57,13 @@ object HiddenDialogsHelper {
     fun filter(controller: MessagesController, account: Int) {
         val hidden = synchronized(cache) { cache.get(account)?.takeIf { it.isNotEmpty() }?.toSet() } ?: return
         val pred = { d: TLRPC.Dialog -> hidden.contains(d.id) }
-        controller.allDialogs.removeAll(pred)
+        // entiny: allDialogs is never pruned here, otherwise an unhidden chat stays missing from every list until restart
+        val derived = listOf(
+            controller.dialogsServerOnly, controller.dialogsForward, controller.dialogsCanAddUsers, controller.dialogsMyChannels,
+            controller.dialogsMyGroups, controller.dialogsChannelsOnly, controller.dialogsUsersOnly, controller.dialogsForBlock,
+            controller.dialogsGroupsOnly,
+        )
+        for (list in derived) list.removeAll(pred)
         for (i in 0 until controller.dialogsByFolder.size()) {
             controller.dialogsByFolder.valueAt(i)?.removeAll(pred)
         }

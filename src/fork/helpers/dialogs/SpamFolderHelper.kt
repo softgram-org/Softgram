@@ -165,7 +165,7 @@ object SpamFolderHelper {
     fun filter(controller: MessagesController, account: Int) {
         if (!isEnabled() || state(account).spam.isEmpty()) return
         val pred = { d: TLRPC.Dialog -> contains(account, d.id) }
-        controller.allDialogs.removeAll(pred)
+        // entiny: allDialogs is the source every sort rebuilds from, removing from it made released chats vanish until restart
         for (i in 0 until controller.dialogsByFolder.size()) {
             controller.dialogsByFolder.valueAt(i)?.removeAll(pred)
         }
@@ -180,7 +180,15 @@ object SpamFolderHelper {
         val st = state(account)
         if (st.spam.contains(dialogId)) return contains(account, dialogId)
         if (st.released.contains(dialogId) || st.talked.contains(dialogId) || !isStranger(account, dialogId)) return false
-        return MessagesController.getInstance(account).dialogs_dict.get(dialogId) == null
+        return !spokeBefore(account, dialogId)
+    }
+
+    private fun spokeBefore(account: Int, dialogId: Long): Boolean {
+        val last = MessagesController.getInstance(account).dialogMessage.get(dialogId) ?: return false
+        for (message in last) {
+            if (message != null && message.isOut) return true
+        }
+        return false
     }
 
     @JvmStatic

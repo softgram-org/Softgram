@@ -26,7 +26,7 @@ import org.telegram.ui.Components.ItemOptions
 import org.telegram.ui.Components.LayoutHelper
 import org.telegram.ui.Components.RecyclerListView
 
-// entiny: chats of people who are not contacts and never got a message from you; swipe right takes a chat out, swipe left blocks and deletes it
+// entiny: chats of people who are not contacts and never got a message from you; swipe right blocks and deletes a chat, swipe left takes it out
 class SpamActivity : BaseFragment(), NotificationCenter.NotificationCenterDelegate {
 
     private val items = ArrayList<TLRPC.Dialog>()
@@ -59,7 +59,6 @@ class SpamActivity : BaseFragment(), NotificationCenter.NotificationCenterDelega
             val removed = oldIds.indices.filter { oldIds[it] !in newIds }
             if (removed.size == 1 && oldIds.size - 1 == newIds.size && oldIds.filter { it in newIds } == newIds) {
                 adapter.notifyItemRemoved(removed[0])
-                adapter.notifyItemRangeChanged(0, items.size)
             } else {
                 adapter.notifyDataSetChanged()
             }
@@ -90,6 +89,7 @@ class SpamActivity : BaseFragment(), NotificationCenter.NotificationCenterDelega
             true
         }
         SpamFolderHelper.attachSwipe(recycler, currentAccount, null)
+        (recycler.itemAnimator as? androidx.recyclerview.widget.SimpleItemAnimator)?.supportsChangeAnimations = false
         listView = recycler
         frame.addView(recycler, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT.toFloat()))
 

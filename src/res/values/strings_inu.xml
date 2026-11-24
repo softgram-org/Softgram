@@ -1847,10 +1847,10 @@
     <string name="InuProxyAggressiveRotation">Aggressive rotation</string>
     <string name="InuProxyAggressiveRotationInfo">While connecting, switches to the next proxy on every rotation timeout, even before checks finish. Needs proxy rotation on in the proxy list</string>
     <string name="InuProxyTunnelHeader">Tunnel</string>
-    <string name="InuSpamBlock">Block</string>
+    <string name="InuSpamBlock">Block &amp; delete</string>
     <string name="InuSpamEmpty">No messages from strangers</string>
     <string name="InuSpamFolder">Spam pill</string>
-    <string name="InuSpamFolderInfo">Chats from people who are not in your contacts and whom you never wrote to arrive silently behind the Spam pill, which shows how many are unread. Swipe a chat right to take it out of Spam, swipe left to block the user and delete the chat for both sides</string>
+    <string name="InuSpamFolderInfo">Chats from people who are not in your contacts and whom you never wrote to arrive silently behind the Spam pill, which shows how many are unread. Swipe a chat right to block the user and delete the chat for both sides, swipe left to take it out of Spam</string>
     <string name="InuSpamRestore">Not spam</string>
     <string name="InuSpamTitle">Spam</string>
     <string name="InuWsTunnel">WebSocket tunnel</string>

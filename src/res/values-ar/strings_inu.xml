@@ -1853,7 +1853,7 @@
     <string name="InuSpamBlock">حظر</string>
     <string name="InuSpamEmpty">لا توجد رسائل من غرباء</string>
     <string name="InuSpamFolder">كبسولة الرسائل المزعجة</string>
-    <string name="InuSpamFolderInfo">المحادثات من أشخاص ليسوا في جهات اتصالك ولم تراسلهم من قبل تصل بصمت خلف كبسولة الرسائل المزعجة مع عدد غير المقروء. اسحب المحادثة لليمين لإخراجها، ولليسار لحظر المستخدم وحذف المحادثة للطرفين</string>
+    <string name="InuSpamFolderInfo">المحادثات من أشخاص ليسوا في جهات اتصالك ولم تراسلهم من قبل تصل بصمت خلف كبسولة الرسائل المزعجة مع عدد غير المقروء. اسحب المحادثة لليمين لحظر المستخدم وحذف المحادثة للطرفين، ولليسار لإخراجها من الرسائل المزعجة</string>
     <string name="InuSpamRestore">ليست مزعجة</string>
     <string name="InuSpamTitle">الرسائل المزعجة</string>
     <string name="InuWsTunnel">نفق WebSocket</string>

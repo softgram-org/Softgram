@@ -6,13 +6,17 @@ import android.animation.ValueAnimator
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.View
 import android.view.ViewConfiguration
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.RecyclerView
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.LocaleController
@@ -26,7 +30,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 
-// entiny: row swipes of the Spam folder. right = take the chat out of Spam, left = block the user and delete the chat for both sides
+// entiny: row swipes of the Spam folder. right = block the user and delete the chat for both sides, left = take the chat out of Spam
 class SpamSwipeController private constructor(
     private val list: RecyclerView,
     private val account: Int,
@@ -35,18 +39,13 @@ class SpamSwipeController private constructor(
 
     private val touchSlop = ViewConfiguration.get(list.context).scaledTouchSlop
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val iconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeCap = Paint.Cap.ROUND
-        strokeJoin = Paint.Join.ROUND
-        color = Color.WHITE
-    }
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
     }
-    private val path = Path()
+    private val blockIcon: Drawable? = loadIcon(R.drawable.msg_block)
+    private val restoreIcon: Drawable? = loadIcon(R.drawable.msg_markread)
 
     private var candidate: DialogCell? = null
     private var downX = 0f
@@ -72,6 +71,12 @@ class SpamSwipeController private constructor(
             if (view.translationX != 0f) view.translationX = 0f
             view.swipeCanceled = false
         }
+    }
+
+    private fun loadIcon(res: Int): Drawable? {
+        val drawable = ContextCompat.getDrawable(list.context, res)?.mutate() ?: return null
+        drawable.setColorFilter(PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN))
+        return drawable
     }
 
     private fun dp(value: Float): Int = AndroidUtilities.dp(value)
@@ -145,13 +150,17 @@ class SpamSwipeController private constructor(
         list.parent?.requestDisallowInterceptTouchEvent(true)
     }
 
-    private fun threshold(cell: View): Float = max(dp(88f).toFloat(), cell.width * 0.3f)
+    private fun threshold(cell: View): Float = max(dp(96f).toFloat(), cell.width * 0.3f)
 
     private fun move(cell: DialogCell, dx: Float) {
         val width = cell.width.toFloat()
-        val translation = min(max(dx, -width), width)
+        val limit = threshold(cell)
+        val pulled = abs(dx)
+        // entiny: past the threshold the row gets heavier, so the pull feels rubber-banded instead of free-running
+        val eased = if (pulled <= limit) pulled else limit + (pulled - limit) * 0.5f
+        val translation = (if (dx < 0f) -1f else 1f) * min(eased, width)
         cell.translationX = translation
-        val nowArmed = abs(translation) >= threshold(cell)
+        val nowArmed = abs(translation) >= limit
         if (nowArmed != armed) {
             armed = nowArmed
             animateArm(if (armed) 1f else 0f)
@@ -170,7 +179,7 @@ class SpamSwipeController private constructor(
     private fun animateArm(target: Float) {
         armAnimator?.cancel()
         val animator = ValueAnimator.ofFloat(armProgress, target)
-        animator.duration = 220
+        animator.duration = if (target > 0f) 260 else 180
         animator.interpolator = CubicBezierInterpolator.EASE_OUT_QUINT
         animator.addUpdateListener {
             armProgress = it.animatedValue as Float
@@ -207,8 +216,8 @@ class SpamSwipeController private constructor(
     private fun complete(cell: DialogCell, direction: Int) {
         val dialogId = activeDialogId
         val animator = ValueAnimator.ofFloat(cell.translationX, direction * cell.width.toFloat())
-        animator.duration = 200
-        animator.interpolator = CubicBezierInterpolator.EASE_OUT_QUINT
+        animator.duration = 220
+        animator.interpolator = CubicBezierInterpolator.EASE_IN
         animator.addUpdateListener {
             cell.translationX = it.animatedValue as Float
             list.invalidate()
@@ -223,8 +232,8 @@ class SpamSwipeController private constructor(
             override fun onAnimationEnd(animation: Animator) {
                 if (settleAnimator === animator) settleAnimator = null
                 if (cancelled) return
-                if (direction > 0) SpamFolderHelper.release(account, dialogId) else SpamFolderHelper.blockAndDelete(account, dialogId)
-                AndroidUtilities.runOnUIThread({ clearActive(cell) }, 350)
+                if (direction > 0) SpamFolderHelper.blockAndDelete(account, dialogId) else SpamFolderHelper.release(account, dialogId)
+                AndroidUtilities.runOnUIThread({ clearActive(cell) }, 400)
             }
         })
         settleAnimator = animator
@@ -234,7 +243,7 @@ class SpamSwipeController private constructor(
     private fun snapBack(cell: DialogCell) {
         animateArm(0f)
         val animator = ValueAnimator.ofFloat(cell.translationX, 0f)
-        animator.duration = 240
+        animator.duration = 280
         animator.interpolator = CubicBezierInterpolator.EASE_OUT_QUINT
         animator.addUpdateListener {
             cell.translationX = it.animatedValue as Float
@@ -276,24 +285,28 @@ class SpamSwipeController private constructor(
         val cell = active ?: return
         val shift = cell.translationX
         if (shift == 0f || cell.parent !== parent) return
-        val restore = shift > 0f
+        val block = shift > 0f
         val top = cell.top + cell.translationY
         val bottom = cell.bottom + cell.translationY
-        val left = if (restore) cell.left.toFloat() else cell.right + shift
-        val right = if (restore) cell.left + shift else cell.right.toFloat()
+        val left = if (block) cell.left.toFloat() else cell.right + shift
+        val right = if (block) cell.left + shift else cell.right.toFloat()
         val revealWidth = right - left
         if (revealWidth <= 0f) return
 
-        val accent = if (restore) RESTORE_COLOR else BLOCK_COLOR
-        val idle = if (Theme.isCurrentThemeDark()) 0xFF4A4F57.toInt() else 0xFFA9ADB3.toInt()
-        val anchor = dp(44f).toFloat()
-        val cx = if (restore) cell.left + anchor else cell.right - anchor
+        val progress = (abs(shift) / threshold(cell)).coerceIn(0f, 1f)
+        val accent = if (block) Theme.getColor(Theme.key_dialogSwipeRemove) else Theme.getColor(Theme.key_chats_archiveBackground)
+        val idle = Theme.getColor(Theme.key_windowBackgroundGray)
+        // entiny: the strip warms up towards the action colour while pulling, then floods with it once armed
+        val strip = ColorUtils.blendARGB(idle, accent, 0.45f * progress * progress)
+
+        val inset = min(dp(40f).toFloat(), revealWidth / 2f)
+        val cx = if (block) cell.left + inset else cell.right - inset
         val cy = (top + bottom) / 2f
 
         c.save()
         c.clipRect(left, top, right, bottom)
         paint.style = Paint.Style.FILL
-        paint.color = idle
+        paint.color = strip
         c.drawRect(left, top, right, bottom, paint)
         if (armProgress > 0f) {
             val reach = hypot(max(abs(cx - left), abs(right - cx)), (bottom - top) / 2f)
@@ -301,50 +314,33 @@ class SpamSwipeController private constructor(
             c.drawCircle(cx, cy, reach * armProgress, paint)
         }
 
-        val visibility = ((revealWidth - dp(16f)) / dp(40f)).coerceIn(0f, 1f)
+        val visibility = ((revealWidth - dp(12f)) / dp(36f)).coerceIn(0f, 1f)
         if (visibility > 0f) {
-            val scale = (0.7f + 0.3f * visibility) * (1f + 0.12f * sin(Math.PI * armProgress).toFloat())
-            val alpha = (255 * visibility).toInt()
-            c.save()
-            c.translate(cx, cy - dp(8f))
-            c.scale(scale, scale)
-            iconPaint.alpha = alpha
-            iconPaint.strokeWidth = dp(2.2f).toFloat()
-            if (restore) drawRestoreIcon(c) else drawBlockIcon(c)
-            c.restore()
-            textPaint.alpha = alpha
-            textPaint.textSize = dp(12f).toFloat()
-            val label = LocaleController.getString(if (restore) R.string.InuSpamRestore else R.string.InuSpamBlock)
-            c.drawText(label, cx, cy + dp(24f), textPaint)
+            val pop = 1f + 0.2f * sin(Math.PI * armProgress).toFloat()
+            val scale = (0.55f + 0.45f * progress) * pop
+            val half = dp(12f)
+            val icon = if (block) blockIcon else restoreIcon
+            if (icon != null) {
+                icon.setBounds(-half, -half, half, half)
+                icon.alpha = (255 * visibility).toInt()
+                c.save()
+                c.translate(cx, cy - dp(9f))
+                c.scale(scale, scale)
+                icon.draw(c)
+                c.restore()
+            }
+            val labelVisibility = ((revealWidth - dp(56f)) / dp(24f)).coerceIn(0f, 1f)
+            if (labelVisibility > 0f) {
+                textPaint.alpha = (255 * labelVisibility).toInt()
+                textPaint.textSize = dp(12f).toFloat()
+                val label = LocaleController.getString(if (block) R.string.InuSpamBlock else R.string.InuSpamRestore)
+                c.drawText(label, cx, cy + dp(18f), textPaint)
+            }
         }
         c.restore()
     }
 
-    private fun drawRestoreIcon(c: Canvas) {
-        val u = dp(1f).toFloat()
-        path.reset()
-        path.moveTo(-10 * u, 2 * u)
-        path.lineTo(-10 * u, 9 * u)
-        path.lineTo(10 * u, 9 * u)
-        path.lineTo(10 * u, 2 * u)
-        path.moveTo(0f, 5 * u)
-        path.lineTo(0f, -9 * u)
-        path.moveTo(-5 * u, -4 * u)
-        path.lineTo(0f, -9 * u)
-        path.lineTo(5 * u, -4 * u)
-        c.drawPath(path, iconPaint)
-    }
-
-    private fun drawBlockIcon(c: Canvas) {
-        val u = dp(1f).toFloat()
-        c.drawCircle(0f, 0f, 10 * u, iconPaint)
-        c.drawLine(-7 * u, -7 * u, 7 * u, 7 * u, iconPaint)
-    }
-
     companion object {
-        private const val RESTORE_COLOR = 0xFF34C759.toInt()
-        private const val BLOCK_COLOR = 0xFFFF3B30.toInt()
-
         @JvmStatic
         fun attach(list: RecyclerView, account: Int, probe: SpamFolderHelper.SelectionProbe?) {
             val controller = SpamSwipeController(list, account, probe)

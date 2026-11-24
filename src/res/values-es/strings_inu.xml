@@ -1862,7 +1862,7 @@ Aunque los concedas, un plugin todavía puede:</string>
     <string name="InuSpamBlock">Bloquear</string>
     <string name="InuSpamEmpty">No hay mensajes de desconocidos</string>
     <string name="InuSpamFolder">Píldora de spam</string>
-    <string name="InuSpamFolderInfo">Los chats de personas que no están en tus contactos y a las que nunca has escrito llegan en silencio tras la píldora No deseados, con el contador de no leídos. Desliza a la derecha para sacar el chat, a la izquierda para bloquear al usuario y borrar el chat para ambos</string>
+    <string name="InuSpamFolderInfo">Los chats de personas que no están en tus contactos y a las que nunca has escrito llegan en silencio tras la píldora No deseados, con el contador de no leídos. Desliza a la derecha para bloquear al usuario y borrar el chat para ambos, a la izquierda para sacar el chat</string>
     <string name="InuSpamRestore">No es spam</string>
     <string name="InuSpamTitle">No deseados</string>
     <string name="InuWsTunnel">Túnel WebSocket</string>

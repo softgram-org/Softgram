@@ -1839,10 +1839,10 @@
     <string name="InuProxyAggressiveRotation">چرخش تهاجمی</string>
     <string name="InuProxyAggressiveRotationInfo">هنگام اتصال، با هر مهلت چرخش به پروکسی بعدی می‌رود، حتی پیش از پایان بررسی‌ها. نیاز به روشن بودن چرخش پروکسی در فهرست پروکسی دارد</string>
     <string name="InuProxyTunnelHeader">تونل</string>
-    <string name="InuSpamBlock">بلاک</string>
+    <string name="InuSpamBlock">بلاک و حذف</string>
     <string name="InuSpamEmpty">پیام ناشناسی وجود ندارد</string>
     <string name="InuSpamFolder">کپسول Spam</string>
-    <string name="InuSpamFolderInfo">گفتگوهای افرادی که در مخاطبین شما نیستند و تا به حال به آن‌ها پیام نداده‌اید، بی‌صدا پشت کپسول Spam می‌روند و تعداد خوانده‌نشده‌ها کنارش نمایش داده می‌شود. کشیدن گفتگو به راست آن را از Spam خارج می‌کند و کشیدن به چپ، کاربر را بلاک و گفتگو را برای هر دو طرف حذف می‌کند</string>
+    <string name="InuSpamFolderInfo">گفتگوهای افرادی که در مخاطبین شما نیستند و تا به حال به آن‌ها پیام نداده‌اید، بی‌صدا پشت کپسول Spam می‌روند و تعداد خوانده‌نشده‌ها کنارش نمایش داده می‌شود. کشیدن گفتگو به راست، کاربر را بلاک و گفتگو را برای هر دو طرف حذف می‌کند و کشیدن به چپ آن را از Spam خارج می‌کند</string>
     <string name="InuSpamRestore">خارج کردن</string>
     <string name="InuSpamTitle">Spam</string>
     <string name="InuWsTunnel">تونل WebSocket</string>
