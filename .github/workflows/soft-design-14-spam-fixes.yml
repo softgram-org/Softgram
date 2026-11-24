@@ -1,0 +1,555 @@
+name: Soft Design 14 - Spam fixes and swipe polish
+
+# Uploading this file applies the change by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-14-spam-fixes.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 14
+        run: |
+          cat > /tmp/SpamSwipeController.kt <<'KTEOF'
+          package desu.inugram.helpers.dialogs
+
+          import android.animation.Animator
+          import android.animation.AnimatorListenerAdapter
+          import android.animation.ValueAnimator
+          import android.graphics.Canvas
+          import android.graphics.Color
+          import android.graphics.Paint
+          import android.graphics.PorterDuff
+          import android.graphics.PorterDuffColorFilter
+          import android.graphics.Typeface
+          import android.graphics.drawable.Drawable
+          import android.view.HapticFeedbackConstants
+          import android.view.MotionEvent
+          import android.view.VelocityTracker
+          import android.view.View
+          import android.view.ViewConfiguration
+          import androidx.core.content.ContextCompat
+          import androidx.core.graphics.ColorUtils
+          import androidx.recyclerview.widget.RecyclerView
+          import org.telegram.messenger.AndroidUtilities
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.R
+          import org.telegram.ui.ActionBar.Theme
+          import org.telegram.ui.Cells.DialogCell
+          import org.telegram.ui.Components.CubicBezierInterpolator
+          import kotlin.math.abs
+          import kotlin.math.hypot
+          import kotlin.math.max
+          import kotlin.math.min
+          import kotlin.math.sin
+
+          // entiny: row swipes of the Spam folder. right = block the user and delete the chat for both sides, left = take the chat out of Spam
+          class SpamSwipeController private constructor(
+              private val list: RecyclerView,
+              private val account: Int,
+              private val probe: SpamFolderHelper.SelectionProbe?,
+          ) : RecyclerView.ItemDecoration(), RecyclerView.OnItemTouchListener {
+
+              private val touchSlop = ViewConfiguration.get(list.context).scaledTouchSlop
+              private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+              private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                  color = Color.WHITE
+                  typeface = Typeface.DEFAULT_BOLD
+                  textAlign = Paint.Align.CENTER
+              }
+              private val blockIcon: Drawable? = loadIcon(R.drawable.msg_block)
+              private val restoreIcon: Drawable? = loadIcon(R.drawable.msg_markread)
+
+              private var candidate: DialogCell? = null
+              private var downX = 0f
+              private var downY = 0f
+              private var originX = 0f
+              private var nearEdge = false
+              private var swiping = false
+              private var tracker: VelocityTracker? = null
+
+              private var active: DialogCell? = null
+              private var activeDialogId = 0L
+              private var armed = false
+              private var armProgress = 0f
+              private var armAnimator: ValueAnimator? = null
+              private var settleAnimator: ValueAnimator? = null
+
+              private val childListener = object : RecyclerView.OnChildAttachStateChangeListener {
+                  override fun onChildViewAttachedToWindow(view: View) {}
+
+                  override fun onChildViewDetachedFromWindow(view: View) {
+                      if (view !is DialogCell) return
+                      if (view === active) abandon()
+                      if (view.translationX != 0f) view.translationX = 0f
+                      view.swipeCanceled = false
+                  }
+              }
+
+              private fun loadIcon(res: Int): Drawable? {
+                  val drawable = ContextCompat.getDrawable(list.context, res)?.mutate() ?: return null
+                  drawable.setColorFilter(PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN))
+                  return drawable
+              }
+
+              private fun dp(value: Float): Int = AndroidUtilities.dp(value)
+
+              override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                  when (e.actionMasked) {
+                      MotionEvent.ACTION_DOWN -> {
+                          candidate = null
+                          if (settleAnimator != null) settleAnimator?.end()
+                          if (probe?.active() == true) return false
+                          val child = rv.findChildViewUnder(e.x, e.y)
+                          if (child is DialogCell && SpamFolderHelper.contains(account, child.dialogId)) {
+                              candidate = child
+                              downX = e.x
+                              downY = e.y
+                              nearEdge = e.x < dp(24f)
+                              if (!nearEdge) rv.parent?.requestDisallowInterceptTouchEvent(true)
+                          }
+                          return false
+                      }
+                      MotionEvent.ACTION_MOVE -> {
+                          val cell = candidate ?: return swiping
+                          if (swiping) return true
+                          val dx = e.x - downX
+                          val dy = e.y - downY
+                          if (abs(dy) > touchSlop && abs(dy) > abs(dx)) {
+                              candidate = null
+                              return false
+                          }
+                          if (abs(dx) > touchSlop && abs(dx) > abs(dy) * 1.2f) {
+                              if (dx > 0 && nearEdge) {
+                                  candidate = null
+                                  return false
+                              }
+                              begin(cell, e)
+                              return true
+                          }
+                          return false
+                      }
+                      MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> candidate = null
+                  }
+                  return swiping
+              }
+
+              override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
+                  val cell = active ?: return
+                  if (!swiping) return
+                  tracker?.addMovement(e)
+                  when (e.actionMasked) {
+                      MotionEvent.ACTION_MOVE -> move(cell, e.x - originX)
+                      MotionEvent.ACTION_UP -> finish(cell, false)
+                      MotionEvent.ACTION_CANCEL -> finish(cell, true)
+                  }
+              }
+
+              override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+
+              private fun begin(cell: DialogCell, e: MotionEvent) {
+                  settleAnimator?.cancel()
+                  armAnimator?.cancel()
+                  swiping = true
+                  active = cell
+                  activeDialogId = cell.dialogId
+                  armed = false
+                  armProgress = 0f
+                  originX = e.x
+                  cell.swipeCanceled = true
+                  cell.isPressed = false
+                  tracker?.recycle()
+                  tracker = VelocityTracker.obtain().also { it.addMovement(e) }
+                  list.parent?.requestDisallowInterceptTouchEvent(true)
+              }
+
+              private fun threshold(cell: View): Float = max(dp(96f).toFloat(), cell.width * 0.3f)
+
+              private fun move(cell: DialogCell, dx: Float) {
+                  val width = cell.width.toFloat()
+                  val limit = threshold(cell)
+                  val pulled = abs(dx)
+                  // entiny: past the threshold the row gets heavier, so the pull feels rubber-banded instead of free-running
+                  val eased = if (pulled <= limit) pulled else limit + (pulled - limit) * 0.5f
+                  val translation = (if (dx < 0f) -1f else 1f) * min(eased, width)
+                  cell.translationX = translation
+                  val nowArmed = abs(translation) >= limit
+                  if (nowArmed != armed) {
+                      armed = nowArmed
+                      animateArm(if (armed) 1f else 0f)
+                      if (armed) tick()
+                  }
+                  list.invalidate()
+              }
+
+              private fun tick() {
+                  try {
+                      list.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+                  } catch (_: Exception) {
+                  }
+              }
+
+              private fun animateArm(target: Float) {
+                  armAnimator?.cancel()
+                  val animator = ValueAnimator.ofFloat(armProgress, target)
+                  animator.duration = if (target > 0f) 260 else 180
+                  animator.interpolator = CubicBezierInterpolator.EASE_OUT_QUINT
+                  animator.addUpdateListener {
+                      armProgress = it.animatedValue as Float
+                      list.invalidate()
+                  }
+                  armAnimator = animator
+                  animator.start()
+              }
+
+              private fun finish(cell: DialogCell, cancelled: Boolean) {
+                  var velocity = 0f
+                  tracker?.let {
+                      it.computeCurrentVelocity(1000)
+                      velocity = it.xVelocity
+                      it.recycle()
+                  }
+                  tracker = null
+                  swiping = false
+                  val translation = cell.translationX
+                  val direction = if (translation >= 0f) 1 else -1
+                  val flung = abs(velocity) > dp(900f) && (velocity > 0f) == (translation > 0f) && abs(translation) > dp(48f)
+                  if (!cancelled && (armed || flung)) {
+                      if (!armed) {
+                          armed = true
+                          animateArm(1f)
+                          tick()
+                      }
+                      complete(cell, direction)
+                  } else {
+                      snapBack(cell)
+                  }
+              }
+
+              private fun complete(cell: DialogCell, direction: Int) {
+                  val dialogId = activeDialogId
+                  val animator = ValueAnimator.ofFloat(cell.translationX, direction * cell.width.toFloat())
+                  animator.duration = 220
+                  animator.interpolator = CubicBezierInterpolator.EASE_IN
+                  animator.addUpdateListener {
+                      cell.translationX = it.animatedValue as Float
+                      list.invalidate()
+                  }
+                  animator.addListener(object : AnimatorListenerAdapter() {
+                      private var cancelled = false
+
+                      override fun onAnimationCancel(animation: Animator) {
+                          cancelled = true
+                      }
+
+                      override fun onAnimationEnd(animation: Animator) {
+                          if (settleAnimator === animator) settleAnimator = null
+                          if (cancelled) return
+                          if (direction > 0) SpamFolderHelper.blockAndDelete(account, dialogId) else SpamFolderHelper.release(account, dialogId)
+                          AndroidUtilities.runOnUIThread({ clearActive(cell) }, 400)
+                      }
+                  })
+                  settleAnimator = animator
+                  animator.start()
+              }
+
+              private fun snapBack(cell: DialogCell) {
+                  animateArm(0f)
+                  val animator = ValueAnimator.ofFloat(cell.translationX, 0f)
+                  animator.duration = 280
+                  animator.interpolator = CubicBezierInterpolator.EASE_OUT_QUINT
+                  animator.addUpdateListener {
+                      cell.translationX = it.animatedValue as Float
+                      list.invalidate()
+                  }
+                  animator.addListener(object : AnimatorListenerAdapter() {
+                      override fun onAnimationEnd(animation: Animator) {
+                          if (settleAnimator === animator) settleAnimator = null
+                          clearActive(cell)
+                      }
+                  })
+                  settleAnimator = animator
+                  animator.start()
+              }
+
+              private fun clearActive(cell: DialogCell) {
+                  if (active !== cell) return
+                  active = null
+                  armed = false
+                  armProgress = 0f
+                  cell.swipeCanceled = false
+                  list.invalidate()
+              }
+
+              private fun abandon() {
+                  settleAnimator?.cancel()
+                  armAnimator?.cancel()
+                  settleAnimator = null
+                  swiping = false
+                  tracker?.recycle()
+                  tracker = null
+                  active = null
+                  armed = false
+                  armProgress = 0f
+                  list.invalidate()
+              }
+
+              override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+                  val cell = active ?: return
+                  val shift = cell.translationX
+                  if (shift == 0f || cell.parent !== parent) return
+                  val block = shift > 0f
+                  val top = cell.top + cell.translationY
+                  val bottom = cell.bottom + cell.translationY
+                  val left = if (block) cell.left.toFloat() else cell.right + shift
+                  val right = if (block) cell.left + shift else cell.right.toFloat()
+                  val revealWidth = right - left
+                  if (revealWidth <= 0f) return
+
+                  val progress = (abs(shift) / threshold(cell)).coerceIn(0f, 1f)
+                  val accent = if (block) Theme.getColor(Theme.key_dialogSwipeRemove) else Theme.getColor(Theme.key_chats_archiveBackground)
+                  val idle = Theme.getColor(Theme.key_windowBackgroundGray)
+                  // entiny: the strip warms up towards the action colour while pulling, then floods with it once armed
+                  val strip = ColorUtils.blendARGB(idle, accent, 0.45f * progress * progress)
+
+                  val inset = min(dp(40f).toFloat(), revealWidth / 2f)
+                  val cx = if (block) cell.left + inset else cell.right - inset
+                  val cy = (top + bottom) / 2f
+
+                  c.save()
+                  c.clipRect(left, top, right, bottom)
+                  paint.style = Paint.Style.FILL
+                  paint.color = strip
+                  c.drawRect(left, top, right, bottom, paint)
+                  if (armProgress > 0f) {
+                      val reach = hypot(max(abs(cx - left), abs(right - cx)), (bottom - top) / 2f)
+                      paint.color = accent
+                      c.drawCircle(cx, cy, reach * armProgress, paint)
+                  }
+
+                  val visibility = ((revealWidth - dp(12f)) / dp(36f)).coerceIn(0f, 1f)
+                  if (visibility > 0f) {
+                      val pop = 1f + 0.2f * sin(Math.PI * armProgress).toFloat()
+                      val scale = (0.55f + 0.45f * progress) * pop
+                      val half = dp(12f)
+                      val icon = if (block) blockIcon else restoreIcon
+                      if (icon != null) {
+                          icon.setBounds(-half, -half, half, half)
+                          icon.alpha = (255 * visibility).toInt()
+                          c.save()
+                          c.translate(cx, cy - dp(9f))
+                          c.scale(scale, scale)
+                          icon.draw(c)
+                          c.restore()
+                      }
+                      val labelVisibility = ((revealWidth - dp(56f)) / dp(24f)).coerceIn(0f, 1f)
+                      if (labelVisibility > 0f) {
+                          textPaint.alpha = (255 * labelVisibility).toInt()
+                          textPaint.textSize = dp(12f).toFloat()
+                          val label = LocaleController.getString(if (block) R.string.InuSpamBlock else R.string.InuSpamRestore)
+                          c.drawText(label, cx, cy + dp(18f), textPaint)
+                      }
+                  }
+                  c.restore()
+              }
+
+              companion object {
+                  @JvmStatic
+                  fun attach(list: RecyclerView, account: Int, probe: SpamFolderHelper.SelectionProbe?) {
+                      val controller = SpamSwipeController(list, account, probe)
+                      list.addItemDecoration(controller)
+                      list.addOnItemTouchListener(controller)
+                      list.addOnChildAttachStateChangeListener(controller.childListener)
+                  }
+              }
+          }
+          KTEOF
+          cat > /tmp/step.py <<'PYEOF'
+          import os, re, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def die(m):
+              print("ERROR: " + m)
+              sys.exit(1)
+
+          def once(s, old, new, label):
+              n = s.count(old)
+              if n != 1:
+                  die("%s: anchor found %d times (need 1)" % (label, n))
+              return s.replace(old, new)
+
+          if not os.path.isdir("src/res") or not os.path.isfile("series"):
+              die("run from the repository root")
+          for need in ("src/fork/helpers/dialogs/SpamFolderHelper.kt", "src/fork/ui/SpamActivity.kt", "src/fork/helpers/dialogs/HiddenDialogsHelper.kt"):
+              if not os.path.isfile(need):
+                  die(need + " missing, apply Soft Design 12 and 13 first")
+
+          # ---------------------------------------------------------------- swipe controller (full rewrite)
+          wr("src/fork/helpers/dialogs/SpamSwipeController.kt", rd(os.environ.get("SG_KT", "/tmp/SpamSwipeController.kt")))
+
+          # ---------------------------------------------------------------- SpamFolderHelper
+          P = "src/fork/helpers/dialogs/SpamFolderHelper.kt"
+          s = rd(P)
+
+          if "spokeBefore" not in s:
+              # filter(): the stock allDialogs list must stay intact, otherwise a chat taken out of Spam never comes back until restart
+              old = (
+                  "        val pred = { d: TLRPC.Dialog -> contains(account, d.id) }\n"
+                  "        controller.allDialogs.removeAll(pred)\n"
+                  "        for (i in 0 until controller.dialogsByFolder.size()) {\n"
+              )
+              new = (
+                  "        val pred = { d: TLRPC.Dialog -> contains(account, d.id) }\n"
+                  "        // entiny: allDialogs is the source every sort rebuilds from, removing from it made released chats vanish until restart\n"
+                  "        for (i in 0 until controller.dialogsByFolder.size()) {\n"
+              )
+              s = once(s, old, new, "SpamFolderHelper.filter")
+
+              # notifications: the dialog already exists when the first message of a stranger is processed
+              old = "        return MessagesController.getInstance(account).dialogs_dict.get(dialogId) == null\n    }\n"
+              new = (
+                  "        return !spokeBefore(account, dialogId)\n"
+                  "    }\n"
+                  "\n"
+                  "    private fun spokeBefore(account: Int, dialogId: Long): Boolean {\n"
+                  "        val last = MessagesController.getInstance(account).dialogMessage.get(dialogId) ?: return false\n"
+                  "        for (message in last) {\n"
+                  "            if (message != null && message.isOut) return true\n"
+                  "        }\n"
+                  "        return false\n"
+                  "    }\n"
+              )
+              s = once(s, old, new, "SpamFolderHelper.shouldSilence")
+              wr(P, s)
+
+          # ---------------------------------------------------------------- HiddenDialogsHelper
+          P = "src/fork/helpers/dialogs/HiddenDialogsHelper.kt"
+          s = rd(P)
+          if "dialogsForBlock" not in s:
+              old = (
+                  "        val pred = { d: TLRPC.Dialog -> hidden.contains(d.id) }\n"
+                  "        controller.allDialogs.removeAll(pred)\n"
+                  "        for (i in 0 until controller.dialogsByFolder.size()) {\n"
+              )
+              new = (
+                  "        val pred = { d: TLRPC.Dialog -> hidden.contains(d.id) }\n"
+                  "        // entiny: allDialogs is never pruned here, otherwise an unhidden chat stays missing from every list until restart\n"
+                  "        val derived = listOf(\n"
+                  "            controller.dialogsServerOnly, controller.dialogsForward, controller.dialogsCanAddUsers, controller.dialogsMyChannels,\n"
+                  "            controller.dialogsMyGroups, controller.dialogsChannelsOnly, controller.dialogsUsersOnly, controller.dialogsForBlock,\n"
+                  "            controller.dialogsGroupsOnly,\n"
+                  "        )\n"
+                  "        for (list in derived) list.removeAll(pred)\n"
+                  "        for (i in 0 until controller.dialogsByFolder.size()) {\n"
+              )
+              s = once(s, old, new, "HiddenDialogsHelper.filter")
+              wr(P, s)
+
+          # ---------------------------------------------------------------- SpamActivity
+          P = "src/fork/ui/SpamActivity.kt"
+          s = rd(P)
+          changed = False
+          old = "                adapter.notifyItemRemoved(removed[0])\n                adapter.notifyItemRangeChanged(0, items.size)\n"
+          if old in s:
+              s = s.replace(old, "                adapter.notifyItemRemoved(removed[0])\n")
+              changed = True
+          old = "        SpamFolderHelper.attachSwipe(recycler, currentAccount, null)\n"
+          if "supportsChangeAnimations" not in s:
+              s = once(s, old, old + "        (recycler.itemAnimator as? androidx.recyclerview.widget.SimpleItemAnimator)?.supportsChangeAnimations = false\n", "SpamActivity animator")
+              changed = True
+          old = "swipe right takes a chat out, swipe left blocks and deletes it"
+          if old in s:
+              s = s.replace(old, "swipe right blocks and deletes a chat, swipe left takes it out")
+              changed = True
+          if changed:
+              wr(P, s)
+
+          # ---------------------------------------------------------------- strings (swipe directions changed)
+          INFO = {
+           "values": "Chats from people who are not in your contacts and whom you never wrote to arrive silently behind the Spam pill, which shows how many are unread. Swipe a chat right to block the user and delete the chat for both sides, swipe left to take it out of Spam",
+           "values-fa": "گفتگوهای افرادی که در مخاطبین شما نیستند و تا به حال به آن‌ها پیام نداده‌اید، بی‌صدا پشت کپسول Spam می‌روند و تعداد خوانده‌نشده‌ها کنارش نمایش داده می‌شود. کشیدن گفتگو به راست، کاربر را بلاک و گفتگو را برای هر دو طرف حذف می‌کند و کشیدن به چپ آن را از Spam خارج می‌کند",
+           "values-ru": "Чаты людей, которых нет в ваших контактах и которым вы никогда не писали, бесшумно попадают за пилюлю «Спам» со счётчиком непрочитанных. Свайп вправо блокирует пользователя и удаляет чат у обоих, свайп влево вынимает чат из спама",
+           "values-uk": "Чати людей, яких немає у ваших контактах і яким ви ніколи не писали, безшумно потрапляють за пілюлю «Спам» з лічильником непрочитаних. Свайп вправо блокує користувача й видаляє чат в обох, свайп вліво виймає чат зі спаму",
+           "values-ar": "المحادثات من أشخاص ليسوا في جهات اتصالك ولم تراسلهم من قبل تصل بصمت خلف كبسولة الرسائل المزعجة مع عدد غير المقروء. اسحب المحادثة لليمين لحظر المستخدم وحذف المحادثة للطرفين، ولليسار لإخراجها من الرسائل المزعجة",
+           "values-es": "Los chats de personas que no están en tus contactos y a las que nunca has escrito llegan en silencio tras la píldora No deseados, con el contador de no leídos. Desliza a la derecha para bloquear al usuario y borrar el chat para ambos, a la izquierda para sacar el chat",
+           "values-it": "Le chat di persone che non sono nei tuoi contatti e a cui non hai mai scritto arrivano in silenzio dietro la pillola Indesiderati, con il conteggio dei non letti. Scorri a destra per bloccare l\\'utente ed eliminare la chat per entrambi, a sinistra per togliere la chat",
+           "values-tr": "Kişilerinizde olmayan ve hiç yazmadığınız kişilerin sohbetleri okunmamış sayısıyla birlikte sessizce İstenmeyen hapının arkasına düşer. Sohbeti sağa kaydırarak kullanıcıyı engelleyin ve sohbeti iki taraftan silin, sola kaydırarak çıkarın",
+           "values-ja": "連絡先にいない人、これまでメッセージを送ったことがない人とのチャットは、未読数付きの「スパム」ピルの奥に通知なしで入ります。右にスワイプでブロックして双方のチャットを削除し、左にスワイプでスパムから外します",
+           "values-zh-rCN": "不在联系人中且你从未联系过的人发来的聊天会静默进入带未读数的“垃圾信息”胶囊。向右滑动将屏蔽该用户并为双方删除聊天，向左滑动将聊天移出",
+          }
+          LABEL = {"values": "Block &amp; delete", "values-fa": "بلاک و حذف"}
+
+          def set_string(locale, key, val):
+              p = "src/res/%s/strings_inu.xml" % locale
+              if not os.path.isfile(p):
+                  print("skip (no file): " + p)
+                  return
+              s = rd(p)
+              pat = re.compile(r'(<string name="%s">)(.*?)(</string>)' % key, re.S)
+              if not pat.search(s):
+                  print("skip (no key): %s %s" % (p, key))
+                  return
+              wr(p, pat.sub(lambda m: m.group(1) + val + m.group(3), s, count=1))
+
+          for loc, val in INFO.items():
+              set_string(loc, "InuSpamFolderInfo", val)
+          for loc, val in LABEL.items():
+              set_string(loc, "InuSpamBlock", val)
+
+          # ---------------------------------------------------------------- FEATURES.md
+          P = "FEATURES.md"
+          s = rd(P)
+          old = "swipe right to take a chat out, swipe left to block the user and delete the chat for both sides"
+          if old in s:
+              s = s.replace(old, "swipe right to block the user and delete the chat for both sides, swipe left to take a chat out")
+              wr(P, s)
+
+          print("OK: spam fixes applied")
+          PYEOF
+          SG_KT=/tmp/SpamSwipeController.kt python3 /tmp/step.py
+
+      - name: Sanity check
+        run: |
+          grep -q 'spokeBefore' src/fork/helpers/dialogs/SpamFolderHelper.kt
+          ! grep -q 'controller.allDialogs.removeAll' src/fork/helpers/dialogs/SpamFolderHelper.kt
+          ! grep -q 'controller.allDialogs.removeAll' src/fork/helpers/dialogs/HiddenDialogsHelper.kt
+          grep -q 'blockAndDelete(account, dialogId) else SpamFolderHelper.release' src/fork/helpers/dialogs/SpamSwipeController.kt
+          echo 'verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 14: spam fixes, silent notifications, swipe polish"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
