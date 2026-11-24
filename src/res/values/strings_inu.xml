@@ -1078,6 +1078,8 @@
     <string name="InuIosChatsTabFirstFolder">Chats tab returns to first folder</string>
     <string name="InuIosChatsTabFirstFolderInfo">Tapping the selected Chats tab returns to the first folder before scrolling up.</string>
     <string name="InuIosInputAppearance">Appearance (iOS)</string>
+    <string name="InuSoftInputAppearance">Appearance Soft</string>
+    <string name="InuSoftInputAppearanceInfo">Soft rounded input bar with blue icons. Turn off to use the iOS or Telegram input bar. While this is on, the iOS input bar options are ignored.</string>
     <string name="InuIosMessageMenu">iOS-style message menu</string>
     <string name="InuIosSettings">iOS settings</string>
     <string name="InuIosSettingsInfo">Title centering, bottom bar, input field, chat header and liquid glass.</string>

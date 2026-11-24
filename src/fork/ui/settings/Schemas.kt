@@ -1221,7 +1221,10 @@ object Schemas {
                 if (InuConfig.NON_ISLAND_HEADERS in changed) page.rebuildAll()
                 else if (InuConfig.NON_ISLAND_FOLDERS_BAR in changed || InuConfig.NON_ISLAND_GLOBAL_SEARCH in changed || InuConfig.HIDE_FADE_VIEW in changed) page.rebuildSoft()
                 if (InuConfig.NON_ISLAND_CHAT_ELEMENTS in changed) {
-                    if (InuConfig.NON_ISLAND_CHAT_ELEMENTS.value) InuConfig.IOS_INPUT_APPEARANCE.value = false
+                    if (InuConfig.NON_ISLAND_CHAT_ELEMENTS.value) {
+                        InuConfig.IOS_INPUT_APPEARANCE.value = false
+                        InuConfig.SOFT_INPUT_APPEARANCE.value = false
+                    }
                     InuHooks.syncChatInputRowHeight()
                 }
             }) { id ->

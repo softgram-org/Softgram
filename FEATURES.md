@@ -135,6 +135,7 @@ Softgram is built on top of [inugram](https://github.com/teidesu/inugram). for t
 - **add to folder from any folder** — the chat selection menu offers "add to folder" inside folders too, so a chat moves between folders without the All chats tab; off by default
 - **unread chats first** — unread chats, muted ones too, go above read ones in every folder; pinned chats stay on top
 - **spam folder** — chats from people who are not in your contacts and whom you never wrote to arrive silently behind a Spam pill with an unread counter; swipe right to block the user and delete the chat for both sides, swipe left to take a chat out; on by default, switch it off under folders
+- **soft input bar** — the input bar is one soft rounded pill (emoji, divider, text, paperclip) with a round button beside it; the voice, video message and send icons are blue and the send icon is the Softgram plane. It follows the Liquid Glass settings. On by default; turn off Appearance Soft in iOS settings to get the iOS or Telegram bar back
 - **tap avatar** to open the profile from the chat list
 - **keep three-dot menu** — keep the chats menu button when the side menu is on
 

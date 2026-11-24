@@ -695,3 +695,4 @@ entiny/local-reactions.patch
 softgram/ephemeral-ring.patch
 softgram/send-planes.patch
 softgram/spam-folder.patch
+softgram/soft-input-bar.patch

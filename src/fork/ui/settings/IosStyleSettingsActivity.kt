@@ -55,6 +55,14 @@ class IosStyleSettingsActivity : SettingsPageActivity() {
         if (inputBarPreviewCell == null) inputBarPreviewCell = InputBarPreviewCell(context, getResourceProvider())
         items.add(UItem.asCustom(inputBarPreviewCell))
         items.add(
+            mkTwoLineCheckItem(
+                TOGGLE_SOFT_INPUT_APPEARANCE,
+                R.string.InuSoftInputAppearance,
+                R.string.InuSoftInputAppearanceInfo,
+                InuConfig.SOFT_INPUT_APPEARANCE.value,
+            )
+        )
+        if (!InuConfig.SOFT_INPUT_APPEARANCE.value) items.add(
             UItem.asButton(
                 BUTTON_ACTION_BUTTON_STYLE,
                 LocaleController.getString(R.string.InuActionButtonStyle),
@@ -65,7 +73,7 @@ class IosStyleSettingsActivity : SettingsPageActivity() {
                 }
             )
         )
-        if (InuConfig.IOS_INPUT_APPEARANCE.value) {
+        if (!InuConfig.SOFT_INPUT_APPEARANCE.value && InuConfig.IOS_INPUT_APPEARANCE.value) {
             items.add(
                 mkTwoLineCheckItem(
                     TOGGLE_COMPACT_INPUT_SIZE,
@@ -85,7 +93,7 @@ class IosStyleSettingsActivity : SettingsPageActivity() {
                 )
             }
         }
-        items.add(UItem.asShadow(LocaleController.getString(R.string.InuActionButtonStyleInfo)))
+        items.add(UItem.asShadow(if (InuConfig.SOFT_INPUT_APPEARANCE.value) null else LocaleController.getString(R.string.InuActionButtonStyleInfo)))
 
 
         items.add(UItem.asHeader(LocaleController.getString(R.string.InuLiquidGlass)))
@@ -183,6 +191,14 @@ class IosStyleSettingsActivity : SettingsPageActivity() {
                 (view as? NotificationsCheckCell)?.isChecked = new
             }
 
+            TOGGLE_SOFT_INPUT_APPEARANCE -> {
+                val new = InuConfig.SOFT_INPUT_APPEARANCE.toggle()
+                if (new) InuConfig.NON_ISLAND_CHAT_ELEMENTS.value = false
+                InuHooks.syncChatInputRowHeight()
+                inputBarPreviewCell?.updateInputBarState()
+                listView.adapter.update(true)
+            }
+
             TOGGLE_COMPACT_INPUT_SIZE -> {
                 val new = InuConfig.COMPACT_INPUT_SIZE.toggle()
                 (view as? NotificationsCheckCell)?.isChecked = new
@@ -275,6 +291,7 @@ class IosStyleSettingsActivity : SettingsPageActivity() {
         private val TOGGLE_IOS_INPUT_APPEARANCE = InuUtils.generateId()
         private val TOGGLE_COMPACT_INPUT_SIZE = InuUtils.generateId()
         private val TOGGLE_COMMANDS_NEAR_STICKERS = InuUtils.generateId()
+        private val TOGGLE_SOFT_INPUT_APPEARANCE = InuUtils.generateId()
         private val BUTTON_ACTION_BUTTON_STYLE = InuUtils.generateId()
 
         @JvmField
@@ -296,6 +313,7 @@ class IosStyleSettingsActivity : SettingsPageActivity() {
                 SearchRegistry.Entry("ios-input-appearance", R.string.InuIosInputAppearance, TOGGLE_IOS_INPUT_APPEARANCE),
                 SearchRegistry.Entry("compact-input-size", R.string.InuCompactInputSize, TOGGLE_COMPACT_INPUT_SIZE),
                 SearchRegistry.Entry("commands-near-stickers", R.string.InuCommandsNearStickers, TOGGLE_COMMANDS_NEAR_STICKERS),
+                SearchRegistry.Entry("soft-input-appearance", R.string.InuSoftInputAppearance, TOGGLE_SOFT_INPUT_APPEARANCE),
                 SearchRegistry.Entry("action-button-style", R.string.InuActionButtonStyle, BUTTON_ACTION_BUTTON_STYLE),
             ),
         )

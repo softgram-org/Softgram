@@ -7,10 +7,14 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
 import android.view.Gravity
+import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.core.graphics.ColorUtils
 import desu.inugram.InuConfig
 import desu.inugram.helpers.chat.ActionButtonStyle
+import desu.inugram.helpers.chat.SoftIcons
+import desu.inugram.helpers.chat.SoftInputHelper
 import org.telegram.messenger.AndroidUtilities
 import org.telegram.messenger.LiteMode
 import org.telegram.messenger.R
@@ -47,6 +51,7 @@ class InputBarPreviewCell(
     private var isPlacementEnabled = false
     private var isAppearanceEnabled = false
     private var isCompactEnabled = false
+    private var isSoftEnabled = false
     private var gapPx = 0
 
     private var lastWallpaper: Drawable? = null
@@ -129,8 +134,13 @@ class InputBarPreviewCell(
 
     fun updateInputBarState() {
         buildGlassFactory()
-        isPlacementEnabled = InuConfig.IOS_INPUT_BUTTON_PLACEMENT.value
+        isPlacementEnabled = desu.inugram.helpers.chat.IosInputHelper.isButtonPlacement()
         isAppearanceEnabled = desu.inugram.helpers.chat.IosInputHelper.isAppearance()
+        isSoftEnabled = SoftInputHelper.isSoft()
+        val iconsVisibility = if (isSoftEnabled) View.INVISIBLE else View.VISIBLE
+        emojiIconView.visibility = iconsVisibility
+        attachIconView.visibility = iconsVisibility
+        sendIconView.visibility = iconsVisibility
         isCompactEnabled = desu.inugram.helpers.chat.IosInputHelper.isCompact()
         val gapDp = if (isCompactEnabled) GAP_COMPACT_DP else GAP_NORMAL_DP
         gapPx = AndroidUtilities.dp(gapDp.toFloat())
@@ -159,6 +169,26 @@ class InputBarPreviewCell(
         super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY))
     }
 
+    private fun drawSoft(canvas: Canvas, fieldTop: Int, fieldBottom: Int) {
+        val pillLeft = emojiIconView.left
+        val pillRight = sendIconView.left - gapPx
+        capsuleDrawable?.let {
+            it.setBounds(pillLeft, fieldTop, pillRight, fieldBottom)
+            it.draw(canvas)
+        }
+        rightBubbleDrawable?.let {
+            it.setBounds(sendIconView.left, fieldTop, sendIconView.right, fieldBottom)
+            it.draw(canvas)
+        }
+        val h = (fieldBottom - fieldTop).toFloat()
+        val cy = (fieldTop + fieldBottom) / 2f
+        val iconColor = Theme.getColor(Theme.key_glass_defaultIcon)
+        SoftIcons.drawSmile(canvas, pillLeft + h / 2f, cy, h * 0.235f, iconColor)
+        SoftIcons.drawDivider(canvas, pillLeft + h + AndroidUtilities.dpf2(4f), cy, iconColor, 1f)
+        SoftIcons.drawClip(canvas, pillRight - h / 2f, cy, h / 24f * 1.05f, ColorUtils.setAlphaComponent(iconColor, 0xB4))
+        SoftIcons.drawVoice(canvas, (sendIconView.left + sendIconView.right) / 2f, cy, h - AndroidUtilities.dpf2(2f), SoftInputHelper.BLUE)
+    }
+
     override fun dispatchDraw(canvas: Canvas) {
         val wallpaper = Theme.getCachedWallpaperNonBlocking()
         if (wallpaper != null) {
@@ -172,6 +202,10 @@ class InputBarPreviewCell(
         val padding = AndroidUtilities.dp(CELL_VERTICAL_PADDING_DP.toFloat())
         val fieldTop = attachIconView.top
         val fieldBottom = attachIconView.bottom
+        if (isSoftEnabled) {
+            drawSoft(canvas, fieldTop, fieldBottom)
+            return
+        }
         if (isAppearanceEnabled) {
             val leftIcon = if (isPlacementEnabled) attachIconView else emojiIconView
             val pillLeft = leftIcon.right + gapPx

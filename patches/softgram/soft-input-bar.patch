@@ -1,0 +1,67 @@
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
+index 3670fc4..42013df 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
+@@ -2805,5 +2805,5 @@ public class ChatActivityEnterView extends FrameLayout implements
+                     BlurredBackgroundDrawable outsideLeftBubble = isIosButtonPlacement() ? inu_glass.attach : inu_glass.emoji;
+                     View outsideLeftButton = isIosButtonPlacement() ? attachButton : emojiButton;
+-                    if (child == outsideLeftButton) {
++                    if (child == outsideLeftButton && !desu.inugram.helpers.chat.SoftInputHelper.isSoft()) {
+                         desu.inugram.helpers.chat.IosInputHelper.drawBubble(canvas, outsideLeftBubble, child);
+                     }
+@@ -2986,5 +2986,10 @@ public class ChatActivityEnterView extends FrameLayout implements
+             attachButton.setScaleType(ImageView.ScaleType.CENTER);
+             ThemeBind.colorFilter(attachButton, Theme.key_glass_defaultIcon, resourcesProvider, PorterDuff.Mode.MULTIPLY);
+-            attachButton.setImageResource(R.drawable.msg_input_attach2);
++            final Drawable inu_softClip = desu.inugram.helpers.chat.SoftInputHelper.attachIcon();
++            if (inu_softClip != null) {
++                attachButton.setImageDrawable(inu_softClip);
++            } else {
++                attachButton.setImageResource(R.drawable.msg_input_attach2);
++            }
+             ThemeBind.selectorBackground(attachButton, Theme.createSelectorDrawable(getThemedColor(Theme.key_listSelector)), null, ThemeBind.of(Theme.key_listSelector), resourcesProvider);
+             if (!VoiceRecorderHelper.isMovedToAttach()) {
+@@ -5030,5 +5035,5 @@ public class ChatActivityEnterView extends FrameLayout implements
+ 
+     public boolean isIosButtonPlacement() {
+-        return desu.inugram.InuConfig.IOS_INPUT_BUTTON_PLACEMENT.getValue();
++        return desu.inugram.helpers.chat.IosInputHelper.isButtonPlacement();
+     }
+ 
+@@ -5095,6 +5100,13 @@ public class ChatActivityEnterView extends FrameLayout implements
+         canvas.translate(textFieldContainer.getLeft() + messageEditTextContainer.getLeft(), textFieldContainer.getTop() + messageEditTextContainer.getTop());
+         final int inu_inset = desu.inugram.helpers.chat.IosInputHelper.bubbleInsetPx();
++        final boolean inu_soft = desu.inugram.helpers.chat.SoftInputHelper.isSoft() && !isStories && emojiButton != null && emojiButton.getVisibility() == VISIBLE && emojiButton.getAlpha() > 0;
++        if (inu_soft) {
++            pillLeft = inu_inset;
++        }
+         fieldPill.setBounds(pillLeft, inu_inset, messageEditTextContainer.getWidth() - dp(iosGapDp), messageEditTextContainer.getHeight() - inu_inset);
+         fieldPill.draw(canvas);
++        if (inu_soft) {
++            desu.inugram.helpers.chat.SoftInputHelper.drawDivider(canvas, emojiButton);
++        }
+         canvas.restore();
+     }
+@@ -15683,7 +15695,7 @@ public class ChatActivityEnterView extends FrameLayout implements
+             priceText.setOverrideFullWidth(AndroidUtilities.displaySize.x);
+ 
+-            drawable = context.getResources().getDrawable(resId).mutate();
+-            inactiveDrawable = context.getResources().getDrawable(resId).mutate();
+-            drawableInverse = context.getResources().getDrawable(resId).mutate();
++            drawable = desu.inugram.helpers.chat.SoftInputHelper.sendIcon(context, resId, context.getResources().getDrawable(resId).mutate());
++            inactiveDrawable = desu.inugram.helpers.chat.SoftInputHelper.sendIcon(context, resId, context.getResources().getDrawable(resId).mutate());
++            drawableInverse = desu.inugram.helpers.chat.SoftInputHelper.sendIcon(context, resId, context.getResources().getDrawable(resId).mutate());
+             emojiDrawable = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(this, dp(14));
+ 
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterViewAnimatedIconView.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterViewAnimatedIconView.java
+index 63420a1..37731d8 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterViewAnimatedIconView.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterViewAnimatedIconView.java
+@@ -142,4 +142,7 @@ public class ChatActivityEnterViewAnimatedIconView extends RLottieImageView {
+     @Override
+     protected void onDraw(Canvas canvas) {
++        if (!formatMode && desu.inugram.helpers.chat.SoftInputHelper.drawIcon(this, canvas, currentState)) {
++            return;
++        }
+         final float p = formatProgress.set(formatMode);
+         final float cx = getWidth() / 2f, cy = getHeight() / 2f;

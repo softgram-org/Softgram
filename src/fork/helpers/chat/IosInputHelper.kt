@@ -19,16 +19,16 @@ object IosInputHelper {
     private val slowModePill = WeakHashMap<ChatActivityEnterView, Int>()
 
     @JvmStatic
-    fun isButtonPlacement(): Boolean = InuConfig.IOS_INPUT_BUTTON_PLACEMENT.value
+    fun isButtonPlacement(): Boolean = InuConfig.IOS_INPUT_BUTTON_PLACEMENT.value && !SoftInputHelper.isSoft()
 
     @JvmStatic
-    fun isAppearance(): Boolean = InuConfig.IOS_INPUT_APPEARANCE.value && !InuConfig.NON_ISLAND_CHAT_ELEMENTS.value
+    fun isAppearance(): Boolean = (InuConfig.IOS_INPUT_APPEARANCE.value || SoftInputHelper.isSoft()) && !InuConfig.NON_ISLAND_CHAT_ELEMENTS.value
 
     @JvmStatic
     fun isCommandsNearStickers(): Boolean = InuConfig.IOS_INPUT_COMMANDS_NEAR_STICKERS.value && isButtonPlacement() && isAppearance()
 
     @JvmStatic
-    fun isCompact(): Boolean = InuConfig.COMPACT_INPUT_SIZE.value && isAppearance()
+    fun isCompact(): Boolean = InuConfig.COMPACT_INPUT_SIZE.value && isAppearance() && !SoftInputHelper.isSoft()
 
     @JvmStatic
     fun setInputMenuButtonIconInset(view: View, hasRightIcon: Boolean) {

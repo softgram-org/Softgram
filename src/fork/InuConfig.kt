@@ -1474,6 +1474,10 @@ val MEMORY_TRIM = BoolItem("memory_trim", true)
     @JvmField
     val ACTION_BUTTON_STYLE = IntItem("action_button_style", 0)
 
+    /** Appearance Soft: the soft pill input bar. Off falls back to the iOS or Telegram bar. */
+    @JvmField
+    val SOFT_INPUT_APPEARANCE = BoolItem("soft_input_appearance", true)
+
     @JvmField
     val REACTION_BAR_BELOW = BoolItem("reaction_bar_below", false)
 
