@@ -696,3 +696,4 @@ softgram/ephemeral-ring.patch
 softgram/send-planes.patch
 softgram/spam-folder.patch
 softgram/soft-input-bar.patch
+softgram/academics-row.patch

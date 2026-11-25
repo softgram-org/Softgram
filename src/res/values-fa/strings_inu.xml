@@ -1070,6 +1070,7 @@
     <string name="InuIosChatsTabFirstFolder">زبانه گفتگوها به پوشه اول برمی‌گردد</string>
     <string name="InuIosChatsTabFirstFolderInfo">ضربه روی زبانه گفتگوهای انتخاب‌شده، پیش از اسکرول به بالا به پوشه اول برمی‌گردد.</string>
     <string name="InuIosInputAppearance">ظاهر (iOS)</string>
+    <string name="InuAcademicsSoon">به‌زودی</string>
     <string name="InuSoftInputAppearance">Appearance Soft</string>
     <string name="InuSoftInputAppearanceInfo">نوار تایپ گرد و نرم با آیکون‌های آبی. برای استفاده از نوار iOS یا تلگرام خاموشش کنید. تا وقتی روشنه، گزینه‌های نوار iOS نادیده گرفته می‌شن.</string>
     <string name="InuIosMessageMenu">منوی پیام به سبک iOS</string>

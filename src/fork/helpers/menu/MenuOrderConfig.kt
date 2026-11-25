@@ -308,6 +308,7 @@ class ProfileMenuConfig(key: String) : MenuOrderConfig<ProfileRow>(key, Item.ent
         override val iconRes: Int,
     ) : ProfileRow {
         INUGRAM("inugram", 99, R.string.InuSettings, R.drawable.icon_settings_inu),
+        ACADEMICS("academics", 96, R.string.InuAcademics, R.drawable.softgram_academic_school),
         ACCOUNT("account", 1, R.string.SettingsAccount, R.drawable.settings_account),
         CHAT("chat", 2, R.string.SettingsChat, R.drawable.settings_chat),
         PRIVACY("privacy", 3, R.string.SettingsPrivacySecurity, R.drawable.settings_privacy),

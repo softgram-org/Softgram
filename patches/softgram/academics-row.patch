@@ -1,0 +1,21 @@
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java
+index 79f4b7c..534cc24 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java
+@@ -813,4 +813,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
+             items.add(SettingCell.Factory.of(99, 0, 0, R.drawable.softgram_logo, getString(R.string.InuSettings), getString(R.string.InuSettingsInfo)));
+             items.add(UItem.asShadow(null));
++            // softgram: Softgram Academics sits right under Softgram Settings
++            items.add(SettingCell.Factory.of(96, org.telegram.ui.Components.IconBackgroundColors.BLUE.top, org.telegram.ui.Components.IconBackgroundColors.BLUE.bottom, R.drawable.softgram_academic_school, getString(R.string.InuAcademics), getString(R.string.InuAcademicsSlogan)));
++            items.add(UItem.asShadow(null));
+         }
+ 
+@@ -1036,4 +1039,8 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
+                 presentFragment(new desu.inugram.ui.settings.InuSettingsActivity());
+                 break;
++
++            case 96:
++                presentFragment(new desu.inugram.ui.settings.AcademicsActivity());
++                break;
+         }
+     }

@@ -2087,6 +2087,12 @@
     <string name="InuSetReminder">Set reminder</string>
     <string name="InuSettingNotFound">This setting is not available in this version of Softgram</string>
     <string name="InuSettings">Softgram Settings</string>
+    <string name="InuAcademics" translatable="false">Softgram Academics</string>
+    <string name="InuAcademicsSlogan" translatable="false">A tool for study and research</string>
+    <string name="InuAcademicWorkspace" translatable="false">Academic Workspace</string>
+    <string name="InuAcademicCalendar" translatable="false">Calendar &amp; Schedule</string>
+    <string name="InuAcademicStudy" translatable="false">Study Tools</string>
+    <string name="InuAcademicsSoon">Coming soon</string>
     <string name="InuSettingsInfo">Yours. By design Softgram</string>
     <string name="InuSettingsShowAccounts">Show accounts in settings</string>
     <string name="InuShorterSwipeGestures">Shorter swipe gestures</string>

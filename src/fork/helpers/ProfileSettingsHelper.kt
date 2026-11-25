@@ -32,6 +32,7 @@ object ProfileSettingsHelper {
     // entiny: stock section of a row: 0 inugram, 1 main, 2 premium, 3 help, 4 experimental; -1 unknown
     private fun stockGroupOf(item: UItem): Int = when (item.id) {
         99 -> 0
+        96 -> 5
         in 1..3, in 5..10 -> 1
         in 11..13, 15, 16, MONEY_ROW_ID -> 2
         17, 18, 19, 23 -> 3
