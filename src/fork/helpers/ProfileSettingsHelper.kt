@@ -67,7 +67,14 @@ object ProfileSettingsHelper {
         val customized = InuConfig.PROFILE_SETTINGS_ROWS.isCustomized()
         val inherited = inheritedGroups(rows)
         fun groupOf(item: UItem): Int = stockGroupOf(item).takeIf { it >= 0 } ?: inherited[item.id] ?: -1
-        val ordered = reorderByMenu(rows, InuConfig.PROFILE_SETTINGS_ROWS.value) { classify(it, customized) }
+        val ordered = ArrayList(reorderByMenu(rows, InuConfig.PROFILE_SETTINGS_ROWS.value) { classify(it, customized) })
+        // softgram: Softgram Academics stays right under Softgram Settings
+        val academicsAt = ordered.indexOfFirst { it.id == 96 }
+        val inugramAt = ordered.indexOfFirst { it.id == 99 }
+        if (academicsAt >= 0 && inugramAt >= 0 && academicsAt != inugramAt + 1) {
+            val academicsRow = ordered.removeAt(academicsAt)
+            ordered.add(ordered.indexOfFirst { it.id == 99 } + 1, academicsRow)
+        }
         val rebuilt = ArrayList<UItem>(ordered.size + 4)
         var lastGroup = -2
         for (row in ordered) {

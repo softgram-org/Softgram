@@ -9,10 +9,12 @@ import org.telegram.ui.Components.UniversalAdapter
 
 // Softgram Academics: Academic Workspace, Calendar & Schedule and Study Tools (the pages come step by step)
 class AcademicsActivity : SettingsPageActivity() {
+    private var header: AcademicsHeaderView? = null
+
     override fun getTitle(): CharSequence = LocaleController.getString(R.string.InuAcademics)
 
     override fun fillItems(items: ArrayList<UItem>, adapter: UniversalAdapter) {
-        context?.let { items.add(UItem.asCustom(AcademicsHeaderView(it))) }
+        context?.let { items.add(UItem.asCustom(header ?: AcademicsHeaderView(it).also { v -> header = v })) }
         items.add(mkSubPageButton(ACADEMIC_WORKSPACE, R.drawable.softgram_academic_workspace, LocaleController.getString(R.string.InuAcademicWorkspace)))
         items.add(mkSubPageButton(ACADEMIC_CALENDAR, R.drawable.softgram_academic_calendar, LocaleController.getString(R.string.InuAcademicCalendar)))
         items.add(mkSubPageButton(ACADEMIC_STUDY, R.drawable.softgram_academic_study, LocaleController.getString(R.string.InuAcademicStudy)))
@@ -22,7 +24,8 @@ class AcademicsActivity : SettingsPageActivity() {
     override fun onClick(item: UItem, view: View, position: Int, x: Float, y: Float) {
         val ctx = context ?: return
         when (item.id) {
-            ACADEMIC_WORKSPACE, ACADEMIC_CALENDAR, ACADEMIC_STUDY ->
+            ACADEMIC_WORKSPACE -> presentFragment(AcademicWorkspaceActivity())
+            ACADEMIC_CALENDAR, ACADEMIC_STUDY ->
                 android.widget.Toast.makeText(ctx, LocaleController.getString(R.string.InuAcademicsSoon), android.widget.Toast.LENGTH_SHORT).show()
         }
     }

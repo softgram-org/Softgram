@@ -2093,6 +2093,21 @@
     <string name="InuAcademicCalendar" translatable="false">Calendar &amp; Schedule</string>
     <string name="InuAcademicStudy" translatable="false">Study Tools</string>
     <string name="InuAcademicsSoon">Coming soon</string>
+    <string name="InuAcademicWorkspaceInfo">Organize your university groups and channels in academic folders. Folders, chats and names stay on this device.</string>
+    <string name="InuAcademicFolders">Folders</string>
+    <string name="InuAcademicNewFolder">New folder</string>
+    <string name="InuAcademicFolderName">Folder name</string>
+    <string name="InuAcademicFolderSummary">%1$d groups and channels</string>
+    <string name="InuAcademicRenameFolder">Rename folder</string>
+    <string name="InuAcademicDeleteFolder">Delete folder</string>
+    <string name="InuAcademicDeleteFolderConfirm">Delete this folder? Your chats are not affected.</string>
+    <string name="InuAcademicSelected">Selected groups and channels</string>
+    <string name="InuAcademicAddChats">Add groups and channels</string>
+    <string name="InuAcademicFolderInfo">Renaming uses Local names, so the original Telegram name does not change. Tap a selected chat for its options.</string>
+    <string name="InuAcademicRenameLocally">Rename locally</string>
+    <string name="InuAcademicResetName">Reset name</string>
+    <string name="InuAcademicRemoveFromFolder">Remove from folder</string>
+    <string name="InuAcademicNoChats">No groups or channels found.</string>
     <string name="InuSettingsInfo">Yours. By design Softgram</string>
     <string name="InuSettingsShowAccounts">Show accounts in settings</string>
     <string name="InuShorterSwipeGestures">Shorter swipe gestures</string>
