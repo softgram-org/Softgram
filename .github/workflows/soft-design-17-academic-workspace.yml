@@ -1,0 +1,563 @@
+name: Soft Design 17 - Academic Workspace
+
+# Needs Soft Design 16 applied first. Uploading this file applies the change by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-17-academic-workspace.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 17
+        run: |
+          cat > /tmp/step.py <<'PYEOF'
+          import os, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              d = os.path.dirname(p)
+              if d:
+                  os.makedirs(d, exist_ok=True)
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def sub(path, old, new):
+              s = rd(path)
+              c = s.count(old)
+              if c != 1:
+                  sys.exit("::error::anchor found %d times in %s: %s" % (c, path, old[:100]))
+              wr(path, s.replace(old, new))
+
+          def after_line(path, needle, text):
+              lines = rd(path).split("\n")
+              hits = [i for i, l in enumerate(lines) if needle in l]
+              if len(hits) != 1:
+                  sys.exit("::error::line anchor found %d times in %s: %s" % (len(hits), path, needle))
+              lines.insert(hits[0] + 1, text)
+              wr(path, "\n".join(lines))
+
+          MARK = ".softgram/17-academic-workspace.done"
+          if os.path.exists(MARK):
+              print("Already applied.")
+              sys.exit(0)
+          if not os.path.exists(".softgram/16-academics-section.done"):
+              sys.exit("::error::apply Soft Design 16 (Softgram Academics) first")
+
+          # 1. fix: the Academics row always sits right under Softgram Settings, even with a saved custom row order
+          sub("src/fork/helpers/ProfileSettingsHelper.kt",
+              "        val ordered = reorderByMenu(rows, InuConfig.PROFILE_SETTINGS_ROWS.value) { classify(it, customized) }\n",
+              "        val ordered = ArrayList(reorderByMenu(rows, InuConfig.PROFILE_SETTINGS_ROWS.value) { classify(it, customized) })\n"
+              "        // softgram: Softgram Academics stays right under Softgram Settings\n"
+              "        val academicsAt = ordered.indexOfFirst { it.id == 96 }\n"
+              "        val inugramAt = ordered.indexOfFirst { it.id == 99 }\n"
+              "        if (academicsAt >= 0 && inugramAt >= 0 && academicsAt != inugramAt + 1) {\n"
+              "            val academicsRow = ordered.removeAt(academicsAt)\n"
+              "            ordered.add(ordered.indexOfFirst { it.id == 99 } + 1, academicsRow)\n"
+              "        }\n")
+
+          # 2. fix: the page header is built once, so it does not get rebuilt (and jump) when the list refreshes
+          A = "src/fork/ui/settings/AcademicsActivity.kt"
+          sub(A, "class AcademicsActivity : SettingsPageActivity() {\n",
+                 "class AcademicsActivity : SettingsPageActivity() {\n    private var header: AcademicsHeaderView? = null\n\n")
+          sub(A, "        context?.let { items.add(UItem.asCustom(AcademicsHeaderView(it))) }\n",
+                 "        context?.let { items.add(UItem.asCustom(header ?: AcademicsHeaderView(it).also { v -> header = v })) }\n")
+          sub(A, "            ACADEMIC_WORKSPACE, ACADEMIC_CALENDAR, ACADEMIC_STUDY ->\n",
+                 "            ACADEMIC_WORKSPACE -> presentFragment(AcademicWorkspaceActivity())\n"
+                 "            ACADEMIC_CALENDAR, ACADEMIC_STUDY ->\n")
+
+          # 3. device-only storage for the workspace
+          wr("src/fork/helpers/academics/AcademicStore.kt", r'''package desu.inugram.helpers.academics
+
+          import android.content.Context
+          import org.json.JSONArray
+          import org.json.JSONObject
+          import org.telegram.messenger.ApplicationLoader
+
+          // Academic Workspace data. Everything stays on this device; Telegram never sees it.
+          object AcademicStore {
+              class Folder(val id: Int, var name: String, val chats: LinkedHashSet<Long> = LinkedHashSet())
+
+              private const val PREFS = "softgram_academics"
+              private val cache = HashMap<Int, MutableList<Folder>>()
+
+              private fun prefs() = ApplicationLoader.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+              var enabled: Boolean
+                  get() = prefs().getBoolean("enabled", false)
+                  set(value) {
+                      prefs().edit().putBoolean("enabled", value).apply()
+                  }
+
+              fun folders(account: Int): MutableList<Folder> = cache.getOrPut(account) { load(account) }
+
+              fun find(account: Int, id: Int): Folder? = folders(account).firstOrNull { it.id == id }
+
+              fun create(account: Int, name: String): Folder {
+                  val list = folders(account)
+                  val folder = Folder((list.maxOfOrNull { it.id } ?: 0) + 1, name)
+                  list.add(folder)
+                  save(account)
+                  return folder
+              }
+
+              fun rename(account: Int, id: Int, name: String) {
+                  find(account, id)?.name = name
+                  save(account)
+              }
+
+              fun delete(account: Int, id: Int) {
+                  folders(account).removeAll { it.id == id }
+                  save(account)
+              }
+
+              fun setChat(account: Int, id: Int, dialogId: Long, selected: Boolean) {
+                  val folder = find(account, id) ?: return
+                  if (selected) folder.chats.add(dialogId) else folder.chats.remove(dialogId)
+                  save(account)
+              }
+
+              private fun key(account: Int) = "folders_$account"
+
+              private fun load(account: Int): MutableList<Folder> {
+                  val result = ArrayList<Folder>()
+                  val raw = prefs().getString(key(account), null) ?: return result
+                  try {
+                      val array = JSONArray(raw)
+                      for (i in 0 until array.length()) {
+                          val obj = array.getJSONObject(i)
+                          val folder = Folder(obj.getInt("id"), obj.getString("name"))
+                          val chats = obj.optJSONArray("chats")
+                          if (chats != null) {
+                              for (j in 0 until chats.length()) folder.chats.add(chats.getLong(j))
+                          }
+                          result.add(folder)
+                      }
+                  } catch (e: Exception) {
+                      android.util.Log.e("AcademicStore", "bad data", e)
+                  }
+                  return result
+              }
+
+              private fun save(account: Int) {
+                  val array = JSONArray()
+                  for (folder in folders(account)) {
+                      val chats = JSONArray()
+                      for (id in folder.chats) chats.put(id)
+                      array.put(JSONObject().put("id", folder.id).put("name", folder.name).put("chats", chats))
+                  }
+                  prefs().edit().putString(key(account), array.toString()).apply()
+              }
+          }
+          ''')
+
+          # 4. Academic Workspace page: switch and folders
+          wr("src/fork/ui/settings/AcademicWorkspaceActivity.kt", r'''package desu.inugram.ui.settings
+
+          import android.view.View
+          import desu.inugram.helpers.InuUtils
+          import desu.inugram.helpers.academics.AcademicStore
+          import desu.inugram.ui.showInputDialog
+          import org.telegram.messenger.AndroidUtilities
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.R
+          import org.telegram.ui.ActionBar.Theme
+          import org.telegram.ui.Cells.TextCheckCell
+          import org.telegram.ui.Components.UItem
+          import org.telegram.ui.Components.UniversalAdapter
+
+          // Academic Workspace: turn it on, then create academic folders and fill them with groups and channels
+          class AcademicWorkspaceActivity : SettingsPageActivity() {
+              override fun getTitle(): CharSequence = LocaleController.getString(R.string.InuAcademicWorkspace)
+
+              override fun onResume() {
+                  super.onResume()
+                  listView?.adapter?.update(true)
+              }
+
+              override fun fillItems(items: ArrayList<UItem>, adapter: UniversalAdapter) {
+                  items.add(
+                      UItem.asRippleCheck(TOGGLE_ENABLED, LocaleController.getString(R.string.InuAcademicWorkspace))
+                          .setChecked(AcademicStore.enabled)
+                  )
+                  items.add(UItem.asShadow(LocaleController.getString(R.string.InuAcademicWorkspaceInfo)))
+                  if (!AcademicStore.enabled) return
+
+                  val folders = AcademicStore.folders(currentAccount)
+                  if (folders.isNotEmpty()) {
+                      items.add(UItem.asHeader(LocaleController.getString(R.string.InuAcademicFolders)))
+                      for (folder in folders) {
+                          items.add(
+                              mkSubPageButton(
+                                  FOLDER_BASE + folder.id,
+                                  folder.name,
+                                  LocaleController.formatString(R.string.InuAcademicFolderSummary, folder.chats.size),
+                              )
+                          )
+                      }
+                      items.add(UItem.asShadow(null))
+                  }
+                  items.add(SoftIcons.button(BUTTON_NEW, R.drawable.msg_add, LocaleController.getString(R.string.InuAcademicNewFolder)))
+                  items.add(UItem.asShadow(null))
+              }
+
+              override fun onClick(item: UItem, view: View, position: Int, x: Float, y: Float) {
+                  when {
+                      item.id == TOGGLE_ENABLED -> {
+                          val new = !AcademicStore.enabled
+                          AcademicStore.enabled = new
+                          (view as? TextCheckCell)?.apply {
+                              setChecked(new)
+                              setBackgroundColorAnimated(
+                                  new,
+                                  Theme.getColor(if (new) Theme.key_windowBackgroundChecked else Theme.key_windowBackgroundUnchecked),
+                              )
+                          }
+                          listView?.adapter?.update(true)
+                      }
+
+                      item.id == BUTTON_NEW -> {
+                          showInputDialog(
+                              this,
+                              title = LocaleController.getString(R.string.InuAcademicNewFolder),
+                              hint = LocaleController.getString(R.string.InuAcademicFolderName),
+                          ) { raw ->
+                              val name = raw.trim()
+                              if (name.isEmpty()) {
+                                  false
+                              } else {
+                                  val folder = AcademicStore.create(currentAccount, name)
+                                  listView?.adapter?.update(true)
+                                  AndroidUtilities.runOnUIThread({ presentFragment(AcademicFolderActivity(folder.id)) }, 250)
+                                  true
+                              }
+                          }
+                      }
+
+                      item.id >= FOLDER_BASE -> presentFragment(AcademicFolderActivity(item.id - FOLDER_BASE))
+                  }
+              }
+
+              companion object {
+                  private const val FOLDER_BASE = 300_000
+                  private val TOGGLE_ENABLED = InuUtils.generateId()
+                  private val BUTTON_NEW = InuUtils.generateId()
+              }
+          }
+          ''')
+
+          # 5. folder page: pick groups and channels, rename them locally, rename or delete the folder
+          wr("src/fork/ui/settings/AcademicFolderActivity.kt", r'''package desu.inugram.ui.settings
+
+          import android.content.Context
+          import android.view.View
+          import desu.inugram.InuConfig
+          import desu.inugram.helpers.InuUtils
+          import desu.inugram.helpers.academics.AcademicStore
+          import desu.inugram.helpers.profile.LocalNameHelper
+          import desu.inugram.ui.showInputDialog
+          import org.telegram.messenger.ChatObject
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.R
+          import org.telegram.tgnet.TLRPC
+          import org.telegram.ui.ActionBar.ActionBar
+          import org.telegram.ui.ActionBar.AlertDialog
+          import org.telegram.ui.Components.UItem
+          import org.telegram.ui.Components.UniversalAdapter
+          import java.util.Locale
+
+          // One academic folder: its groups and channels. Names changed here are local to this device.
+          class AcademicFolderActivity(private val folderId: Int) : SettingsPageActivity() {
+              private var query: String? = null
+              private var searching = false
+
+              private fun folder(): AcademicStore.Folder? = AcademicStore.find(currentAccount, folderId)
+
+              override fun getTitle(): CharSequence = folder()?.name ?: ""
+
+              override fun createView(context: Context): View {
+                  val view = super.createView(context)
+                  simpleActionBar.setActionBarMenuOnItemClick(object : ActionBar.ActionBarMenuOnItemClick() {
+                      override fun onItemClick(id: Int) {
+                          if (id == -1) finishFragment()
+                      }
+                  })
+                  addSearch(MENU_SEARCH, Locale.ROOT, trim = true, onExpand = { expanded ->
+                      searching = expanded
+                      if (!expanded) {
+                          query = null
+                          listView?.adapter?.update(true)
+                      }
+                  }) {
+                      query = it
+                      listView?.adapter?.update(true)
+                  }
+                  return view
+              }
+
+              override fun onBackPressed(invoked: Boolean): Boolean {
+                  if (!searching) return super.onBackPressed(invoked)
+                  if (invoked) simpleActionBar.closeSearchField()
+                  return false
+              }
+
+              override fun onResume() {
+                  super.onResume()
+                  listView?.adapter?.update(true)
+              }
+
+              private fun candidates(): List<TLRPC.Chat> {
+                  val seen = HashSet<Long>()
+                  val result = ArrayList<TLRPC.Chat>()
+                  for (dialog in messagesController.allDialogs) {
+                      if (dialog.id >= 0) continue
+                      val chat = messagesController.getChat(-dialog.id) ?: continue
+                      if (ChatObject.isNotInChat(chat) || !seen.add(chat.id)) continue
+                      result.add(chat)
+                  }
+                  return result
+              }
+
+              override fun fillItems(items: ArrayList<UItem>, adapter: UniversalAdapter) {
+                  val f = folder() ?: return
+                  val q = query
+                  val noQuery = q.isNullOrEmpty()
+                  if (noQuery) {
+                      items.add(SoftIcons.button(BUTTON_RENAME_FOLDER, R.drawable.msg_edit, LocaleController.getString(R.string.InuAcademicRenameFolder)))
+                      items.add(UItem.asShadow(null))
+                  }
+
+                  val all = ArrayList(candidates())
+                  if (noQuery) {
+                      // chats already in the folder stay listed even when Telegram has not loaded them in the chat list
+                      val known = all.map { it.id }.toHashSet()
+                      for (did in f.chats) {
+                          val chat = messagesController.getChat(-did) ?: continue
+                          if (known.add(chat.id)) all.add(chat)
+                      }
+                  }
+                  all.sortBy { it.title?.lowercase(Locale.ROOT) ?: "" }
+
+                  val selected = ArrayList<TLRPC.Chat>()
+                  val others = ArrayList<TLRPC.Chat>()
+                  for (chat in all) {
+                      if (!noQuery && chat.title?.lowercase(Locale.ROOT)?.contains(q!!) != true) continue
+                      if (f.chats.contains(-chat.id)) selected.add(chat) else others.add(chat)
+                  }
+
+                  if (selected.isNotEmpty()) {
+                      items.add(UItem.asHeader(LocaleController.getString(R.string.InuAcademicSelected)))
+                      for ((index, chat) in selected.withIndex()) {
+                          items.add(UItem.asUserCheckbox(CHAT_BASE + index, chat).setChecked(true))
+                      }
+                  }
+                  if (others.isNotEmpty()) {
+                      if (selected.isNotEmpty()) items.add(UItem.asShadow(null))
+                      items.add(UItem.asHeader(LocaleController.getString(R.string.InuAcademicAddChats)))
+                      for ((index, chat) in others.withIndex()) {
+                          items.add(UItem.asUserCheckbox(CHAT_BASE + OTHERS_OFFSET + index, chat).setChecked(false))
+                      }
+                  }
+                  if (selected.isEmpty() && others.isEmpty()) {
+                      items.add(UItem.asShadow(LocaleController.getString(R.string.InuAcademicNoChats)))
+                  }
+                  if (noQuery) {
+                      items.add(UItem.asShadow(LocaleController.getString(R.string.InuAcademicFolderInfo)))
+                      items.add(SoftIcons.button(BUTTON_DELETE_FOLDER, R.drawable.entiny_trash, LocaleController.getString(R.string.InuAcademicDeleteFolder)))
+                      items.add(UItem.asShadow(null))
+                  }
+              }
+
+              override fun onClick(item: UItem, view: View, position: Int, x: Float, y: Float) {
+                  val f = folder() ?: return
+                  val chat = item.`object` as? TLRPC.Chat
+                  when {
+                      item.id == BUTTON_RENAME_FOLDER -> renameFolder(f)
+                      item.id == BUTTON_DELETE_FOLDER -> confirmDelete(f)
+                      chat != null -> {
+                          val dialogId = -chat.id
+                          if (f.chats.contains(dialogId)) {
+                              showChatOptions(f, chat)
+                          } else {
+                              AcademicStore.setChat(currentAccount, f.id, dialogId, true)
+                              listView?.adapter?.update(true)
+                          }
+                      }
+                  }
+              }
+
+              private fun showChatOptions(f: AcademicStore.Folder, chat: TLRPC.Chat) {
+                  val ctx = parentActivity ?: return
+                  val dialogId = -chat.id
+                  val labels = arrayOf<CharSequence>(
+                      LocaleController.getString(R.string.InuAcademicRenameLocally),
+                      LocaleController.getString(R.string.InuAcademicResetName),
+                      LocaleController.getString(R.string.InuAcademicRemoveFromFolder),
+                  )
+                  val dialog = AlertDialog.Builder(ctx, resourceProvider)
+                      .setTitle(chat.title ?: "")
+                      .setItems(labels) { _, which ->
+                          when (which) {
+                              0 -> {
+                                  // local names are what keeps the Telegram name untouched, so it has to be on
+                                  if (!InuConfig.LOCAL_NAMES.value) {
+                                      InuConfig.LOCAL_NAMES.value = true
+                                      LocalNameHelper.onToggle()
+                                  }
+                                  LocalNameHelper.showEditor(this, currentAccount, dialogId, Runnable { listView?.adapter?.update(true) })
+                              }
+
+                              1 -> {
+                                  LocalNameHelper.remove(currentAccount, dialogId)
+                                  listView?.adapter?.update(true)
+                              }
+
+                              2 -> {
+                                  AcademicStore.setChat(currentAccount, f.id, dialogId, false)
+                                  listView?.adapter?.update(true)
+                              }
+                          }
+                      }
+                      .create()
+                  showDialog(dialog)
+              }
+
+              private fun renameFolder(f: AcademicStore.Folder) {
+                  showInputDialog(
+                      this,
+                      title = LocaleController.getString(R.string.InuAcademicRenameFolder),
+                      hint = LocaleController.getString(R.string.InuAcademicFolderName),
+                      initialText = f.name,
+                      selectAll = true,
+                  ) { raw ->
+                      val name = raw.trim()
+                      if (name.isEmpty()) {
+                          false
+                      } else {
+                          AcademicStore.rename(currentAccount, f.id, name)
+                          simpleActionBar?.setTitle(name)
+                          listView?.adapter?.update(true)
+                          true
+                      }
+                  }
+              }
+
+              private fun confirmDelete(f: AcademicStore.Folder) {
+                  val ctx = parentActivity ?: return
+                  val dialog = AlertDialog.Builder(ctx, resourceProvider)
+                      .setTitle(LocaleController.getString(R.string.InuAcademicDeleteFolder))
+                      .setMessage(LocaleController.getString(R.string.InuAcademicDeleteFolderConfirm))
+                      .setPositiveButton(LocaleController.getString(R.string.Delete)) { _, _ ->
+                          AcademicStore.delete(currentAccount, f.id)
+                          finishFragment()
+                      }
+                      .setNegativeButton(LocaleController.getString(R.string.Cancel), null)
+                      .create()
+                  showDialog(dialog)
+              }
+
+              companion object {
+                  private const val CHAT_BASE = 100_000
+                  private const val OTHERS_OFFSET = 50_000
+                  private const val MENU_SEARCH = 0
+                  private val BUTTON_RENAME_FOLDER = InuUtils.generateId()
+                  private val BUTTON_DELETE_FOLDER = InuUtils.generateId()
+              }
+          }
+          ''')
+
+          # 6. strings: descriptions are translatable, English elsewhere
+          after_line("src/res/values/strings_inu.xml", 'name="InuAcademicsSoon">',
+              '    <string name="InuAcademicWorkspaceInfo">Organize your university groups and channels in academic folders. Folders, chats and names stay on this device.</string>\n'
+              '    <string name="InuAcademicFolders">Folders</string>\n'
+              '    <string name="InuAcademicNewFolder">New folder</string>\n'
+              '    <string name="InuAcademicFolderName">Folder name</string>\n'
+              '    <string name="InuAcademicFolderSummary">%1$d groups and channels</string>\n'
+              '    <string name="InuAcademicRenameFolder">Rename folder</string>\n'
+              '    <string name="InuAcademicDeleteFolder">Delete folder</string>\n'
+              '    <string name="InuAcademicDeleteFolderConfirm">Delete this folder? Your chats are not affected.</string>\n'
+              '    <string name="InuAcademicSelected">Selected groups and channels</string>\n'
+              '    <string name="InuAcademicAddChats">Add groups and channels</string>\n'
+              '    <string name="InuAcademicFolderInfo">Renaming uses Local names, so the original Telegram name does not change. Tap a selected chat for its options.</string>\n'
+              '    <string name="InuAcademicRenameLocally">Rename locally</string>\n'
+              '    <string name="InuAcademicResetName">Reset name</string>\n'
+              '    <string name="InuAcademicRemoveFromFolder">Remove from folder</string>\n'
+              '    <string name="InuAcademicNoChats">No groups or channels found.</string>')
+          after_line("src/res/values-fa/strings_inu.xml", 'name="InuAcademicsSoon"',
+              '    <string name="InuAcademicWorkspaceInfo">گروه‌ها و کانال‌های دانشگاهی‌ات را در فولدرهای آکادمیک مرتب کن. فولدرها، چت‌ها و نام‌ها فقط روی همین دستگاه می‌مانند.</string>\n'
+              '    <string name="InuAcademicFolders">فولدرها</string>\n'
+              '    <string name="InuAcademicNewFolder">فولدر جدید</string>\n'
+              '    <string name="InuAcademicFolderName">نام فولدر</string>\n'
+              '    <string name="InuAcademicFolderSummary">%1$d گروه و کانال</string>\n'
+              '    <string name="InuAcademicRenameFolder">تغییر نام فولدر</string>\n'
+              '    <string name="InuAcademicDeleteFolder">حذف فولدر</string>\n'
+              '    <string name="InuAcademicDeleteFolderConfirm">این فولدر حذف شود؟ چت‌های شما تغییری نمی‌کنند.</string>\n'
+              '    <string name="InuAcademicSelected">گروه‌ها و کانال‌های انتخاب‌شده</string>\n'
+              '    <string name="InuAcademicAddChats">افزودن گروه و کانال</string>\n'
+              '    <string name="InuAcademicFolderInfo">تغییر نام از «نام‌های محلی» استفاده می‌کند، پس نام اصلی در تلگرام عوض نمی‌شود. برای گزینه‌ها روی چت انتخاب‌شده بزن.</string>\n'
+              '    <string name="InuAcademicRenameLocally">تغییر نام محلی</string>\n'
+              '    <string name="InuAcademicResetName">بازگرداندن نام</string>\n'
+              '    <string name="InuAcademicRemoveFromFolder">حذف از فولدر</string>\n'
+              '    <string name="InuAcademicNoChats">گروه یا کانالی پیدا نشد.</string>')
+
+          # 7. features list
+          try:
+              lines = rd("FEATURES.md").split("\n")
+              hit = [i for i, l in enumerate(lines) if l.startswith("- **softgram academics**")]
+              if len(hit) == 1:
+                  lines.insert(hit[0] + 1, "- **academic workspace** — turn it on in Softgram Academics, create academic folders and put groups and channels in them. Chats can be renamed locally (the Telegram name does not change). Folders and names stay on the device. The Chats screen tabs (Groups, Channels, Files, Voice & Video, Polls) come in the next step")
+                  wr("FEATURES.md", "\n".join(lines))
+              else:
+                  print("warning: FEATURES.md row not added")
+          except FileNotFoundError:
+              print("warning: FEATURES.md missing")
+
+          os.makedirs(".softgram", exist_ok=True)
+          wr(MARK, "academic workspace (settings and folders) applied\n")
+          print("OK: Soft Design 17 applied")
+
+          PYEOF
+          python3 /tmp/step.py
+
+      - name: Sanity check
+        run: |
+          for f in src/fork/helpers/academics/AcademicStore.kt src/fork/ui/settings/AcademicWorkspaceActivity.kt src/fork/ui/settings/AcademicFolderActivity.kt; do
+            test -f "$f" || { echo "::error::missing $f"; exit 1; }
+          done
+          grep -q 'AcademicWorkspaceActivity()' src/fork/ui/settings/AcademicsActivity.kt || { echo "::error::workspace not wired"; exit 1; }
+          grep -q 'academicsAt' src/fork/helpers/ProfileSettingsHelper.kt || { echo "::error::row fix missing"; exit 1; }
+          grep -q 'InuAcademicWorkspaceInfo' src/res/values/strings_inu.xml || { echo "::error::strings missing"; exit 1; }
+          echo 'verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 17: Academic Workspace folders, Academics row and header fixes"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
