@@ -1,0 +1,276 @@
+name: Soft Design 16 - Softgram Academics
+
+# Uploading this file applies the change by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-16-academics-section.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 16
+        run: |
+          cat > /tmp/step.py <<'PYEOF'
+          import os, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def sub(path, old, new):
+              s = rd(path)
+              c = s.count(old)
+              if c != 1:
+                  sys.exit("::error::anchor found %d times in %s: %s" % (c, path, old[:100]))
+              wr(path, s.replace(old, new))
+
+          def after_line(path, needle, text):
+              lines = rd(path).split("\n")
+              hits = [i for i, l in enumerate(lines) if needle in l]
+              if len(hits) != 1:
+                  sys.exit("::error::line anchor found %d times in %s: %s" % (len(hits), path, needle))
+              lines.insert(hits[0] + 1, text)
+              wr(path, "\n".join(lines))
+
+          MARK = ".softgram/16-academics-section.done"
+          if os.path.exists(MARK):
+              print("Already applied.")
+              sys.exit(0)
+
+          # 1. icons: white outline vectors, same style as the other settings icons
+          ICONS = {
+              "softgram_academic_school": [
+                  "M22 9l-10 -4l-10 4l10 4l10 -4v6",
+                  "M6 10.6v5.4a6 3 0 0 0 12 0v-5.4",
+              ],
+              "softgram_academic_workspace": [
+                  "M9 4h3l2 2h5a2 2 0 0 1 2 2v7a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2",
+                  "M17 17v2a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2h2",
+              ],
+              "softgram_academic_calendar": [
+                  "M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z",
+                  "M16 3v4", "M8 3v4", "M4 11h16", "M8 15h2", "M14 15h2", "M8 18h2",
+              ],
+              "softgram_academic_study": [
+                  "M5 11a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v7a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z",
+                  "M8 6h9.5a1.5 1.5 0 0 1 1.5 1.5",
+                  "M9 14h6", "M9 17h3",
+              ],
+          }
+          for name, paths in ICONS.items():
+              body = "".join(
+                  '    <path\n'
+                  '        android:strokeColor="#FFFFFF"\n'
+                  '        android:strokeWidth="1.8"\n'
+                  '        android:strokeLineCap="round"\n'
+                  '        android:strokeLineJoin="round"\n'
+                  '        android:pathData="%s" />\n' % d for d in paths)
+              wr("src/res/drawable/%s.xml" % name,
+                 '<?xml version="1.0" encoding="utf-8"?>\n'
+                 '<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
+                 '    android:width="24dp"\n'
+                 '    android:height="24dp"\n'
+                 '    android:viewportWidth="24"\n'
+                 '    android:viewportHeight="24">\n' + body + '</vector>\n')
+
+          # 2. the Academics page: title with the slogan, then the three features
+          wr("src/fork/ui/settings/AcademicsHeaderView.kt", r'''package desu.inugram.ui.settings
+
+          import android.content.Context
+          import android.view.Gravity
+          import android.widget.LinearLayout
+          import android.widget.TextView
+          import org.telegram.messenger.AndroidUtilities
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.R
+          import org.telegram.ui.ActionBar.Theme
+          import org.telegram.ui.Components.LayoutHelper
+
+          // Softgram Academics: section title with its slogan directly under it
+          class AcademicsHeaderView(context: Context) : LinearLayout(context) {
+              init {
+                  orientation = VERTICAL
+                  setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite))
+                  val side = AndroidUtilities.dp(21f)
+                  setPadding(side, AndroidUtilities.dp(15f), side, AndroidUtilities.dp(10f))
+                  val align = if (LocaleController.isRTL) Gravity.RIGHT else Gravity.LEFT
+
+                  val title = TextView(context).apply {
+                      text = LocaleController.getString(R.string.InuAcademics)
+                      textSize = 15f
+                      typeface = AndroidUtilities.bold()
+                      setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueHeader))
+                      gravity = align
+                  }
+                  addView(title, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT))
+
+                  val slogan = TextView(context).apply {
+                      text = LocaleController.getString(R.string.InuAcademicsSlogan)
+                      textSize = 13f
+                      setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText2))
+                      gravity = align
+                  }
+                  addView(slogan, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0f, 3f, 0f, 0f))
+              }
+          }
+          ''')
+
+          wr("src/fork/ui/settings/AcademicsActivity.kt", r'''package desu.inugram.ui.settings
+
+          import android.view.View
+          import desu.inugram.helpers.InuUtils
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.R
+          import org.telegram.ui.Components.UItem
+          import org.telegram.ui.Components.UniversalAdapter
+
+          // Softgram Academics: Academic Workspace, Calendar & Schedule and Study Tools (the pages come step by step)
+          class AcademicsActivity : SettingsPageActivity() {
+              override fun getTitle(): CharSequence = LocaleController.getString(R.string.InuAcademics)
+
+              override fun fillItems(items: ArrayList<UItem>, adapter: UniversalAdapter) {
+                  context?.let { items.add(UItem.asCustom(AcademicsHeaderView(it))) }
+                  items.add(mkSubPageButton(ACADEMIC_WORKSPACE, R.drawable.softgram_academic_workspace, LocaleController.getString(R.string.InuAcademicWorkspace)))
+                  items.add(mkSubPageButton(ACADEMIC_CALENDAR, R.drawable.softgram_academic_calendar, LocaleController.getString(R.string.InuAcademicCalendar)))
+                  items.add(mkSubPageButton(ACADEMIC_STUDY, R.drawable.softgram_academic_study, LocaleController.getString(R.string.InuAcademicStudy)))
+                  items.add(UItem.asShadow(null))
+              }
+
+              override fun onClick(item: UItem, view: View, position: Int, x: Float, y: Float) {
+                  val ctx = context ?: return
+                  when (item.id) {
+                      ACADEMIC_WORKSPACE, ACADEMIC_CALENDAR, ACADEMIC_STUDY ->
+                          android.widget.Toast.makeText(ctx, LocaleController.getString(R.string.InuAcademicsSoon), android.widget.Toast.LENGTH_SHORT).show()
+                  }
+              }
+
+              companion object {
+                  private val ACADEMIC_WORKSPACE = InuUtils.generateId()
+                  private val ACADEMIC_CALENDAR = InuUtils.generateId()
+                  private val ACADEMIC_STUDY = InuUtils.generateId()
+              }
+          }
+          ''')
+
+          # 3. icon plate colors
+          sub("src/fork/ui/settings/SoftIcons.kt",
+              "            R.drawable.entiny_plugins to IconBackgroundColors.GREEN,\n",
+              "            R.drawable.entiny_plugins to IconBackgroundColors.GREEN,\n"
+              "            R.drawable.softgram_academic_school to IconBackgroundColors.BLUE,\n"
+              "            R.drawable.softgram_academic_workspace to IconBackgroundColors.PURPLE,\n"
+              "            R.drawable.softgram_academic_calendar to IconBackgroundColors.RED,\n"
+              "            R.drawable.softgram_academic_study to IconBackgroundColors.GREEN,\n")
+
+          # 4. the row on the main Settings screen: its own card right under Softgram Settings
+          sub("src/fork/helpers/menu/MenuOrderConfig.kt",
+              '        INUGRAM("inugram", 99, R.string.InuSettings, R.drawable.icon_settings_inu),\n',
+              '        INUGRAM("inugram", 99, R.string.InuSettings, R.drawable.icon_settings_inu),\n'
+              '        ACADEMICS("academics", 96, R.string.InuAcademics, R.drawable.softgram_academic_school),\n')
+          sub("src/fork/helpers/ProfileSettingsHelper.kt",
+              "        99 -> 0\n",
+              "        99 -> 0\n        96 -> 5\n")
+
+          # 5. the stock patch (the row and its click) goes last in the series
+          PATCH = r'''diff --git a/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java
+          index 79f4b7c..534cc24 100644
+          --- a/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java
+          +++ b/TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java
+          @@ -813,4 +813,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
+                       items.add(SettingCell.Factory.of(99, 0, 0, R.drawable.softgram_logo, getString(R.string.InuSettings), getString(R.string.InuSettingsInfo)));
+                       items.add(UItem.asShadow(null));
+          +            // softgram: Softgram Academics sits right under Softgram Settings
+          +            items.add(SettingCell.Factory.of(96, org.telegram.ui.Components.IconBackgroundColors.BLUE.top, org.telegram.ui.Components.IconBackgroundColors.BLUE.bottom, R.drawable.softgram_academic_school, getString(R.string.InuAcademics), getString(R.string.InuAcademicsSlogan)));
+          +            items.add(UItem.asShadow(null));
+                   }
+           
+          @@ -1036,4 +1039,8 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
+                           presentFragment(new desu.inugram.ui.settings.InuSettingsActivity());
+                           break;
+          +
+          +            case 96:
+          +                presentFragment(new desu.inugram.ui.settings.AcademicsActivity());
+          +                break;
+                   }
+               }
+          '''
+          wr("patches/softgram/academics-row.patch", PATCH.lstrip("\n"))
+          series = rd("series")
+          if "softgram/academics-row.patch" not in series.split("\n"):
+              if not series.endswith("\n"):
+                  series += "\n"
+              wr("series", series + "softgram/academics-row.patch\n")
+
+          # 6. strings: names stay English everywhere
+          after_line("src/res/values/strings_inu.xml", 'name="InuSettings">',
+              '    <string name="InuAcademics" translatable="false">Softgram Academics</string>\n'
+              '    <string name="InuAcademicsSlogan" translatable="false">A tool for study and research</string>\n'
+              '    <string name="InuAcademicWorkspace" translatable="false">Academic Workspace</string>\n'
+              '    <string name="InuAcademicCalendar" translatable="false">Calendar &amp; Schedule</string>\n'
+              '    <string name="InuAcademicStudy" translatable="false">Study Tools</string>\n'
+              '    <string name="InuAcademicsSoon">Coming soon</string>')
+          after_line("src/res/values-fa/strings_inu.xml", 'name="InuIosInputAppearance"',
+              '    <string name="InuAcademicsSoon">به‌زودی</string>')
+
+          # 7. features list
+          try:
+              lines = rd("FEATURES.md").split("\n")
+              hit = [i for i, l in enumerate(lines) if l.startswith("- **spam folder**")]
+              if len(hit) == 1:
+                  lines.insert(hit[0] + 1, "- **softgram academics** — its own row right under Softgram Settings on the Settings screen (\"A tool for study and research\"); it opens a page with Academic Workspace, Calendar & Schedule and Study Tools. Only the look for now; the pages come step by step")
+                  wr("FEATURES.md", "\n".join(lines))
+              else:
+                  print("warning: FEATURES.md row not added")
+          except FileNotFoundError:
+              print("warning: FEATURES.md missing")
+
+          os.makedirs(".softgram", exist_ok=True)
+          wr(MARK, "softgram academics row applied\n")
+          print("OK: Soft Design 16 applied")
+
+          PYEOF
+          python3 /tmp/step.py
+
+      - name: Sanity check
+        run: |
+          for f in src/res/drawable/softgram_academic_school.xml src/res/drawable/softgram_academic_workspace.xml src/res/drawable/softgram_academic_calendar.xml src/res/drawable/softgram_academic_study.xml src/fork/ui/settings/AcademicsActivity.kt src/fork/ui/settings/AcademicsHeaderView.kt patches/softgram/academics-row.patch; do
+            test -f "$f" || { echo "::error::missing $f"; exit 1; }
+          done
+          grep -q '^softgram/academics-row.patch$' series || { echo "::error::series entry missing"; exit 1; }
+          grep -q 'ACADEMICS("academics", 96' src/fork/helpers/menu/MenuOrderConfig.kt || { echo "::error::menu item missing"; exit 1; }
+          grep -q 'InuAcademicsSlogan' src/res/values/strings_inu.xml || { echo "::error::strings missing"; exit 1; }
+          echo 'verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 16: Softgram Academics row under Softgram Settings (look only)"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
