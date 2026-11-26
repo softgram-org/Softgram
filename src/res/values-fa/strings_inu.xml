@@ -1086,6 +1086,14 @@
     <string name="InuAcademicResetName">بازگرداندن نام</string>
     <string name="InuAcademicRemoveFromFolder">حذف از فولدر</string>
     <string name="InuAcademicNoChats">گروه یا کانالی پیدا نشد.</string>
+    <string name="InuFmtOther">سایر</string>
+    <string name="InuAcademicLoading">در حال بارگذاری…</string>
+    <string name="InuAcademicEmpty">هنوز چیزی اینجا نیست.</string>
+    <string name="InuAcademicDuplicates">%1$d مورد تکراری پنهان شد. فایلی که در چند چت فوروارد شده فقط یک‌بار نمایش داده می‌شود.</string>
+    <string name="InuAcademicVoiceTitle">پیام صوتی</string>
+    <string name="InuAcademicVideoTitle">ویدئو</string>
+    <string name="InuAcademicVideoMessageTitle">ویدئو مسیج</string>
+    <string name="InuAcademicPollOptions">%1$d گزینه · %2$d رأی</string>
     <string name="InuSoftInputAppearance">Appearance Soft</string>
     <string name="InuSoftInputAppearanceInfo">نوار تایپ گرد و نرم با آیکون‌های مشکی. برای استفاده از نوار iOS یا تلگرام خاموشش کنید. تا وقتی روشنه، گزینه‌های نوار iOS نادیده گرفته می‌شن.</string>
     <string name="InuIosMessageMenu">منوی پیام به سبک iOS</string>

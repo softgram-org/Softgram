@@ -2108,6 +2108,22 @@
     <string name="InuAcademicResetName">Reset name</string>
     <string name="InuAcademicRemoveFromFolder">Remove from folder</string>
     <string name="InuAcademicNoChats">No groups or channels found.</string>
+    <string name="InuTabGroups" translatable="false">Groups</string>
+    <string name="InuTabChannels" translatable="false">Channels</string>
+    <string name="InuTabFiles" translatable="false">Files</string>
+    <string name="InuTabVoiceVideo" translatable="false">Voice &amp; Video</string>
+    <string name="InuTabPolls" translatable="false">Polls</string>
+    <string name="InuSecVoice" translatable="false">Voice</string>
+    <string name="InuSecVideo" translatable="false">Video</string>
+    <string name="InuSecVideoMessage" translatable="false">Video message</string>
+    <string name="InuFmtOther">Other</string>
+    <string name="InuAcademicLoading">Loading…</string>
+    <string name="InuAcademicEmpty">Nothing here yet.</string>
+    <string name="InuAcademicDuplicates">%1$d duplicates hidden. A file forwarded to several chats is listed once.</string>
+    <string name="InuAcademicVoiceTitle">Voice message</string>
+    <string name="InuAcademicVideoTitle">Video</string>
+    <string name="InuAcademicVideoMessageTitle">Video message</string>
+    <string name="InuAcademicPollOptions">%1$d options · %2$d votes</string>
     <string name="InuSettingsInfo">Yours. By design Softgram</string>
     <string name="InuSettingsShowAccounts">Show accounts in settings</string>
     <string name="InuShorterSwipeGestures">Shorter swipe gestures</string>

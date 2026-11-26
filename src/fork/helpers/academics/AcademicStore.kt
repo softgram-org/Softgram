@@ -53,6 +53,23 @@ object AcademicStore {
         save(account)
     }
 
+    fun isPinned(account: Int, key: String): Boolean =
+        prefs().getStringSet("pins_$account", emptySet())?.contains(key) == true
+
+    /** returns true when the item is pinned after the toggle */
+    fun togglePin(account: Int, key: String): Boolean {
+        val set = HashSet(prefs().getStringSet("pins_$account", emptySet()) ?: emptySet())
+        val pinned = if (set.contains(key)) {
+            set.remove(key)
+            false
+        } else {
+            set.add(key)
+            true
+        }
+        prefs().edit().putStringSet("pins_$account", set).apply()
+        return pinned
+    }
+
     private fun key(account: Int) = "folders_$account"
 
     private fun load(account: Int): MutableList<Folder> {

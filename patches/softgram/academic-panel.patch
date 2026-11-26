@@ -1,0 +1,22 @@
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
+index 0c0ac4b..926d49e 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/DialogsActivity.java
+@@ -374,4 +374,5 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
+         public int pageAdditionalOffset;
+         public DialogsRecyclerView listView;
++        public View inu_panel;
+         public RecyclerListViewScroller scroller;
+         private LinearLayoutManager layoutManager;
+@@ -472,4 +473,5 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
+         @Override
+         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
++            desu.inugram.ui.academics.AcademicPanel.sync(DialogsActivity.this, this, selectedType);
+             FrameLayout.LayoutParams lp = (LayoutParams) listView.getLayoutParams();
+             if (animateStoriesView) {
+@@ -482,4 +484,5 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
+ 
+         public void updateList(boolean animated) {
++            desu.inugram.ui.academics.AcademicPanel.sync(DialogsActivity.this, this, selectedType);
+             if (isPaused) {
+                 return;
