@@ -183,7 +183,7 @@ class InputBarPreviewCell(
         val h = (fieldBottom - fieldTop).toFloat()
         val cy = (fieldTop + fieldBottom) / 2f
         val iconColor = Theme.getColor(Theme.key_glass_defaultIcon)
-        SoftIcons.drawSmile(canvas, pillLeft + h / 2f, cy, h * 0.235f, iconColor)
+        SoftIcons.drawBlob(canvas, pillLeft + h / 2f, cy, h * 0.62f, iconColor)
         SoftIcons.drawDivider(canvas, pillLeft + h + AndroidUtilities.dpf2(4f), cy, iconColor, 1f)
         SoftIcons.drawFolder(canvas, pillRight - h / 2f, cy, h / 24f * 1.05f, iconColor)
         SoftIcons.drawVoice(canvas, (sendIconView.left + sendIconView.right) / 2f, cy, h - AndroidUtilities.dpf2(2f), iconColor)
