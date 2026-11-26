@@ -55,7 +55,7 @@ class AcademicPanel(context: Context, private val fragment: DialogsActivity) : F
         isClickable = true
         setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite))
         content.orientation = LinearLayout.VERTICAL
-        addView(content, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT))
+        addView(content, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         content.addView(tabsView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT))
         content.addView(formatsView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT))
         list.layoutManager = LinearLayoutManager(context)
@@ -199,7 +199,7 @@ class AcademicPanel(context: Context, private val fragment: DialogsActivity) : F
         val item = row.item
         val also = if (item.chats > 1) " · +${item.chats - 1}" else ""
         val source = chatName(item.dialogId) + also
-        val date = LocaleController.stringForMessageListDate(item.date)
+        val date = LocaleController.stringForMessageListDate(item.date.toLong())
         var pinnable = true
         when (row.kind) {
             AcademicContent.Kind.FILES -> {
@@ -335,8 +335,8 @@ class AcademicPanel(context: Context, private val fragment: DialogsActivity) : F
             label.typeface = AndroidUtilities.bold()
             label.setTextColor(0xFFFFFFFF.toInt())
             icon.scaleType = ImageView.ScaleType.CENTER
-            addView(label, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT))
-            addView(icon, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT))
+            addView(label, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+            addView(icon, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         }
 
         fun show(color: Int, text: String?, iconRes: Int) {

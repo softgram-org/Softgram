@@ -203,7 +203,7 @@ class AcademicFolderActivity(private val folderId: Int) : SettingsPageActivity()
             .setTitle(LocaleController.getString(R.string.InuAcademicDeleteFolder))
             .setMessage(LocaleController.getString(R.string.InuAcademicDeleteFolderConfirm))
             .setPositiveButton(LocaleController.getString(R.string.Delete)) { _, _ ->
-                AcademicFilters.remove(this, currentAccount, f)
+                AcademicFilters.remove(this, f)
                 AcademicStore.delete(currentAccount, f.id)
                 finishFragment()
             }
