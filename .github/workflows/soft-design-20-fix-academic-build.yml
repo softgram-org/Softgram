@@ -1,0 +1,91 @@
+name: Soft Design 20 - Fix academic build errors
+
+# Fixes the six compile errors from the last build. Uploading this file applies the fix by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-20-fix-academic-build.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 20
+        run: |
+          cat > /tmp/step.py <<'PYEOF'
+          import os, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def fix(path, old, new, expected):
+              s = rd(path)
+              c = s.count(old)
+              if c == 0:
+                  if new in s:
+                      print("already fixed: " + old[:60])
+                      return
+                  sys.exit("::error::cannot find in %s: %s" % (path, old[:100]))
+              if c != expected:
+                  sys.exit("::error::found %d times (expected %d) in %s: %s" % (c, expected, path, old[:100]))
+              wr(path, s.replace(old, new))
+
+          MARK = ".softgram/20-fix-academic-build.done"
+          if os.path.exists(MARK):
+              print("Already applied.")
+              sys.exit(0)
+
+          P = "src/fork/ui/academics/AcademicPanel.kt"
+          fix(P, "LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT)",
+                 "FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)", 3)
+          fix(P, "LocaleController.stringForMessageListDate(item.date)",
+                 "LocaleController.stringForMessageListDate(item.date.toLong())", 1)
+          fix("src/fork/ui/settings/AcademicFolderActivity.kt",
+              "AcademicFilters.remove(this, currentAccount, f)", "AcademicFilters.remove(this, f)", 1)
+
+          os.makedirs(".softgram", exist_ok=True)
+          wr(MARK, "academic build errors fixed\n")
+          print("OK: Soft Design 20 applied")
+
+          PYEOF
+          python3 /tmp/step.py
+
+      - name: Sanity check
+        run: |
+          ! grep -q 'LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT)' src/fork/ui/academics/AcademicPanel.kt || { echo "::error::panel not fixed"; exit 1; }
+          ! grep -q 'AcademicFilters.remove(this, currentAccount, f)' src/fork/ui/settings/AcademicFolderActivity.kt || { echo "::error::folder page not fixed"; exit 1; }
+          echo 'verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 20: fix academic build errors"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
