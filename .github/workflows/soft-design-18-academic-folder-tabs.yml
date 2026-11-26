@@ -1,0 +1,197 @@
+name: Soft Design 18 - Academic folders as chat tabs
+
+# Needs Soft Design 17 applied first. Uploading this file applies the change by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-18-academic-folder-tabs.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 18
+        run: |
+          cat > /tmp/step.py <<'PYEOF'
+          import os, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              d = os.path.dirname(p)
+              if d:
+                  os.makedirs(d, exist_ok=True)
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def sub(path, old, new):
+              s = rd(path)
+              c = s.count(old)
+              if c != 1:
+                  sys.exit("::error::anchor found %d times in %s: %s" % (c, path, old[:100]))
+              wr(path, s.replace(old, new))
+
+          MARK = ".softgram/18-academic-folder-tabs.done"
+          if os.path.exists(MARK):
+              print("Already applied.")
+              sys.exit(0)
+          if not os.path.exists(".softgram/17-academic-workspace.done"):
+              sys.exit("::error::apply Soft Design 17 (Academic Workspace) first")
+
+          # 1. the store remembers which local Telegram folder belongs to each academic folder
+          S = "src/fork/helpers/academics/AcademicStore.kt"
+          sub(S, "    class Folder(val id: Int, var name: String, val chats: LinkedHashSet<Long> = LinkedHashSet())\n",
+                 "    class Folder(val id: Int, var name: String, val chats: LinkedHashSet<Long> = LinkedHashSet(), var filterId: Int = 0)\n")
+          sub(S, '                val folder = Folder(obj.getInt("id"), obj.getString("name"))\n',
+                 '                val folder = Folder(obj.getInt("id"), obj.getString("name"), LinkedHashSet(), obj.optInt("filter", 0))\n')
+          sub(S, '            array.put(JSONObject().put("id", folder.id).put("name", folder.name).put("chats", chats))\n',
+                 '            array.put(JSONObject().put("id", folder.id).put("name", folder.name).put("chats", chats).put("filter", folder.filterId))\n')
+          sub(S, "    fun delete(account: Int, id: Int) {\n",
+                 "    fun setFilterId(account: Int, id: Int, filterId: Int) {\n"
+                 "        find(account, id)?.filterId = filterId\n"
+                 "        save(account)\n"
+                 "    }\n\n"
+                 "    fun delete(account: Int, id: Int) {\n")
+
+          # 2. each academic folder is also a local folder, so it shows up as a tab (pill) on the Chats screen
+          wr("src/fork/helpers/academics/AcademicFilters.kt", r'''package desu.inugram.helpers.academics
+
+          import desu.inugram.helpers.dialogs.LocalFoldersHelper
+          import org.telegram.messenger.MessagesController
+          import org.telegram.messenger.support.LongSparseIntArray
+          import org.telegram.ui.ActionBar.BaseFragment
+
+          // An academic folder is mirrored as a local folder (kept on this device only), which gives it a tab on the Chats screen.
+          object AcademicFilters {
+              private const val STUDY_ICON = "\uD83C\uDF93" // the study icon of folder tabs
+
+              private fun filterOf(fragment: BaseFragment, folder: AcademicStore.Folder): MessagesController.DialogFilter? =
+                  if (folder.filterId == 0) null else fragment.messagesController.dialogFiltersById.get(folder.filterId)
+
+              private fun inSync(filter: MessagesController.DialogFilter, folder: AcademicStore.Folder): Boolean =
+                  filter.name == folder.name && filter.alwaysShow.toHashSet() == folder.chats.toHashSet()
+
+              /** creates the local folder when it is missing, otherwise makes its name and chats match the academic folder */
+              fun sync(fragment: BaseFragment, account: Int, folder: AcademicStore.Folder) {
+                  val always = ArrayList<Long>(folder.chats)
+                  val existing = filterOf(fragment, folder)
+                  if (existing == null) {
+                      val filter = MessagesController.DialogFilter()
+                      filter.id = LocalFoldersHelper.nextLocalFilterId()
+                      filter.inu_emoticon = STUDY_ICON
+                      LocalFoldersHelper.processAddLocalFilter(
+                          filter, 0, folder.name, ArrayList(), false, (Math.random() * 8).toInt(),
+                          always, ArrayList(), LongSparseIntArray(),
+                          true, false, true, true, false, fragment, null,
+                      )
+                      AcademicStore.setFilterId(account, folder.id, filter.id)
+                  } else {
+                      LocalFoldersHelper.processAddLocalFilter(
+                          existing, existing.flags, folder.name, existing.entities, existing.title_noanimate, existing.color,
+                          always, existing.neverShow, existing.pinnedDialogs,
+                          false, false, true, true, false, fragment, null,
+                      )
+                  }
+              }
+
+              fun remove(fragment: BaseFragment, folder: AcademicStore.Folder) {
+                  val filter = filterOf(fragment, folder) ?: return
+                  fragment.messagesController.removeFilter(filter)
+                  fragment.messagesStorage.deleteDialogFilter(filter)
+                  folder.filterId = 0
+              }
+
+              /** makes sure every academic folder has its tab; only touches folders that changed or lost their tab */
+              fun ensureAll(fragment: BaseFragment, account: Int) {
+                  // until Telegram has loaded its folders a missing tab may only be a late one; creating it now would duplicate it
+                  if (!fragment.messagesController.dialogFiltersLoaded) return
+                  for (folder in AcademicStore.folders(account).toList()) {
+                      val filter = filterOf(fragment, folder)
+                      if (filter == null || !inSync(filter, folder)) sync(fragment, account, folder)
+                  }
+              }
+
+              /** turning the workspace off removes the tabs; the academic folders themselves are kept */
+              fun removeAll(fragment: BaseFragment, account: Int) {
+                  for (folder in AcademicStore.folders(account).toList()) {
+                      remove(fragment, folder)
+                      AcademicStore.setFilterId(account, folder.id, 0)
+                  }
+              }
+          }
+          ''')
+
+          # 3. the pages keep the tab in step with the folder
+          W = "src/fork/ui/settings/AcademicWorkspaceActivity.kt"
+          sub(W, "import desu.inugram.helpers.academics.AcademicStore\n",
+                 "import desu.inugram.helpers.academics.AcademicFilters\nimport desu.inugram.helpers.academics.AcademicStore\n")
+          sub(W, "        super.onResume()\n        listView?.adapter?.update(true)\n",
+                 "        super.onResume()\n        if (AcademicStore.enabled) AcademicFilters.ensureAll(this, currentAccount)\n        listView?.adapter?.update(true)\n")
+          sub(W, "                AcademicStore.enabled = new\n",
+                 "                AcademicStore.enabled = new\n"
+                 "                if (new) AcademicFilters.ensureAll(this, currentAccount) else AcademicFilters.removeAll(this, currentAccount)\n")
+          sub(W, "                        val folder = AcademicStore.create(currentAccount, name)\n",
+                 "                        val folder = AcademicStore.create(currentAccount, name)\n"
+                 "                        AcademicFilters.sync(this, currentAccount, folder)\n")
+
+          Fo = "src/fork/ui/settings/AcademicFolderActivity.kt"
+          sub(Fo, "import desu.inugram.helpers.academics.AcademicStore\n",
+                  "import desu.inugram.helpers.academics.AcademicFilters\nimport desu.inugram.helpers.academics.AcademicStore\n")
+          sub(Fo, "                    AcademicStore.setChat(currentAccount, f.id, dialogId, true)\n",
+                  "                    AcademicStore.setChat(currentAccount, f.id, dialogId, true)\n"
+                  "                    AcademicFilters.sync(this, currentAccount, f)\n")
+          sub(Fo, "                        AcademicStore.setChat(currentAccount, f.id, dialogId, false)\n",
+                  "                        AcademicStore.setChat(currentAccount, f.id, dialogId, false)\n"
+                  "                        AcademicFilters.sync(this, currentAccount, f)\n")
+          sub(Fo, "                AcademicStore.rename(currentAccount, f.id, name)\n",
+                  "                AcademicStore.rename(currentAccount, f.id, name)\n"
+                  "                AcademicFilters.sync(this, currentAccount, f)\n")
+          sub(Fo, "                AcademicStore.delete(currentAccount, f.id)\n",
+                  "                AcademicFilters.remove(this, currentAccount, f)\n"
+                  "                AcademicStore.delete(currentAccount, f.id)\n")
+
+          os.makedirs(".softgram", exist_ok=True)
+          wr(MARK, "academic folders as chat tabs applied\n")
+          print("OK: Soft Design 18 applied")
+
+          PYEOF
+          python3 /tmp/step.py
+
+      - name: Sanity check
+        run: |
+          test -f src/fork/helpers/academics/AcademicFilters.kt || { echo "::error::missing AcademicFilters"; exit 1; }
+          grep -q 'filterId' src/fork/helpers/academics/AcademicStore.kt || { echo "::error::store not updated"; exit 1; }
+          grep -q 'AcademicFilters.sync' src/fork/ui/settings/AcademicFolderActivity.kt || { echo "::error::folder page not wired"; exit 1; }
+          grep -q 'AcademicFilters.ensureAll' src/fork/ui/settings/AcademicWorkspaceActivity.kt || { echo "::error::workspace page not wired"; exit 1; }
+          echo 'verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 18: academic folders appear as tabs on the Chats screen"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
