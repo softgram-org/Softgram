@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import desu.inugram.InuConfig
 import desu.inugram.helpers.InuUtils
+import desu.inugram.helpers.academics.AcademicFilters
 import desu.inugram.helpers.academics.AcademicStore
 import desu.inugram.helpers.profile.LocalNameHelper
 import desu.inugram.ui.showInputDialog
@@ -131,6 +132,7 @@ class AcademicFolderActivity(private val folderId: Int) : SettingsPageActivity()
                     showChatOptions(f, chat)
                 } else {
                     AcademicStore.setChat(currentAccount, f.id, dialogId, true)
+                    AcademicFilters.sync(this, currentAccount, f)
                     listView?.adapter?.update(true)
                 }
             }
@@ -165,6 +167,7 @@ class AcademicFolderActivity(private val folderId: Int) : SettingsPageActivity()
 
                     2 -> {
                         AcademicStore.setChat(currentAccount, f.id, dialogId, false)
+                        AcademicFilters.sync(this, currentAccount, f)
                         listView?.adapter?.update(true)
                     }
                 }
@@ -186,6 +189,7 @@ class AcademicFolderActivity(private val folderId: Int) : SettingsPageActivity()
                 false
             } else {
                 AcademicStore.rename(currentAccount, f.id, name)
+                AcademicFilters.sync(this, currentAccount, f)
                 simpleActionBar?.setTitle(name)
                 listView?.adapter?.update(true)
                 true
@@ -199,6 +203,7 @@ class AcademicFolderActivity(private val folderId: Int) : SettingsPageActivity()
             .setTitle(LocaleController.getString(R.string.InuAcademicDeleteFolder))
             .setMessage(LocaleController.getString(R.string.InuAcademicDeleteFolderConfirm))
             .setPositiveButton(LocaleController.getString(R.string.Delete)) { _, _ ->
+                AcademicFilters.remove(this, currentAccount, f)
                 AcademicStore.delete(currentAccount, f.id)
                 finishFragment()
             }

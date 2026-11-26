@@ -2,6 +2,7 @@ package desu.inugram.ui.settings
 
 import android.view.View
 import desu.inugram.helpers.InuUtils
+import desu.inugram.helpers.academics.AcademicFilters
 import desu.inugram.helpers.academics.AcademicStore
 import desu.inugram.ui.showInputDialog
 import org.telegram.messenger.AndroidUtilities
@@ -18,6 +19,7 @@ class AcademicWorkspaceActivity : SettingsPageActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (AcademicStore.enabled) AcademicFilters.ensureAll(this, currentAccount)
         listView?.adapter?.update(true)
     }
 
@@ -52,6 +54,7 @@ class AcademicWorkspaceActivity : SettingsPageActivity() {
             item.id == TOGGLE_ENABLED -> {
                 val new = !AcademicStore.enabled
                 AcademicStore.enabled = new
+                if (new) AcademicFilters.ensureAll(this, currentAccount) else AcademicFilters.removeAll(this, currentAccount)
                 (view as? TextCheckCell)?.apply {
                     setChecked(new)
                     setBackgroundColorAnimated(
@@ -73,6 +76,7 @@ class AcademicWorkspaceActivity : SettingsPageActivity() {
                         false
                     } else {
                         val folder = AcademicStore.create(currentAccount, name)
+                        AcademicFilters.sync(this, currentAccount, folder)
                         listView?.adapter?.update(true)
                         AndroidUtilities.runOnUIThread({ presentFragment(AcademicFolderActivity(folder.id)) }, 250)
                         true

@@ -7,7 +7,7 @@ import org.telegram.messenger.ApplicationLoader
 
 // Academic Workspace data. Everything stays on this device; Telegram never sees it.
 object AcademicStore {
-    class Folder(val id: Int, var name: String, val chats: LinkedHashSet<Long> = LinkedHashSet())
+    class Folder(val id: Int, var name: String, val chats: LinkedHashSet<Long> = LinkedHashSet(), var filterId: Int = 0)
 
     private const val PREFS = "softgram_academics"
     private val cache = HashMap<Int, MutableList<Folder>>()
@@ -37,6 +37,11 @@ object AcademicStore {
         save(account)
     }
 
+    fun setFilterId(account: Int, id: Int, filterId: Int) {
+        find(account, id)?.filterId = filterId
+        save(account)
+    }
+
     fun delete(account: Int, id: Int) {
         folders(account).removeAll { it.id == id }
         save(account)
@@ -57,7 +62,7 @@ object AcademicStore {
             val array = JSONArray(raw)
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
-                val folder = Folder(obj.getInt("id"), obj.getString("name"))
+                val folder = Folder(obj.getInt("id"), obj.getString("name"), LinkedHashSet(), obj.optInt("filter", 0))
                 val chats = obj.optJSONArray("chats")
                 if (chats != null) {
                     for (j in 0 until chats.length()) folder.chats.add(chats.getLong(j))
@@ -75,7 +80,7 @@ object AcademicStore {
         for (folder in folders(account)) {
             val chats = JSONArray()
             for (id in folder.chats) chats.put(id)
-            array.put(JSONObject().put("id", folder.id).put("name", folder.name).put("chats", chats))
+            array.put(JSONObject().put("id", folder.id).put("name", folder.name).put("chats", chats).put("filter", folder.filterId))
         }
         prefs().edit().putString(key(account), array.toString()).apply()
     }
