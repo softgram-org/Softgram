@@ -1,0 +1,62 @@
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
+index 42013df..4a1a74c 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/ChatActivityEnterView.java
+@@ -2141,6 +2141,11 @@ public class ChatActivityEnterView extends FrameLayout implements
+ 
+             sendDrawable = getResources().getDrawable(R.drawable.attach_send).mutate();
+             ThemeBind.drawableColorFilter(this, sendDrawable, Theme.key_chat_messagePanelVoicePressed, ChatActivityEnterView.this.resourcesProvider, PorterDuff.Mode.MULTIPLY);
++            if (desu.inugram.helpers.chat.SoftInputHelper.isSoft()) {
++                micDrawable = desu.inugram.helpers.chat.SoftInputHelper.recordIcon(false);
++                cameraDrawable = desu.inugram.helpers.chat.SoftInputHelper.recordIcon(true);
++                sendDrawable = new desu.inugram.helpers.chat.SoftPlaneDrawable();
++            }
+ 
+             micOutline = getResources().getDrawable(R.drawable.input_mic).mutate();
+             ThemeBind.drawableColorFilter(this, micOutline, Theme.key_glass_defaultIcon, ChatActivityEnterView.this.resourcesProvider, PorterDuff.Mode.MULTIPLY);
+@@ -2352,9 +2357,9 @@ public class ChatActivityEnterView extends FrameLayout implements
+             }
+ 
+             if (progressToSeekbarStep3 > 0) {
+-                paint.setColor(ColorUtils.blendARGB(getThemedColor(Theme.key_chat_messagePanelVoiceBackground), getThemedColor(Theme.key_chat_recordedVoiceBackground), progressToSeekbarStep3));
++                paint.setColor(ColorUtils.blendARGB(desu.inugram.helpers.chat.SoftInputHelper.recordCircleColor(getThemedColor(Theme.key_chat_messagePanelVoiceBackground)), getThemedColor(Theme.key_chat_recordedVoiceBackground), progressToSeekbarStep3));
+             } else {
+-                paint.setColor(getThemedColor(Theme.key_chat_messagePanelVoiceBackground));
++                paint.setColor(desu.inugram.helpers.chat.SoftInputHelper.recordCircleColor(getThemedColor(Theme.key_chat_messagePanelVoiceBackground)));
+             }
+ 
+             Drawable drawable;
+@@ -2572,9 +2577,9 @@ public class ChatActivityEnterView extends FrameLayout implements
+         }
+ 
+         public void updateColors() {
+-            paint.setColor(getThemedColor(Theme.key_chat_messagePanelVoiceBackground));
+-            tinyWaveDrawable.paint.setColor(ColorUtils.setAlphaComponent(getThemedColor(Theme.key_chat_messagePanelVoiceBackground), (int) (255 * WaveDrawable.CIRCLE_ALPHA_2)));
+-            bigWaveDrawable.paint.setColor(ColorUtils.setAlphaComponent(getThemedColor(Theme.key_chat_messagePanelVoiceBackground), (int) (255 * WaveDrawable.CIRCLE_ALPHA_1)));
++            paint.setColor(desu.inugram.helpers.chat.SoftInputHelper.recordCircleColor(getThemedColor(Theme.key_chat_messagePanelVoiceBackground)));
++            tinyWaveDrawable.paint.setColor(ColorUtils.setAlphaComponent(desu.inugram.helpers.chat.SoftInputHelper.recordWaveColor(getThemedColor(Theme.key_chat_messagePanelVoiceBackground)), (int) (255 * WaveDrawable.CIRCLE_ALPHA_2)));
++            bigWaveDrawable.paint.setColor(ColorUtils.setAlphaComponent(desu.inugram.helpers.chat.SoftInputHelper.recordWaveColor(getThemedColor(Theme.key_chat_messagePanelVoiceBackground)), (int) (255 * WaveDrawable.CIRCLE_ALPHA_1)));
+ 
+             paintAlpha = paint.getAlpha();
+         }
+@@ -9339,6 +9344,7 @@ public class ChatActivityEnterView extends FrameLayout implements
+             }
+         }
+         layoutParams.rightMargin = Math.max(layoutParams.rightMargin, Math.max(0, sendButton.width() - dp(DEFAULT_HEIGHT)));
++        layoutParams.rightMargin = Math.max(layoutParams.rightMargin, desu.inugram.helpers.chat.SoftInputHelper.minFieldRightPx(iosGapDp));
+         if (doneButton != null && doneButton.getVisibility() == VISIBLE) {
+             layoutParams.rightMargin = Math.max(layoutParams.rightMargin, Math.max(0, doneButton.width() - dp(DEFAULT_HEIGHT)));
+         }
+@@ -15723,9 +15729,9 @@ public class ChatActivityEnterView extends FrameLayout implements
+         public void setResourceId(int resId) {
+             if (this.resId != resId) {
+                 this.resId = resId;
+-                drawable = getContext().getResources().getDrawable(resId).mutate();
+-                inactiveDrawable = getContext().getResources().getDrawable(resId).mutate();
+-                drawableInverse = getContext().getResources().getDrawable(resId).mutate();
++                drawable = desu.inugram.helpers.chat.SoftInputHelper.sendIcon(getContext(), resId, getContext().getResources().getDrawable(resId).mutate());
++                inactiveDrawable = desu.inugram.helpers.chat.SoftInputHelper.sendIcon(getContext(), resId, getContext().getResources().getDrawable(resId).mutate());
++                drawableInverse = desu.inugram.helpers.chat.SoftInputHelper.sendIcon(getContext(), resId, getContext().getResources().getDrawable(resId).mutate());
+                 invalidate();
+             }
+         }
