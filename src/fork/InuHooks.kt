@@ -90,6 +90,7 @@ object InuHooks {
         Utilities.globalQueue.postRunnable {
             CloudSettingsHelper.attachAutoSyncListener()
             ProxyVpnHelper.init(context)
+            desu.inugram.helpers.proxy.xray.XrayManager.init()
             UrlCleanerHelper.preload()
         }
         if (BuildConfig.INU_BUILD_TYPE == "debug") SearchRegistry.verifySlugs()

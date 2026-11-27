@@ -85,7 +85,7 @@ object ProxyListMenuHelper {
     }
 
     private fun links(list: List<SharedConfig.ProxyInfo>): String =
-        list.joinToString("\n\n") { it.settings.link }
+        list.joinToString("\n\n") { desu.inugram.helpers.proxy.xray.XrayManager.shareLink(it) }
 
     private fun styleDestructive(sub: ActionBarMenuSubItem) {
         sub.setIconColor(Theme.getColor(Theme.key_text_RedRegular))

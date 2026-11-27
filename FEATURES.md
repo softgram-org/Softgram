@@ -156,6 +156,7 @@ Softgram is built on top of [inugram](https://github.com/teidesu/inugram). for t
 - **experimental proxy page** — ping all and delete failed proxies, proxy list menu with copy and share all links, save a proxy without connecting, custom proxy link sheet with status check, aggressive rotation, all off by default
   - **websocket tunnel** — connect through Telegram Web endpoints, no third-party servers; excluded from settings backups - *inspired by [tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy) (@Flowseal) and [NimarkoGram](https://github.com/Ettacent/NimarkoGram)*
   - **block direct connections** — extra requests go only through your SOCKS5 proxy
+  - **xray / v2ray configs** — import vless, vmess, trojan and shadowsocks links from the clipboard; they sit in the proxy list with name and ping, and select, share (original link) and delete like any proxy; the core runs inside the app
 - **plugin market** — themed catalog with filters, version badges, authors and tags, a dedicated page and automatic sdk installation
 - **osmdroid map view** — pure-java openstreetmap renderer replacing maplibre, about 12 MB less native code
 - **faster cold start**, locale caching and a smaller apk without android auto

@@ -1,0 +1,36 @@
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ProxyListActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/ProxyListActivity.java
+index e3aaaa5..a475bc9 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/ProxyListActivity.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/ProxyListActivity.java
+@@ -201,6 +201,10 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
+                     ? proxyInfo.settings.getAddress() + " (WEB)"
+                     : proxyInfo.settings.getAddress() + ":" + proxyInfo.settings.getPort());
+             currentInfo = proxyInfo;
++            String inu_name = desu.inugram.helpers.proxy.xray.XrayManager.displayName(proxyInfo.settings.getAddress(), proxyInfo.settings.getPort());
++            if (inu_name != null) {
++                textView.setText(inu_name);
++            }
+         }
+
+         public void updateStatus() {
+@@ -593,7 +597,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
+                             if (links.length() > 0) {
+                                 links.append("\n\n");
+                             }
+-                            links.append(info.settings.getLink());
++                            links.append(desu.inugram.helpers.proxy.xray.XrayManager.shareLink(info));
+                         }
+
+                         Intent shareIntent = new Intent(Intent.ACTION_SEND);
+diff --git a/TMessagesProj_App/build.gradle b/TMessagesProj_App/build.gradle
+index d73a5f4..e0a6a1a 100644
+--- a/TMessagesProj_App/build.gradle
++++ b/TMessagesProj_App/build.gradle
+@@ -38,6 +38,7 @@ android {
+     defaultConfig.applicationId = "org.softgram.messenger"
+
+     sourceSets.main.jniLibs.srcDirs = ['../TMessagesProj/jni/']
++    sourceSets.main.jniLibs.srcDirs += ['xray-jni']
+
+     packaging {
+         jniLibs {

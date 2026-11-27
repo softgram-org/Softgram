@@ -1,4 +1,5 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'java-library'
 
 layout.buildDirectory = rootProject.layout.buildDirectory.dir('InuCore')
 
@@ -24,6 +25,7 @@ compileTestKotlin {
 }
 
 dependencies {
+    api files('libs/libv2ray-classes.jar')
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.jetbrains.kotlin:kotlin-test:2.1.20"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:2.1.20"

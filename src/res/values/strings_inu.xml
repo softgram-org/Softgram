@@ -1831,7 +1831,10 @@
     <string name="InuProfileSettingsRowsReset">Reset to default</string>
     <string name="InuProxyImported_one">%1$d proxy imported</string>
     <string name="InuProxyImported_other">%1$d proxies imported</string>
-    <string name="InuProxyImportFromClipboard">Import from clipboard</string>
+    <string name="InuProxyImportFromClipboard">Import from clipboard (proxy or Xray)</string>
+    <string name="InuXrayTrustTitle">Use configs you trust</string>
+    <string name="InuXrayTrustText">The owner of a config can see your IP address and when you connect. Your messages stay encrypted.</string>
+    <string name="InuXrayTrustImport">Import</string>
     <string name="InuProxyImportNothing">No new proxy links found in clipboard</string>
     <string name="InuProxyPage">Proxy</string>
     <string name="InuProxyDisclaimer">Heads up: everything on this page is experimental. Honestly, it works in maybe half of the cases. If something does not work, loads slowly, or chats and media stop loading, just switch the feature off. I don\'t know whether it works on your network or not. These features were removed once after bug reports and are back now for testing, so please report any problems.</string>

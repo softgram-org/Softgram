@@ -110,6 +110,9 @@ export const forkSyncFiles: ForkSyncFile[] = [
   // classes at install, through profileinstaller; the debuggable variant ignores it
   { source: 'src/profile/baseline-prof.txt', target: 'TMessagesProj_App/src/main', pluginsOnly: true },
   { source: 'src/vendor/google_material', target: 'TMessagesProj/src/main/java/google_material', directory: true },
+  // xray core (libgojni.so from AndroidLibXrayLite), packaged through an extra jni source dir of the app module
+  { source: 'src/vendor/xray/arm64-v8a/*.so', target: 'TMessagesProj_App/xray-jni/arm64-v8a' },
+  { source: 'src/vendor/xray/armeabi-v7a/*.so', target: 'TMessagesProj_App/xray-jni/armeabi-v7a' },
   // values
   res('animator/*.xml', 'animator'),
   ...splashColorDirs.map(dir => res(`${dir}/colors_inu_splash.xml`, dir)),
