@@ -1,0 +1,715 @@
+name: Soft Design 21 - Xray / v2ray configs
+
+# Adds Xray / v2ray configs to the proxy list: paste vless, vmess, trojan or ss links with "Import from clipboard".
+# Each config is a normal proxy row (name, ping, select, share, delete); the Xray core runs inside the app.
+# Uploading this file applies the change by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-21-xray-import.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch Xray core (pinned and checksummed)
+        run: |
+          set -euo pipefail
+          AAR_URL="https://github.com/2dust/AndroidLibXrayLite/releases/download/v26.11.26/libv2ray.aar"
+          AAR_SHA="7d428665a2c56f6f9beefe3b18e785af1100cc0dc1da39fbfc0691bff7526859"
+          curl -fsSL --retry 3 -o /tmp/libv2ray.aar "$AAR_URL"
+          echo "$AAR_SHA  /tmp/libv2ray.aar" | sha256sum -c -
+          python3 - <<'PYEOF'
+          import zipfile, os
+          src = zipfile.ZipFile("/tmp/libv2ray.aar")
+          os.makedirs("src/core/libs", exist_ok=True)
+          rules = "-keep class go.** { *; }\n-keep class libv2ray.** { *; }\n-dontwarn go.**\n-dontwarn libv2ray.**\n"
+          inner = zipfile.ZipFile(__import__("io").BytesIO(src.read("classes.jar")))
+          with zipfile.ZipFile("src/core/libs/libv2ray-classes.jar", "w", zipfile.ZIP_DEFLATED) as out:
+              for n in inner.namelist():
+                  if n.endswith("/") or n.startswith("META-INF/"):
+                      continue
+                  out.writestr(n, inner.read(n))
+              out.writestr("META-INF/proguard/libv2ray.pro", rules)
+          for abi in ("arm64-v8a", "armeabi-v7a"):
+              d = "src/vendor/xray/" + abi
+              os.makedirs(d, exist_ok=True)
+              with open(d + "/libgojni.so", "wb") as f:
+                  f.write(src.read("jni/%s/libgojni.so" % abi))
+          print("core files written")
+          PYEOF
+          ls -la src/core/libs src/vendor/xray/*
+
+      - name: Apply Soft Design 21
+        run: |
+          cat > /tmp/step.py <<'PYEOF'
+          import os, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              os.makedirs(os.path.dirname(p) or ".", exist_ok=True)
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def fix(path, old, new, expected=1):
+              s = rd(path)
+              c = s.count(old)
+              if c == 0:
+                  if new in s:
+                      print("already applied: " + old[:60])
+                      return
+                  sys.exit("::error::cannot find in %s: %s" % (path, old[:100]))
+              if c != expected:
+                  sys.exit("::error::found %d times (expected %d) in %s: %s" % (c, expected, path, old[:100]))
+              wr(path, s.replace(old, new))
+
+          MARK = ".softgram/21-xray-import.done"
+          if os.path.exists(MARK):
+              print("Already applied.")
+              sys.exit(0)
+
+          XRAY_LINK = r'''package desu.inugram.helpers.proxy.xray
+
+          import android.net.Uri
+          import android.util.Base64
+          import org.json.JSONArray
+          import org.json.JSONObject
+
+          object XrayLink {
+              private val schemes = listOf("vless://", "vmess://", "trojan://", "ss://")
+
+              fun isXrayLink(line: String): Boolean = schemes.any { line.startsWith(it, ignoreCase = true) }
+
+              fun toOutbound(link: String): JSONObject? = try {
+                  when {
+                      link.startsWith("vless://", true) -> vless(link)
+                      link.startsWith("vmess://", true) -> vmess(link)
+                      link.startsWith("trojan://", true) -> trojan(link)
+                      link.startsWith("ss://", true) -> shadowsocks(link)
+                      else -> null
+                  }
+              } catch (_: Throwable) {
+                  null
+              }
+
+              fun protocolOf(link: String): String = when {
+                  link.startsWith("vless://", true) -> "VLESS"
+                  link.startsWith("vmess://", true) -> "VMess"
+                  link.startsWith("trojan://", true) -> "Trojan"
+                  link.startsWith("ss://", true) -> "Shadowsocks"
+                  else -> "Xray"
+              }
+
+              fun nameOf(link: String): String = try {
+                  val raw = if (link.startsWith("vmess://", true)) JSONObject(b64(link.substring(8))).optString("ps")
+                  else Uri.decode(link.substringAfter('#', ""))
+                  raw.trim().take(40)
+              } catch (_: Throwable) {
+                  ""
+              }
+
+              private fun b64(input: String): String {
+                  var s = input.trim().replace('-', '+').replace('_', '/')
+                  while (s.length % 4 != 0) s += "="
+                  return String(Base64.decode(s, Base64.DEFAULT), Charsets.UTF_8)
+              }
+
+              private fun query(uri: Uri): Map<String, String> {
+                  val m = HashMap<String, String>()
+                  for (k in uri.queryParameterNames) uri.getQueryParameter(k)?.let { m[k] = it }
+                  return m
+              }
+
+              private fun hostOf(uri: Uri): String = uri.host.orEmpty().removePrefix("[").removeSuffix("]")
+
+              private fun vless(link: String): JSONObject {
+                  val uri = Uri.parse(link)
+                  val host = hostOf(uri)
+                  val port = uri.port
+                  val id = uri.userInfo.orEmpty()
+                  require(host.isNotEmpty() && port in 1..65535 && id.isNotEmpty())
+                  val p = query(uri)
+                  val user = JSONObject().put("id", id).put("encryption", p["encryption"] ?: "none").put("level", 0)
+                  p["flow"]?.takeIf { it.isNotEmpty() }?.let { user.put("flow", it) }
+                  return JSONObject().put("protocol", "vless")
+                      .put("settings", JSONObject().put("vnext", JSONArray().put(
+                          JSONObject().put("address", host).put("port", port).put("users", JSONArray().put(user)))))
+                      .put("streamSettings", stream(p, host))
+              }
+
+              private fun trojan(link: String): JSONObject {
+                  val uri = Uri.parse(link)
+                  val host = hostOf(uri)
+                  val port = uri.port
+                  val password = uri.userInfo.orEmpty()
+                  require(host.isNotEmpty() && port in 1..65535 && password.isNotEmpty())
+                  val p = HashMap(query(uri))
+                  if (p["security"].isNullOrEmpty()) p["security"] = "tls"
+                  return JSONObject().put("protocol", "trojan")
+                      .put("settings", JSONObject().put("servers", JSONArray().put(
+                          JSONObject().put("address", host).put("port", port).put("password", password).put("level", 0))))
+                      .put("streamSettings", stream(p, host))
+              }
+
+              private fun vmess(link: String): JSONObject {
+                  val j = JSONObject(b64(link.substring(8)))
+                  val host = j.optString("add")
+                  val port = j.optString("port").toInt()
+                  val id = j.optString("id")
+                  require(host.isNotEmpty() && port in 1..65535 && id.isNotEmpty())
+                  val p = HashMap<String, String>()
+                  val net = j.optString("net").ifEmpty { "tcp" }
+                  p["type"] = net
+                  p["headerType"] = j.optString("type")
+                  p["security"] = if (j.optString("tls") == "tls") "tls" else "none"
+                  for (k in listOf("sni", "alpn", "fp", "host", "path")) j.optString(k).takeIf { it.isNotEmpty() }?.let { p[k] = it }
+                  if (net == "grpc") {
+                      p["serviceName"] = j.optString("path")
+                      if (j.optString("type") == "multi") p["mode"] = "multi"
+                  }
+                  val user = JSONObject().put("id", id).put("alterId", j.optString("aid").toIntOrNull() ?: 0)
+                      .put("security", j.optString("scy").ifEmpty { "auto" }).put("level", 0)
+                  return JSONObject().put("protocol", "vmess")
+                      .put("settings", JSONObject().put("vnext", JSONArray().put(
+                          JSONObject().put("address", host).put("port", port).put("users", JSONArray().put(user)))))
+                      .put("streamSettings", stream(p, host))
+              }
+
+              private fun shadowsocks(link: String): JSONObject {
+                  var rest = link.substring(5)
+                  rest = rest.substringBefore('#')
+                  require(!rest.substringAfter('?', "").contains("plugin="))
+                  rest = rest.substringBefore('?')
+                  val creds: String
+                  val hostPort: String
+                  if (rest.contains('@')) {
+                      val userInfo = rest.substringBeforeLast('@')
+                      hostPort = rest.substringAfterLast('@')
+                      creds = if (userInfo.contains(':')) Uri.decode(userInfo) else b64(Uri.decode(userInfo))
+                  } else {
+                      val all = b64(rest)
+                      creds = all.substringBeforeLast('@')
+                      hostPort = all.substringAfterLast('@')
+                  }
+                  val method = creds.substringBefore(':')
+                  val password = creds.substringAfter(':')
+                  val host = hostPort.substringBeforeLast(':').removePrefix("[").removeSuffix("]")
+                  val port = hostPort.substringAfterLast(':').toInt()
+                  require(method.isNotEmpty() && password.isNotEmpty() && host.isNotEmpty() && port in 1..65535)
+                  return JSONObject().put("protocol", "shadowsocks")
+                      .put("settings", JSONObject().put("servers", JSONArray().put(
+                          JSONObject().put("address", host).put("port", port).put("method", method).put("password", password).put("level", 0))))
+              }
+
+              private fun stream(p: Map<String, String>, address: String): JSONObject {
+                  val net = when (val t = (p["type"] ?: "tcp").lowercase()) {
+                      "", "raw" -> "tcp"
+                      "splithttp" -> "xhttp"
+                      "tcp", "ws", "grpc", "httpupgrade", "xhttp" -> t
+                      else -> throw IllegalArgumentException("unsupported transport $t")
+                  }
+                  val sec = (p["security"] ?: "none").lowercase().let { if (it.isEmpty()) "none" else it }
+                  val s = JSONObject().put("network", net).put("security", sec)
+                  when (sec) {
+                      "none" -> {}
+                      "tls" -> {
+                          val tls = JSONObject().put("serverName", p["sni"]?.takeIf { it.isNotEmpty() } ?: p["host"]?.takeIf { it.isNotEmpty() } ?: address)
+                          p["fp"]?.takeIf { it.isNotEmpty() }?.let { tls.put("fingerprint", it) }
+                          p["alpn"]?.takeIf { it.isNotEmpty() }?.let { tls.put("alpn", JSONArray(it.split(','))) }
+                          s.put("tlsSettings", tls)
+                      }
+                      "reality" -> {
+                          val pbk = p["pbk"].orEmpty()
+                          require(pbk.isNotEmpty())
+                          s.put("realitySettings", JSONObject()
+                              .put("serverName", p["sni"].orEmpty())
+                              .put("fingerprint", p["fp"]?.takeIf { it.isNotEmpty() } ?: "chrome")
+                              .put("publicKey", pbk)
+                              .put("shortId", p["sid"].orEmpty())
+                              .put("spiderX", p["spx"].orEmpty()))
+                      }
+                      else -> throw IllegalArgumentException("unsupported security $sec")
+                  }
+                  val path = p["path"]?.takeIf { it.isNotEmpty() } ?: "/"
+                  val host = p["host"]?.takeIf { it.isNotEmpty() }
+                  when (net) {
+                      "tcp" -> if (p["headerType"] == "http") {
+                          s.put("tcpSettings", JSONObject().put("header", JSONObject().put("type", "http").put("request", JSONObject()
+                              .put("path", JSONArray().put(path))
+                              .put("headers", JSONObject().put("Host", JSONArray().put(host ?: address))))))
+                      }
+                      "ws" -> s.put("wsSettings", JSONObject().put("path", path).apply {
+                          if (host != null) put("headers", JSONObject().put("Host", host))
+                      })
+                      "grpc" -> s.put("grpcSettings", JSONObject().put("serviceName", p["serviceName"].orEmpty()).put("multiMode", p["mode"] == "multi"))
+                      "httpupgrade" -> s.put("httpupgradeSettings", JSONObject().put("path", path).apply { if (host != null) put("host", host) })
+                      "xhttp" -> s.put("xhttpSettings", JSONObject().put("path", path).apply {
+                          if (host != null) put("host", host)
+                          p["mode"]?.takeIf { it.isNotEmpty() }?.let { put("mode", it) }
+                          p["extra"]?.takeIf { it.isNotEmpty() }?.let { runCatching { put("extra", JSONObject(it)) } }
+                      })
+                  }
+                  return s
+              }
+          }
+          '''
+
+          XRAY_MANAGER = r'''package desu.inugram.helpers.proxy.xray
+
+          import libv2ray.CoreCallbackHandler
+          import libv2ray.CoreController
+          import libv2ray.Libv2ray
+          import org.json.JSONArray
+          import org.json.JSONObject
+          import org.telegram.messenger.AndroidUtilities
+          import org.telegram.messenger.ApplicationLoader
+          import org.telegram.messenger.FileLog
+          import org.telegram.messenger.NotificationCenter
+          import org.telegram.messenger.SharedConfig
+          import org.telegram.messenger.Utilities
+          import java.io.File
+          import java.net.InetAddress
+          import java.net.ServerSocket
+          import java.security.SecureRandom
+
+          // entiny: every saved xray link is a normal SOCKS5 entry on 127.0.0.1 in the stock proxy list; one core process serves all of them,
+          // so the stock check shows a real ping for each and switching entries never restarts anything
+          object XrayManager : NotificationCenter.NotificationCenterDelegate {
+              private const val PREFS = "softgram_xray"
+              private const val KEY_ENTRIES = "entries"
+              private const val KEY_ENV = "env_key"
+              private const val LOCAL_HOST = "127.0.0.1"
+              private const val GRACE_MS = 60_000L
+
+              private class Entry(val port: Int, val user: String, val pass: String, val link: String, val name: String, val created: Long)
+
+              private val lock = Any()
+              private var cache: MutableList<Entry>? = null
+              private var controller: CoreController? = null
+              private var runningKey = ""
+              private var envReady = false
+              private var observing = false
+
+              private val handler = object : CoreCallbackHandler {
+                  override fun startup(): Long = 0L
+                  override fun shutdown(): Long = 0L
+                  override fun onEmitStatus(code: Long, message: String?): Long = 0L
+              }
+
+              @JvmStatic
+              fun isXrayLink(line: String): Boolean = XrayLink.isXrayLink(line)
+
+              @JvmStatic
+              fun init() {
+                  ensureObserver()
+                  reconcile()
+              }
+
+              // returns a tg://socks link to the local core, null when the link is not a usable xray config
+              @JvmStatic
+              fun importLink(link: String): String? {
+                  if (XrayLink.toOutbound(link) == null) return null
+                  ensureObserver()
+                  val entry = synchronized(lock) {
+                      val list = entries()
+                      list.firstOrNull { it.link == link } ?: run {
+                          val name = XrayLink.nameOf(link).ifEmpty { "Xray " + (list.size + 1) }
+                          Entry(freePort(list), randomHex(8), randomHex(16), link, name, System.currentTimeMillis()).also {
+                              list.add(it)
+                              save(list)
+                          }
+                      }
+                  }
+                  return "tg://socks?server=$LOCAL_HOST&port=${entry.port}&user=${entry.user}&pass=${entry.pass}"
+              }
+
+              @JvmStatic
+              fun displayName(address: String?, port: Int): String? {
+                  if (address != LOCAL_HOST) return null
+                  val e = synchronized(lock) { entries().firstOrNull { it.port == port } } ?: return null
+                  return e.name + " (" + XrayLink.protocolOf(e.link) + ")"
+              }
+
+              @JvmStatic
+              fun shareLink(info: SharedConfig.ProxyInfo): String {
+                  val s = info.settings
+                  if (s.address == LOCAL_HOST) {
+                      val e = synchronized(lock) { entries().firstOrNull { it.port == s.port } }
+                      if (e != null) return e.link
+                  }
+                  return s.link
+              }
+
+              override fun didReceivedNotification(id: Int, account: Int, vararg args: Any?) {
+                  if (id == NotificationCenter.proxySettingsChanged) reconcile()
+              }
+
+              private fun ensureObserver() {
+                  val first = synchronized(lock) { !observing.also { observing = true } }
+                  if (first) AndroidUtilities.runOnUIThread { NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.proxySettingsChanged) }
+              }
+
+              private fun reconcile() {
+                  AndroidUtilities.runOnUIThread {
+                      val snapshot = synchronized(lock) {
+                          val all = entries()
+                          if (all.isNotEmpty()) {
+                              SharedConfig.loadProxyList()
+                              val alive = SharedConfig.proxyList.filter { it.settings.address == LOCAL_HOST }.map { it.settings.port }.toSet()
+                              val now = System.currentTimeMillis()
+                              val kept = all.filter { it.port in alive || now - it.created < GRACE_MS }
+                              if (kept.size != all.size) {
+                                  all.clear()
+                                  all.addAll(kept)
+                                  save(all)
+                              }
+                          }
+                          ArrayList(all)
+                      }
+                      Utilities.globalQueue.postRunnable { apply(snapshot) }
+                  }
+              }
+
+              private fun apply(list: List<Entry>) {
+                  synchronized(lock) {
+                      if (list.isEmpty()) {
+                          stopLocked()
+                          return
+                      }
+                      val key = list.joinToString("|") { it.port.toString() + ":" + it.user + ":" + it.pass + ":" + it.link }
+                      if (key == runningKey && controller?.isRunning == true) return
+                      stopLocked()
+                      try {
+                          ensureEnv()
+                          val config = buildConfig(list) ?: return
+                          val c = Libv2ray.newCoreController(handler)
+                          c.startLoop(config, 0)
+                          controller = c
+                          runningKey = key
+                      } catch (t: Throwable) {
+                          FileLog.e(t)
+                          controller = null
+                          runningKey = ""
+                      }
+                  }
+              }
+
+              private fun buildConfig(list: List<Entry>): String? {
+                  val inbounds = JSONArray()
+                  val outbounds = JSONArray()
+                  val rules = JSONArray()
+                  for (e in list) {
+                      val outbound = XrayLink.toOutbound(e.link) ?: continue
+                      outbound.put("tag", "out-" + e.port)
+                      outbounds.put(outbound)
+                      inbounds.put(JSONObject()
+                          .put("tag", "in-" + e.port)
+                          .put("listen", LOCAL_HOST)
+                          .put("port", e.port)
+                          .put("protocol", "socks")
+                          .put("settings", JSONObject()
+                              .put("auth", "password")
+                              .put("udp", false)
+                              .put("accounts", JSONArray().put(JSONObject().put("user", e.user).put("pass", e.pass)))))
+                      rules.put(JSONObject()
+                          .put("type", "field")
+                          .put("inboundTag", JSONArray().put("in-" + e.port))
+                          .put("outboundTag", "out-" + e.port))
+                  }
+                  if (outbounds.length() == 0) return null
+                  return JSONObject()
+                      .put("log", JSONObject().put("loglevel", "warning"))
+                      .put("inbounds", inbounds)
+                      .put("outbounds", outbounds)
+                      .put("routing", JSONObject().put("domainStrategy", "AsIs").put("rules", rules))
+                      .toString()
+              }
+
+              private fun stopLocked() {
+                  val c = controller ?: return
+                  controller = null
+                  runningKey = ""
+                  try {
+                      c.stopLoop()
+                  } catch (t: Throwable) {
+                      FileLog.e(t)
+                  }
+              }
+
+              private fun ensureEnv() {
+                  if (envReady) return
+                  val prefs = ApplicationLoader.applicationContext.getSharedPreferences(PREFS, 0)
+                  var key = prefs.getString(KEY_ENV, null)
+                  if (key.isNullOrEmpty()) {
+                      key = randomHex(16)
+                      prefs.edit().putString(KEY_ENV, key).apply()
+                  }
+                  val dir = File(ApplicationLoader.applicationContext.filesDir, "xray")
+                  dir.mkdirs()
+                  Libv2ray.initCoreEnv(dir.absolutePath, key)
+                  envReady = true
+              }
+
+              private fun entries(): MutableList<Entry> {
+                  cache?.let { return it }
+                  val prefs = ApplicationLoader.applicationContext.getSharedPreferences(PREFS, 0)
+                  val out = ArrayList<Entry>()
+                  try {
+                      val arr = JSONArray(prefs.getString(KEY_ENTRIES, "[]"))
+                      for (i in 0 until arr.length()) {
+                          val o = arr.getJSONObject(i)
+                          out.add(Entry(o.getInt("port"), o.getString("user"), o.getString("pass"), o.getString("link"), o.optString("name"), o.optLong("created", 0L)))
+                      }
+                  } catch (t: Throwable) {
+                      FileLog.e(t)
+                  }
+                  cache = out
+                  return out
+              }
+
+              private fun save(list: List<Entry>) {
+                  val arr = JSONArray()
+                  for (e in list) {
+                      arr.put(JSONObject().put("port", e.port).put("user", e.user).put("pass", e.pass).put("link", e.link).put("name", e.name).put("created", e.created))
+                  }
+                  ApplicationLoader.applicationContext.getSharedPreferences(PREFS, 0).edit().putString(KEY_ENTRIES, arr.toString()).apply()
+              }
+
+              private fun freePort(list: List<Entry>): Int {
+                  val rnd = SecureRandom()
+                  val used = list.map { it.port }.toSet()
+                  repeat(200) {
+                      val port = 20000 + rnd.nextInt(40000)
+                      if (port in used) return@repeat
+                      try {
+                          ServerSocket(port, 0, InetAddress.getByName(LOCAL_HOST)).use { return port }
+                      } catch (_: Throwable) {
+                      }
+                  }
+                  throw IllegalStateException("no free local port")
+              }
+
+              private fun randomHex(bytes: Int): String {
+                  val b = ByteArray(bytes)
+                  SecureRandom().nextBytes(b)
+                  return b.joinToString("") { "%02x".format(it) }
+              }
+          }
+          '''
+
+          IMPORT_HELPER = r'''package desu.inugram.helpers
+
+          import android.content.ClipboardManager
+          import android.content.Context
+          import android.net.Uri
+          import desu.inugram.helpers.proxy.xray.XrayManager
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.NotificationCenter
+          import org.telegram.messenger.R
+          import org.telegram.messenger.SharedConfig
+          import org.telegram.ui.ActionBar.AlertDialog
+          import org.telegram.ui.ActionBar.BaseFragment
+          import org.telegram.ui.Components.BulletinFactory
+          import org.telegram.utils.proxy.ProxySettings
+
+          object ProxyImportHelper {
+              private const val TRUST_PREFS = "softgram_xray"
+              private const val TRUST_KEY = "trust_ack"
+
+              @JvmStatic
+              fun importFromClipboard(fragment: BaseFragment) {
+                  val context = fragment.context ?: return
+                  val clip = (context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.primaryClip
+                  val text = clip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(context)?.toString().orEmpty()
+
+                  val hasXray = text.lineSequence().any { XrayManager.isXrayLink(it.trim()) }
+                  val prefs = context.getSharedPreferences(TRUST_PREFS, Context.MODE_PRIVATE)
+                  if (hasXray && !prefs.getBoolean(TRUST_KEY, false)) {
+                      AlertDialog.Builder(context)
+                          .setTitle(LocaleController.getString(R.string.InuXrayTrustTitle))
+                          .setMessage(LocaleController.getString(R.string.InuXrayTrustText))
+                          .setPositiveButton(LocaleController.getString(R.string.InuXrayTrustImport)) { _, _ ->
+                              prefs.edit().putBoolean(TRUST_KEY, true).apply()
+                              runImport(fragment, text)
+                          }
+                          .setNegativeButton(LocaleController.getString(R.string.Cancel), null)
+                          .show()
+                      return
+                  }
+                  runImport(fragment, text)
+              }
+
+              private fun runImport(fragment: BaseFragment, text: String) {
+                  SharedConfig.loadProxyList()
+                  val known = SharedConfig.proxyList.mapTo(HashSet()) { it.settings }
+                  val imported = text.lineSequence()
+                      .mapNotNull { raw ->
+                          val line = raw.trim()
+                          val link = if (XrayManager.isXrayLink(line)) XrayManager.importLink(line) else line
+                          link?.let { ProxySettings.fromUri(Uri.parse(it)) }
+                      }
+                      .filter { it.isValid && known.add(it) }
+                      .map { SharedConfig.ProxyInfo(it) }
+                      .toList()
+
+                  if (imported.isEmpty()) {
+                      BulletinFactory.of(fragment).createErrorBulletin(
+                          LocaleController.getString(R.string.InuProxyImportNothing)
+                      ).show()
+                      return
+                  }
+                  SharedConfig.proxyList.addAll(0, imported)
+                  SharedConfig.saveProxyList()
+                  NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.proxySettingsChanged)
+                  BulletinFactory.of(fragment).createSimpleBulletin(
+                      R.raw.contact_check,
+                      LocaleController.formatPluralString("InuProxyImported", imported.size)
+                  ).show()
+              }
+          }
+          '''
+
+          PATCH = r'''diff --git a/TMessagesProj/src/main/java/org/telegram/ui/ProxyListActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/ProxyListActivity.java
+          index e3aaaa5..a475bc9 100644
+          --- a/TMessagesProj/src/main/java/org/telegram/ui/ProxyListActivity.java
+          +++ b/TMessagesProj/src/main/java/org/telegram/ui/ProxyListActivity.java
+          @@ -201,6 +201,10 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
+                               ? proxyInfo.settings.getAddress() + " (WEB)"
+                               : proxyInfo.settings.getAddress() + ":" + proxyInfo.settings.getPort());
+                       currentInfo = proxyInfo;
+          +            String inu_name = desu.inugram.helpers.proxy.xray.XrayManager.displayName(proxyInfo.settings.getAddress(), proxyInfo.settings.getPort());
+          +            if (inu_name != null) {
+          +                textView.setText(inu_name);
+          +            }
+                   }
+ 
+                   public void updateStatus() {
+          @@ -593,7 +597,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
+                                       if (links.length() > 0) {
+                                           links.append("\n\n");
+                                       }
+          -                            links.append(info.settings.getLink());
+          +                            links.append(desu.inugram.helpers.proxy.xray.XrayManager.shareLink(info));
+                                   }
+ 
+                                   Intent shareIntent = new Intent(Intent.ACTION_SEND);
+          diff --git a/TMessagesProj_App/build.gradle b/TMessagesProj_App/build.gradle
+          index d73a5f4..e0a6a1a 100644
+          --- a/TMessagesProj_App/build.gradle
+          +++ b/TMessagesProj_App/build.gradle
+          @@ -38,6 +38,7 @@ android {
+               defaultConfig.applicationId = "org.softgram.messenger"
+ 
+               sourceSets.main.jniLibs.srcDirs = ['../TMessagesProj/jni/']
+          +    sourceSets.main.jniLibs.srcDirs += ['xray-jni']
+ 
+               packaging {
+                   jniLibs {
+          '''
+
+          wr("src/fork/helpers/proxy/xray/XrayLink.kt", XRAY_LINK)
+          wr("src/fork/helpers/proxy/xray/XrayManager.kt", XRAY_MANAGER)
+
+          # the import helper is replaced as a whole, only when it is still the known stock-fork version
+          cur = rd("src/fork/helpers/ProxyImportHelper.kt")
+          if "XrayManager" not in cur:
+              if "fun importFromClipboard(fragment: BaseFragment)" not in cur or "InuProxyImportNothing" not in cur:
+                  sys.exit("::error::ProxyImportHelper.kt is not the expected version")
+              wr("src/fork/helpers/ProxyImportHelper.kt", IMPORT_HELPER)
+
+          # copy / share all keeps the original config link instead of the local socks one
+          fix("src/fork/helpers/proxy/ProxyListMenuHelper.kt",
+              "list.joinToString(\"\\n\\n\") { it.settings.link }",
+              "list.joinToString(\"\\n\\n\") { desu.inugram.helpers.proxy.xray.XrayManager.shareLink(it) }")
+
+          # start the core on launch when configs are saved
+          fix("src/fork/InuHooks.kt",
+              "            ProxyVpnHelper.init(context)\n",
+              "            ProxyVpnHelper.init(context)\n            desu.inugram.helpers.proxy.xray.XrayManager.init()\n")
+
+          fix("src/res/values/strings_inu.xml",
+              "    <string name=\"InuProxyImportFromClipboard\">Import from clipboard</string>\n",
+              "    <string name=\"InuProxyImportFromClipboard\">Import from clipboard (proxy or Xray)</string>\n"
+              "    <string name=\"InuXrayTrustTitle\">Use configs you trust</string>\n"
+              "    <string name=\"InuXrayTrustText\">The owner of a config can see your IP address and when you connect. Your messages stay encrypted.</string>\n"
+              "    <string name=\"InuXrayTrustImport\">Import</string>\n")
+
+          # jar goes through the fork-owned InuCore module, .so files through the fork sync list
+          fix("src/core/build.gradle",
+              "apply plugin: 'org.jetbrains.kotlin.jvm'\n",
+              "apply plugin: 'org.jetbrains.kotlin.jvm'\napply plugin: 'java-library'\n")
+          fix("src/core/build.gradle",
+              "dependencies {\n    testImplementation 'junit:junit:4.13.2'\n",
+              "dependencies {\n    api files('libs/libv2ray-classes.jar')\n    testImplementation 'junit:junit:4.13.2'\n")
+          fix("assets/scripts/config.ts",
+              "  { source: 'src/vendor/google_material', target: 'TMessagesProj/src/main/java/google_material', directory: true },\n",
+              "  { source: 'src/vendor/google_material', target: 'TMessagesProj/src/main/java/google_material', directory: true },\n"
+              "  // xray core (libgojni.so from AndroidLibXrayLite), packaged through an extra jni source dir of the app module\n"
+              "  { source: 'src/vendor/xray/arm64-v8a/*.so', target: 'TMessagesProj_App/xray-jni/arm64-v8a' },\n"
+              "  { source: 'src/vendor/xray/armeabi-v7a/*.so', target: 'TMessagesProj_App/xray-jni/armeabi-v7a' },\n")
+
+          fix("FEATURES.md",
+              "  - **block direct connections** — extra requests go only through your SOCKS5 proxy\n",
+              "  - **block direct connections** — extra requests go only through your SOCKS5 proxy\n"
+              "  - **xray / v2ray configs** — import vless, vmess, trojan and shadowsocks links from the clipboard; they sit in the proxy list with name and ping, and select, share (original link) and delete like any proxy; the core runs inside the app\n")
+
+          # stock hooks (proxy list name + share link, jni dir) go last in the series
+          wr("patches/softgram/xray-core.patch", PATCH)
+          series = rd("series")
+          if "softgram/xray-core.patch" not in series.split("\n"):
+              if not series.endswith("\n"):
+                  series += "\n"
+              wr("series", series + "softgram/xray-core.patch\n")
+
+          os.makedirs(".softgram", exist_ok=True)
+          wr(MARK, "xray import applied\n")
+          print("OK: Soft Design 21 applied")
+          PYEOF
+          python3 /tmp/step.py
+
+      - name: Sanity check
+        run: |
+          for f in src/core/libs/libv2ray-classes.jar src/vendor/xray/arm64-v8a/libgojni.so src/vendor/xray/armeabi-v7a/libgojni.so src/fork/helpers/proxy/xray/XrayLink.kt src/fork/helpers/proxy/xray/XrayManager.kt patches/softgram/xray-core.patch; do
+            test -s "$f" || { echo "::error::missing $f"; exit 1; }
+          done
+          grep -q '^softgram/xray-core.patch$' series || { echo "::error::series entry missing"; exit 1; }
+          grep -q "api files('libs/libv2ray-classes.jar')" src/core/build.gradle || { echo "::error::core dependency missing"; exit 1; }
+          grep -q 'xray-jni/arm64-v8a' assets/scripts/config.ts || { echo "::error::sync entry missing"; exit 1; }
+          grep -q 'XrayManager.importLink' src/fork/helpers/ProxyImportHelper.kt || { echo "::error::import hook missing"; exit 1; }
+          grep -q 'XrayManager.init()' src/fork/InuHooks.kt || { echo "::error::start hook missing"; exit 1; }
+          grep -q 'XrayManager.shareLink' src/fork/helpers/proxy/ProxyListMenuHelper.kt || { echo "::error::share hook missing"; exit 1; }
+          grep -q 'InuXrayTrustTitle' src/res/values/strings_inu.xml || { echo "::error::strings missing"; exit 1; }
+          unzip -l src/core/libs/libv2ray-classes.jar | grep -q 'META-INF/proguard/libv2ray.pro' || { echo "::error::keep rules missing"; exit 1; }
+          echo 'verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 21: xray / v2ray configs in the proxy list"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
