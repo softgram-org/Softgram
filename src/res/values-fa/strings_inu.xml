@@ -2412,4 +2412,6 @@
     <string name="InuSoftJoinText">اخبار، به‌روزرسانی‌ها و افزونه‌های Softgram در کانال رسمی منتشر می‌شود.</string>
     <string name="InuSoftJoinAction">عضویت</string>
     <string name="InuSoftJoinLater">بعداً</string>
+    <string name="InuWelcomeTitle">گفتگو با دوستانت با Softgram آسان است</string>
+    <string name="InuWelcomeSubtitle">ساده و سریع با دوستانت چت کن و تماس بگیر.</string>
 </resources>

@@ -2426,4 +2426,6 @@
     <string name="InuSoftJoinText">News, updates and plugins for Softgram are posted in the official channel.</string>
     <string name="InuSoftJoinAction">Join</string>
     <string name="InuSoftJoinLater">Not now</string>
+    <string name="InuWelcomeTitle">It\'s easy talking to your friends with Softgram</string>
+    <string name="InuWelcomeSubtitle">Chat and call your friends, simply and quickly.</string>
 </resources>

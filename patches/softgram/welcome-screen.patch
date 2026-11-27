@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: softgram ci <ci@softgram>
+Date: Fri, 27 Nov 2026 05:53:25 +0000
+Subject: Welcome screen: spring-driven 3D shapes over the stock intro.
+
+---
+ TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java
+index 0000000..0000000 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/IntroActivity.java
+@@ -437,6 +437,7 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
+ 
+         updateColors(false);
+ 
++        desu.inugram.ui.SoftWelcome.install(context, frameContainerView, startMessagingButton);
+         return fragmentView;
+     }
+ 
