@@ -15,7 +15,11 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
-import android.view.animation.OvershootInterpolator
+import android.view.MotionEvent
+import android.view.ViewConfiguration
+import android.view.animation.DecelerateInterpolator
+import androidx.recyclerview.widget.RecyclerView
+import org.telegram.ui.Components.RadialProgressView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -321,8 +325,8 @@ class FeedCardView(context: Context, private val host: FeedCardHost) : LinearLay
     override fun setPressed(pressed: Boolean) {
         super.setPressed(pressed)
         animate().cancel()
-        animate().scaleX(if (pressed) 0.965f else 1f).scaleY(if (pressed) 0.965f else 1f)
-            .setDuration(if (pressed) 110L else 380L).setInterpolator(OvershootInterpolator(2.2f)).start()
+        animate().scaleX(if (pressed) 0.98f else 1f).scaleY(if (pressed) 0.98f else 1f)
+            .setDuration(if (pressed) 140L else 240L).setInterpolator(DecelerateInterpolator()).start()
     }
 
     fun bind(it: FeedItem, palette: FeedPalette) {
@@ -344,7 +348,7 @@ class FeedCardView(context: Context, private val host: FeedCardHost) : LinearLay
         cornerPlay.visibility = if (kind == FeedKind.MUSIC) VISIBLE else GONE
         durChip.visibility = if (kind == FeedKind.VIDEO) VISIBLE else GONE
         gifChip.visibility = if (kind == FeedKind.GIF) VISIBLE else GONE
-        media.isClickable = kind == FeedKind.PHOTO || kind == FeedKind.VIDEO || kind == FeedKind.GIF
+        media.isClickable = true
         media.isLongClickable = true
         gifChip.text = "GIF"
         srcChip.text = host.channelTitle(it)
@@ -410,7 +414,7 @@ class FeedCardView(context: Context, private val host: FeedCardHost) : LinearLay
         captionView.visibility = if (cap.isNullOrEmpty()) GONE else VISIBLE
         captionView.text = cap
         captionView.setTextColor(palette.text)
-        metaView.text = host.channelTitle(it) + " · " + LocaleController.formatDateChat(m.messageOwner.date.toLong())
+        metaView.text = "\u2068" + host.channelTitle(it) + "\u2069 · " + LocaleController.formatDateChat(m.messageOwner.date.toLong())
         metaView.setTextColor(palette.sub)
     }
 
@@ -464,4 +468,81 @@ class FeedCardView(context: Context, private val host: FeedCardHost) : LinearLay
     }
 
     private fun fmt(seconds: Int): String = String.format("%d:%02d", seconds / 60, seconds % 60)
+}
+
+
+class PullRefreshLayout(context: Context, private val target: RecyclerView) : FrameLayout(context) {
+    var onRefresh: (() -> Unit)? = null
+    var topOffset = 0
+    private val spinner = RadialProgressView(context)
+    private var startY = 0f
+    private var pulling = false
+    private var refreshing = false
+    private var dist = 0f
+    private val slop = ViewConfiguration.get(context).scaledTouchSlop
+    private val trigger = AndroidUtilities.dp(72f).toFloat()
+
+    init {
+        addView(target, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        spinner.setSize(AndroidUtilities.dp(26f))
+        spinner.visibility = GONE
+        addView(spinner, LayoutParams(AndroidUtilities.dp(26f), AndroidUtilities.dp(26f), Gravity.TOP or Gravity.CENTER_HORIZONTAL))
+    }
+
+    fun setSpinnerColor(color: Int) {
+        spinner.setProgressColor(color)
+    }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                startY = ev.y
+                pulling = false
+            }
+            MotionEvent.ACTION_MOVE -> if (!refreshing && !pulling && ev.y - startY > slop && !target.canScrollVertically(-1)) {
+                pulling = true
+                startY = ev.y
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> pulling = false
+        }
+        return pulling
+    }
+
+    override fun onTouchEvent(ev: MotionEvent): Boolean {
+        if (!pulling) return super.onTouchEvent(ev)
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_MOVE -> setDist((ev.y - startY) * 0.45f)
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                pulling = false
+                if (dist >= trigger) {
+                    refreshing = true
+                    setDist(trigger)
+                    onRefresh?.invoke()
+                } else {
+                    release()
+                }
+            }
+        }
+        return true
+    }
+
+    private fun setDist(value: Float) {
+        dist = value.coerceIn(0f, trigger * 1.8f)
+        target.animate().cancel()
+        target.translationY = dist
+        spinner.visibility = if (dist > 0f || refreshing) VISIBLE else GONE
+        spinner.alpha = (dist / trigger).coerceIn(0f, 1f)
+        spinner.translationY = topOffset + dist / 2f - AndroidUtilities.dp(13f)
+    }
+
+    private fun release() {
+        dist = 0f
+        target.animate().translationY(0f).setDuration(220L).setInterpolator(DecelerateInterpolator()).start()
+        spinner.visibility = GONE
+    }
+
+    fun finishRefresh() {
+        refreshing = false
+        release()
+    }
 }

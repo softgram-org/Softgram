@@ -739,7 +739,7 @@
     <string name="InuFasterDownloads">دانلود سریع‌تر</string>
     <string name="InuFasterDownloadsSection">سرعت دانلود</string>
     <string name="InuFasterUploads">بارگذاری سریع‌تر</string>
-    <string name="InuFeed">فید</string>
+    <string name="InuFeed">کاوش</string>
     <string name="InuFeedAllChannels">همه کانال‌ها</string>
     <string name="InuFeedAllExcluded">همه کانال‌ها از فید پنهان شده‌اند.</string>
     <string name="InuFeedChannelHidden">**%1$s** از فید پنهان شد</string>

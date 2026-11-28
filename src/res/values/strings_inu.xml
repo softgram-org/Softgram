@@ -747,7 +747,7 @@
     <string name="InuFasterDownloads">Faster downloads</string>
     <string name="InuFasterDownloadsSection">Download speed</string>
     <string name="InuFasterUploads">Faster uploads</string>
-    <string name="InuFeed">Feed</string>
+    <string name="InuFeed">Explore</string>
     <string name="InuFeedAllChannels">All channels</string>
     <string name="InuFeedAllExcluded">All channels are hidden from the feed.</string>
     <string name="InuFeedChannelHidden">**%1$s** hidden from feed</string>

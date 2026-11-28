@@ -254,11 +254,11 @@ class MainTabsMenuConfig(key: String) : MenuOrderConfig<MainTabsMenuConfig.Item>
         override val iconRes: Int,
     ) : MenuOrderItem {
         CHATS("chats", 0, R.string.InuChats, R.drawable.msg_viewchats),
+        FEED("feed", 5, R.string.InuFeed, R.drawable.msg_channel),
         CONTACTS("contacts", 1, R.string.MainTabsContacts, R.drawable.msg_contacts),
         SETTINGS("settings", 2, R.string.Settings, R.drawable.msg_settings),
         CALLS("calls", 3, R.string.MainTabsCalls, R.drawable.msg_calls),
         PROFILE("profile", 4, R.string.MainTabsProfile, R.drawable.msg_openprofile),
-        FEED("feed", 5, R.string.InuFeed, R.drawable.msg_channel),
         SEARCH("search", 6, R.string.Search, R.drawable.msg_search);
 
         companion object {
@@ -272,7 +272,21 @@ class MainTabsMenuConfig(key: String) : MenuOrderConfig<MainTabsMenuConfig.Item>
 
     override fun itemByKey(key: String): Item? = Item.forKey(key)
 
-    override fun read(prefs: SharedPreferences): List<MenuOrderEntry<Item>> {
+    override fun read(prefs: SharedPreferences): List<MenuOrderEntry<Item>> = feedNextToChats(readOrdered(prefs))
+
+    private fun feedNextToChats(entries: List<MenuOrderEntry<Item>>): List<MenuOrderEntry<Item>> {
+        val feedAt = entries.indexOfFirst { it.item == Item.FEED }
+        if (feedAt < 0) return entries
+        val last = entries.size - 1
+        val atOldDefault = feedAt == last || (feedAt == last - 1 && entries[last].item == Item.SEARCH)
+        if (!atOldDefault) return entries
+        val feed = entries[feedAt]
+        val rest = entries.filterIndexed { i, _ -> i != feedAt }
+        val at = rest.indexOfFirst { it.item == Item.CHATS } + 1
+        return rest.take(at) + feed + rest.drop(at)
+    }
+
+    private fun readOrdered(prefs: SharedPreferences): List<MenuOrderEntry<Item>> {
         val entries = super.read(prefs)
         val saved = prefs.getString(this.key, "") ?: ""
         if (saved.isEmpty() || saved.contains("\"chats\"")) return entries

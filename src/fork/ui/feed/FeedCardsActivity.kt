@@ -52,7 +52,6 @@ import org.telegram.ui.ChatActivity
 import org.telegram.ui.Components.BulletinFactory
 import org.telegram.ui.Components.ItemOptions
 import org.telegram.ui.Components.LayoutHelper
-import org.telegram.ui.Components.RecyclerListView
 import org.telegram.ui.DialogsActivity
 import org.telegram.ui.MainTabsActivity
 import org.telegram.ui.PhotoViewer
@@ -64,7 +63,8 @@ class FeedCardsActivity @JvmOverloads constructor(
 ) : BaseFragment(), NotificationCenter.NotificationCenterDelegate, MainTabsActivity.TabFragmentDelegate, FeedCardHost {
 
     private val classGuid = ConnectionsManager.generateClassGuid()
-    private var list: RecyclerListView? = null
+    private var list: RecyclerView? = null
+    private var pull: PullRefreshLayout? = null
     private var chipsRow: LinearLayout? = null
     private var emptyView: TextView? = null
     private var header: FrameLayout? = null
@@ -81,6 +81,10 @@ class FeedCardsActivity @JvmOverloads constructor(
     private val pendingDownloads = HashMap<String, MessageObject>()
     private val extraCache = HashMap<String, ArrayList<MessageObject>>()
     private val extraLoading = HashSet<String>()
+    private val extraPeers = HashMap<String, Long>()
+    private val extraOldest = HashMap<String, Int>()
+    private val extraExhausted = HashSet<String>()
+    private val extraPaging = HashSet<String>()
     private val reloadNewer = Runnable { FeedController.getInstance(currentAccount).loadNewer(classGuid, 0) }
 
     override fun onFragmentCreate(): Boolean {
@@ -121,8 +125,10 @@ class FeedCardsActivity @JvmOverloads constructor(
         fragmentView = root
         root.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray))
 
-        val recycler = RecyclerListView(context)
+        val recycler = RecyclerView(context)
         list = recycler
+        recycler.overScrollMode = View.OVER_SCROLL_NEVER
+        recycler.itemAnimator = null
         recycler.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         recycler.adapter = adapter
         recycler.clipToPadding = false
@@ -135,11 +141,16 @@ class FeedCardsActivity @JvmOverloads constructor(
                 lm.findLastVisibleItemPositions(last)
                 if (dy > 0 && maxOf(last[0], last[1]) >= items.size - 6) {
                     FeedController.getInstance(currentAccount).loadMore(classGuid, 0)
+                    loadMoreExtras()
                 }
             }
         })
         recycler.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateParallax() }
-        root.addView(recycler, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL))
+        val puller = PullRefreshLayout(context, recycler)
+        pull = puller
+        puller.setSpinnerColor(getThemedColor(Theme.key_featuredStickers_addButton))
+        puller.onRefresh = { refresh() }
+        root.addView(puller, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL))
 
         val empty = TextView(context)
         emptyView = empty
@@ -169,7 +180,6 @@ class FeedCardsActivity @JvmOverloads constructor(
         var folderButton: View? = null
         folderButton = iconButton(context, R.drawable.msg_folders, LocaleController.getString(R.string.InuFeedFolder)) { showFolderPicker(folderButton ?: return@iconButton) }
         actions.addView(folderButton, LinearLayout.LayoutParams(AndroidUtilities.dp(42f), AndroidUtilities.dp(42f)))
-        actions.addView(iconButton(context, R.drawable.msg_settings, LocaleController.getString(R.string.InuFeedManageChannels)) { presentFragment(FeedExcludedChannelsSettingsActivity()) }, LinearLayout.LayoutParams(AndroidUtilities.dp(42f), AndroidUtilities.dp(42f)))
         head.addView(actions, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT.toFloat(), Gravity.RIGHT or Gravity.CENTER_VERTICAL, 0f, 0f, 6f, 0f))
 
         val scroller = HorizontalScrollView(context)
@@ -193,6 +203,7 @@ class FeedCardsActivity @JvmOverloads constructor(
             val effective = if (hasMainTabs) extendInsetsByTabsHeight(insets) else insets
             val bars = effective.getInsets(WindowInsetsCompat.Type.systemBars())
             top.setPadding(0, bars.top, 0, 0)
+            pull?.topOffset = bars.top + AndroidUtilities.dp(100f)
             recycler.setPadding(AndroidUtilities.dp(8f), bars.top + AndroidUtilities.dp(100f), AndroidUtilities.dp(8f), bars.bottom + AndroidUtilities.dp(12f))
             effective
         }
@@ -318,7 +329,7 @@ class FeedCardsActivity @JvmOverloads constructor(
         for (item in all) if (!seen.containsKey(item.message.dialogId)) seen[item.message.dialogId] = item
         for ((dialogId, item) in seen) {
             val chat = MessagesController.getInstance(currentAccount).getChat(-dialogId) ?: continue
-            addChip(context, row, (if (item.extra) "@" else "") + chat.title, dialogId, if (item.extra) ChatObject.getPublicUsername(chat) else null)
+            addChip(context, row, chat.title, dialogId, if (item.extra) ChatObject.getPublicUsername(chat) else null)
         }
     }
 
@@ -352,6 +363,12 @@ class FeedCardsActivity @JvmOverloads constructor(
         row.addView(chip, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, AndroidUtilities.dp(34f)).also {
             it.setMargins(AndroidUtilities.dp(3f), AndroidUtilities.dp(5f), AndroidUtilities.dp(3f), AndroidUtilities.dp(5f))
         })
+    }
+
+    private fun refresh() {
+        FeedController.getInstance(currentAccount).loadNewer(classGuid, 0)
+        for (username in InuConfig.FEED_EXTRA_CHANNELS.value) loadExtra(username)
+        AndroidUtilities.runOnUIThread({ pull?.finishRefresh() }, 1300L)
     }
 
     private fun updateParallax() {
@@ -521,8 +538,30 @@ class FeedCardsActivity @JvmOverloads constructor(
         updated.remove(username)
         InuConfig.FEED_EXTRA_CHANNELS.value = updated
         extraCache.remove(username)
+        extraPeers.remove(username)
+        extraOldest.remove(username)
+        extraExhausted.remove(username)
         if (filterDialogId != 0L) filterDialogId = 0L
         rebuild()
+    }
+
+    private fun buildExtra(data: TLRPC.messages_Messages): ArrayList<MessageObject> {
+        val usersMap = HashMap<Long, TLRPC.User>()
+        for (user in data.users) usersMap[user.id] = user
+        val chatsMap = HashMap<Long, TLRPC.Chat>()
+        for (c in data.chats) chatsMap[c.id] = c
+        val built = ArrayList<MessageObject>()
+        for (message in data.messages) {
+            if (message is TLRPC.TL_messageEmpty || message is TLRPC.TL_messageService) continue
+            built.add(MessageObject(currentAccount, message, null, usersMap, chatsMap, null, null, true, true, 0L, false, false, false, 0))
+        }
+        return built
+    }
+
+    private fun oldestId(data: TLRPC.messages_Messages): Int {
+        var oldest = Int.MAX_VALUE
+        for (message in data.messages) if (message.id in 1 until oldest) oldest = message.id
+        return oldest
     }
 
     private fun loadExtra(username: String) {
@@ -536,12 +575,13 @@ class FeedCardsActivity @JvmOverloads constructor(
                 val chat = resolved?.chats?.firstOrNull { it.broadcast }
                 if (resolved == null || chat == null) {
                     extraLoading.remove(username)
-                    extraCache[username] = ArrayList()
+                    if (extraCache[username] == null) extraCache[username] = ArrayList()
                     return@runOnUIThread
                 }
                 val controller = MessagesController.getInstance(currentAccount)
                 controller.putUsers(resolved.users, false)
                 controller.putChats(resolved.chats, false)
+                extraPeers[username] = -chat.id
                 val history = TLRPC.TL_messages_getHistory()
                 history.peer = controller.getInputPeer(-chat.id)
                 history.limit = EXTRA_LIMIT
@@ -550,26 +590,50 @@ class FeedCardsActivity @JvmOverloads constructor(
                         extraLoading.remove(username)
                         val data = res as? TLRPC.messages_Messages
                         if (data == null) {
-                            extraCache[username] = ArrayList()
+                            if (extraCache[username] == null) extraCache[username] = ArrayList()
                             return@runOnUIThread
                         }
                         controller.putUsers(data.users, false)
                         controller.putChats(data.chats, false)
-                        val usersMap = HashMap<Long, TLRPC.User>()
-                        for (user in data.users) usersMap[user.id] = user
-                        val chatsMap = HashMap<Long, TLRPC.Chat>()
-                        for (c in data.chats) chatsMap[c.id] = c
-                        val built = ArrayList<MessageObject>()
-                        for (message in data.messages) {
-                            if (message is TLRPC.TL_messageEmpty || message is TLRPC.TL_messageService) continue
-                            built.add(MessageObject(currentAccount, message, null, usersMap, chatsMap, null, null, true, true, 0L, false, false, false, 0))
-                        }
-                        extraCache[username] = built
+                        val firstLoad = extraCache[username] == null
+                        extraCache[username] = buildExtra(data)
+                        extraOldest[username] = oldestId(data)
+                        if (data.messages.size < EXTRA_LIMIT) extraExhausted.add(username) else extraExhausted.remove(username)
                         if (InuConfig.FEED_EXTRA_CHANNELS.value.contains(username)) {
                             rebuild()
-                            BulletinFactory.of(this).createSimpleBulletin(R.raw.contact_check, LocaleController.formatString(R.string.InuFeedChannelAdded, chat.title)).show()
+                            if (firstLoad) BulletinFactory.of(this).createSimpleBulletin(R.raw.contact_check, LocaleController.formatString(R.string.InuFeedChannelAdded, chat.title)).show()
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private fun loadMoreExtras() {
+        val controller = MessagesController.getInstance(currentAccount)
+        val connections = ConnectionsManager.getInstance(currentAccount)
+        for (username in InuConfig.FEED_EXTRA_CHANNELS.value) {
+            val peer = extraPeers[username] ?: continue
+            val oldest = extraOldest[username] ?: continue
+            if (extraExhausted.contains(username) || extraCache[username] == null || !extraPaging.add(username)) continue
+            val history = TLRPC.TL_messages_getHistory()
+            history.peer = controller.getInputPeer(peer)
+            history.offset_id = oldest
+            history.limit = EXTRA_LIMIT
+            connections.sendRequest(history) { res, _ ->
+                AndroidUtilities.runOnUIThread {
+                    extraPaging.remove(username)
+                    val data = res as? TLRPC.messages_Messages ?: return@runOnUIThread
+                    controller.putUsers(data.users, false)
+                    controller.putChats(data.chats, false)
+                    if (data.messages.isEmpty()) {
+                        extraExhausted.add(username)
+                        return@runOnUIThread
+                    }
+                    extraCache[username]?.addAll(buildExtra(data))
+                    extraOldest[username] = oldestId(data)
+                    if (data.messages.size < EXTRA_LIMIT) extraExhausted.add(username)
+                    rebuild()
                 }
             }
         }
@@ -596,6 +660,7 @@ class FeedCardsActivity @JvmOverloads constructor(
             val name = info.first.takeIf { it.isNotEmpty() } ?: continue
             options.add(FolderHelper.getTabIcon(info.second), name) { selectFolder(filter.id) }
         }
+        options.add(R.drawable.msg_settings, LocaleController.getString(R.string.InuFeedManageChannels)) { presentFragment(FeedExcludedChannelsSettingsActivity()) }
         options.show()
     }
 
@@ -713,6 +778,6 @@ class FeedCardsActivity @JvmOverloads constructor(
     }
 
     private companion object {
-        const val EXTRA_LIMIT = 12
+        const val EXTRA_LIMIT = 30
     }
 }
