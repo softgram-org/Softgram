@@ -33,6 +33,7 @@ object XrayManager : NotificationCenter.NotificationCenterDelegate {
     private var runningKey = ""
     private var envReady = false
     private var observing = false
+    @Volatile private var announce = false
 
     private val handler = object : CoreCallbackHandler {
         override fun startup(): Long = 0L
@@ -54,6 +55,7 @@ object XrayManager : NotificationCenter.NotificationCenterDelegate {
     fun importLink(link: String): String? {
         if (XrayLink.toOutbound(link) == null) return null
         ensureObserver()
+        announce = true
         val entry = synchronized(lock) {
             val list = entries()
             list.firstOrNull { it.link == link } ?: run {
@@ -125,15 +127,25 @@ object XrayManager : NotificationCenter.NotificationCenterDelegate {
             stopLocked()
             try {
                 ensureEnv()
-                val config = buildConfig(list) ?: return
+                val config = buildConfig(list)
+                if (config == null) {
+                    toast("Xray: no usable config")
+                    return
+                }
                 val c = Libv2ray.newCoreController(handler)
                 c.startLoop(config, 0)
                 controller = c
                 runningKey = key
+                if (announce) {
+                    announce = false
+                    toast("Xray core is running (" + list.size + " configs). " + Libv2ray.checkVersionX())
+                }
             } catch (t: Throwable) {
                 FileLog.e(t)
                 controller = null
                 runningKey = ""
+                announce = false
+                toast("Xray core failed: " + t.javaClass.simpleName + ": " + t.message)
             }
         }
     }
@@ -167,6 +179,13 @@ object XrayManager : NotificationCenter.NotificationCenterDelegate {
             .put("outbounds", outbounds)
             .put("routing", JSONObject().put("domainStrategy", "AsIs").put("rules", rules))
             .toString()
+    }
+
+    // entiny: short status messages while the xray integration is being tested
+    private fun toast(msg: String) {
+        AndroidUtilities.runOnUIThread {
+            android.widget.Toast.makeText(ApplicationLoader.applicationContext, msg, android.widget.Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun stopLocked() {

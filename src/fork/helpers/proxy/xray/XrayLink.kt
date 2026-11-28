@@ -8,6 +8,8 @@ import org.json.JSONObject
 object XrayLink {
     private val schemes = listOf("vless://", "vmess://", "trojan://", "ss://")
 
+    private fun JSONObject.str(k: String): String = if (isNull(k)) "" else optString(k)
+
     fun isXrayLink(line: String): Boolean = schemes.any { line.startsWith(it, ignoreCase = true) }
 
     fun toOutbound(link: String): JSONObject? = try {
@@ -31,7 +33,7 @@ object XrayLink {
     }
 
     fun nameOf(link: String): String = try {
-        val raw = if (link.startsWith("vmess://", true)) JSONObject(b64(link.substring(8))).optString("ps")
+        val raw = if (link.startsWith("vmess://", true)) JSONObject(b64(link.substring(8))).str("ps")
         else Uri.decode(link.substringAfter('#', ""))
         raw.trim().take(40)
     } catch (_: Throwable) {
@@ -39,7 +41,7 @@ object XrayLink {
     }
 
     private fun b64(input: String): String {
-        var s = input.trim().replace('-', '+').replace('_', '/')
+        var s = input.substringBefore('#').trim().replace('-', '+').replace('_', '/')
         while (s.length % 4 != 0) s += "="
         return String(Base64.decode(s, Base64.DEFAULT), Charsets.UTF_8)
     }
@@ -83,22 +85,22 @@ object XrayLink {
 
     private fun vmess(link: String): JSONObject {
         val j = JSONObject(b64(link.substring(8)))
-        val host = j.optString("add")
-        val port = j.optString("port").toInt()
-        val id = j.optString("id")
+        val host = j.str("add")
+        val port = j.str("port").toInt()
+        val id = j.str("id")
         require(host.isNotEmpty() && port in 1..65535 && id.isNotEmpty())
         val p = HashMap<String, String>()
-        val net = j.optString("net").ifEmpty { "tcp" }
+        val net = j.str("net").ifEmpty { "tcp" }
         p["type"] = net
-        p["headerType"] = j.optString("type")
-        p["security"] = if (j.optString("tls") == "tls") "tls" else "none"
-        for (k in listOf("sni", "alpn", "fp", "host", "path")) j.optString(k).takeIf { it.isNotEmpty() }?.let { p[k] = it }
+        p["headerType"] = j.str("type")
+        p["security"] = if (j.str("tls") == "tls") "tls" else "none"
+        for (k in listOf("sni", "alpn", "fp", "host", "path")) j.str(k).takeIf { it.isNotEmpty() }?.let { p[k] = it }
         if (net == "grpc") {
-            p["serviceName"] = j.optString("path")
-            if (j.optString("type") == "multi") p["mode"] = "multi"
+            p["serviceName"] = j.str("path")
+            if (j.str("type") == "multi") p["mode"] = "multi"
         }
-        val user = JSONObject().put("id", id).put("alterId", j.optString("aid").toIntOrNull() ?: 0)
-            .put("security", j.optString("scy").ifEmpty { "auto" }).put("level", 0)
+        val user = JSONObject().put("id", id).put("alterId", j.str("aid").toIntOrNull() ?: 0)
+            .put("security", j.str("scy").ifEmpty { "auto" }).put("level", 0)
         return JSONObject().put("protocol", "vmess")
             .put("settings", JSONObject().put("vnext", JSONArray().put(
                 JSONObject().put("address", host).put("port", port).put("users", JSONArray().put(user)))))
