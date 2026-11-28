@@ -1,0 +1,634 @@
+name: Soft Design 21 - Reminders from messages
+
+# Needs Soft Design 20 applied first. Uploading this file applies the change by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-21-reminders.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 21
+        run: |
+          cat > /tmp/step.py <<'PYEOF'
+          import os, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              d = os.path.dirname(p)
+              if d:
+                  os.makedirs(d, exist_ok=True)
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def sub(path, old, new):
+              s = rd(path)
+              c = s.count(old)
+              if c != 1:
+                  sys.exit("::error::anchor found %d times in %s: %s" % (c, path, old[:100]))
+              wr(path, s.replace(old, new))
+
+          def after_line(path, needle, text):
+              lines = rd(path).split("\n")
+              hits = [i for i, l in enumerate(lines) if needle in l]
+              if len(hits) != 1:
+                  sys.exit("::error::line anchor found %d times in %s: %s" % (len(hits), path, needle))
+              lines.insert(hits[0] + 1, text)
+              wr(path, "\n".join(lines))
+
+          MARK = ".softgram/21-reminders.done"
+          if os.path.exists(MARK):
+              print("Already applied.")
+              sys.exit(0)
+
+          # 1. stock patches: the note field in Telegram's schedule picker, and the alarm receivers in the manifest
+          ALERTS = r'''diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java
+          index b20f86e..3e5d4f1 100644
+          --- a/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java
+          +++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java
+          @@ -4308,4 +4308,7 @@ public class AlertsCreator {
+               }
+           
+          +    // softgram: an extra view (the reminder note) shown under the title of the schedule picker
+          +    public static View inu_extraView;
+          +
+               public static class ScheduleDatePickerColors {
+           
+          @@ -4403,5 +4406,5 @@ public class AlertsCreator {
+                   long selfUserId = UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
+           
+          -        BottomSheet.Builder builder = new BottomSheet.Builder(context, false, resourcesProvider);
+          +        BottomSheet.Builder builder = new BottomSheet.Builder(context, inu_extraView != null, resourcesProvider);
+                   builder.setApplyBottomPadding(false);
+           
+          @@ -4491,4 +4494,9 @@ public class AlertsCreator {
+                   titleView.setOnTouchListener((v, event) -> true);
+           
+          +        if (inu_extraView != null) {
+          +            container.addView(inu_extraView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 22, 2, 22, 6));
+          +            inu_extraView = null;
+          +        }
+          +
+                   final boolean[] notify = new boolean[] { true };
+                   ActionBarMenuItem optionsButton = null;
+          '''
+          MANIFEST = r'''diff --git a/TMessagesProj/src/main/AndroidManifest.xml b/TMessagesProj/src/main/AndroidManifest.xml
+          index 172ced1..27d5af7 100644
+          --- a/TMessagesProj/src/main/AndroidManifest.xml
+          +++ b/TMessagesProj/src/main/AndroidManifest.xml
+          @@ -53,4 +53,6 @@
+               <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+               <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+          +    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+          +    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
+               <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+               <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+          @@ -627,4 +629,10 @@
+           
+                   <receiver android:name=".NotificationDismissReceiver" android:exported="false"/>
+          +        <receiver android:name="desu.inugram.helpers.academics.ReminderReceiver" android:exported="false"/>
+          +        <receiver android:name="desu.inugram.helpers.academics.ReminderBootReceiver" android:exported="true">
+          +            <intent-filter>
+          +                <action android:name="android.intent.action.BOOT_COMPLETED" />
+          +            </intent-filter>
+          +        </receiver>
+           
+                   <receiver android:name="desu.inugram.helpers.update.ApkInstaller$UpdateReceiver" android:exported="false">
+          '''
+          wr("patches/softgram/reminder-picker.patch", ALERTS.lstrip("\n"))
+          wr("patches/softgram/reminder-manifest.patch", MANIFEST.lstrip("\n"))
+          series = rd("series")
+          if not series.endswith("\n"):
+              series += "\n"
+          for name in ("softgram/reminder-picker.patch", "softgram/reminder-manifest.patch"):
+              if name not in series.split("\n"):
+                  series += name + "\n"
+          wr("series", series)
+
+          # 2. resources: the notification layout and its filled icons (layouts need their own sync line, drawables already have one)
+          sub("assets/scripts/config.ts", "  res('drawable/*.xml', 'drawable'),\n",
+              "  res('drawable/*.xml', 'drawable'),\n  res('layout/*.xml', 'layout'),\n")
+          def vec(name, body):
+              wr("src/res/drawable/%s.xml" % name,
+                 '<?xml version="1.0" encoding="utf-8"?>\n'
+                 '<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
+                 '    android:width="24dp"\n'
+                 '    android:height="24dp"\n'
+                 '    android:viewportWidth="24"\n'
+                 '    android:viewportHeight="24">\n' + body + '</vector>\n')
+
+          vec("softgram_reminder_bell",
+              '    <path\n'
+              '        android:fillColor="#FFFFFF"\n'
+              '        android:pathData="M12,22c1.1,0 2,-0.9 2,-2h-4c0,1.1 0.89,2 2,2zM18,16v-5c0,-3.07 -1.64,-5.64 -4.5,-6.32V4c0,-0.83 -0.67,-1.5 -1.5,-1.5s-1.5,0.67 -1.5,1.5v0.68C7.63,5.36 6,7.92 6,11v5l-2,2v1h16v-1l-2,-2z" />\n')
+          vec("softgram_reminder_close",
+              '    <path\n'
+              '        android:fillColor="#FFFFFF"\n'
+              '        android:pathData="M6.4,5l-1.4,1.4L10.6,12L5,17.6L6.4,19L12,13.4L17.6,19L19,17.6L13.4,12L19,6.4L17.6,5L12,10.6z" />\n')
+          wr("src/res/drawable/softgram_reminder_btn_bg.xml",
+             '<?xml version="1.0" encoding="utf-8"?>\n'
+             '<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">\n'
+             '    <solid android:color="#B3606A7A" />\n'
+             '    <stroke android:width="0.75dp" android:color="#4DFFFFFF" />\n'
+             '</shape>\n')
+          wr("src/res/drawable/softgram_reminder_bell_bg.xml",
+             '<?xml version="1.0" encoding="utf-8"?>\n'
+             '<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">\n'
+             '    <gradient android:angle="270" android:startColor="#4FA3F7" android:endColor="#2F7FD6" />\n'
+             '</shape>\n')
+          wr("src/res/layout/softgram_reminder_notification.xml",
+             '<?xml version="1.0" encoding="utf-8"?>\n'
+             '<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"\n'
+             '    android:layout_width="match_parent"\n'
+             '    android:layout_height="wrap_content"\n'
+             '    android:gravity="center_vertical"\n'
+             '    android:orientation="horizontal">\n\n'
+             '    <FrameLayout\n'
+             '        android:layout_width="40dp"\n'
+             '        android:layout_height="40dp"\n'
+             '        android:background="@drawable/softgram_reminder_bell_bg">\n\n'
+             '        <ImageView\n'
+             '            android:layout_width="22dp"\n'
+             '            android:layout_height="22dp"\n'
+             '            android:layout_gravity="center"\n'
+             '            android:importantForAccessibility="no"\n'
+             '            android:src="@drawable/softgram_reminder_bell" />\n'
+             '    </FrameLayout>\n\n'
+             '    <LinearLayout\n'
+             '        android:layout_width="0dp"\n'
+             '        android:layout_height="wrap_content"\n'
+             '        android:layout_marginStart="12dp"\n'
+             '        android:layout_weight="1"\n'
+             '        android:orientation="vertical">\n\n'
+             '        <TextView\n'
+             '            android:id="@+id/reminder_title"\n'
+             '            android:layout_width="match_parent"\n'
+             '            android:layout_height="wrap_content"\n'
+             '            android:ellipsize="end"\n'
+             '            android:maxLines="1"\n'
+             '            android:textAppearance="@style/TextAppearance.Compat.Notification.Title" />\n\n'
+             '        <TextView\n'
+             '            android:id="@+id/reminder_text"\n'
+             '            android:layout_width="match_parent"\n'
+             '            android:layout_height="wrap_content"\n'
+             '            android:ellipsize="end"\n'
+             '            android:maxLines="2"\n'
+             '            android:textAppearance="@style/TextAppearance.Compat.Notification" />\n'
+             '    </LinearLayout>\n\n'
+             '    <FrameLayout\n'
+             '        android:id="@+id/reminder_close"\n'
+             '        android:layout_width="40dp"\n'
+             '        android:layout_height="40dp"\n'
+             '        android:layout_marginStart="8dp"\n'
+             '        android:background="@drawable/softgram_reminder_btn_bg">\n\n'
+             '        <ImageView\n'
+             '            android:layout_width="20dp"\n'
+             '            android:layout_height="20dp"\n'
+             '            android:layout_gravity="center"\n'
+             '            android:importantForAccessibility="no"\n'
+             '            android:src="@drawable/softgram_reminder_close" />\n'
+             '    </FrameLayout>\n\n'
+             '    <FrameLayout\n'
+             '        android:id="@+id/reminder_snooze"\n'
+             '        android:layout_width="40dp"\n'
+             '        android:layout_height="40dp"\n'
+             '        android:layout_marginStart="8dp"\n'
+             '        android:background="@drawable/softgram_reminder_btn_bg">\n\n'
+             '        <TextView\n'
+             '            android:layout_width="wrap_content"\n'
+             '            android:layout_height="wrap_content"\n'
+             '            android:layout_gravity="center"\n'
+             '            android:importantForAccessibility="no"\n'
+             '            android:text="2"\n'
+             '            android:textColor="#FFFFFF"\n'
+             '            android:textSize="18sp"\n'
+             '            android:textStyle="bold" />\n'
+             '    </FrameLayout>\n'
+             '</LinearLayout>\n')
+
+          # 3. reminders: storage, alarms, notification, and the Add to calendar sheet
+          P = "src/fork/helpers/academics/"
+          wr(P + "ReminderStore.kt", r'''package desu.inugram.helpers.academics
+
+          import android.content.Context
+          import org.json.JSONArray
+          import org.json.JSONObject
+          import org.telegram.messenger.ApplicationLoader
+
+          // Reminders made from messages ("Add to calendar"). They stay on this device.
+          object ReminderStore {
+              const val ACTIVE = 0
+              const val FIRED = 1
+              const val ARCHIVED = 2
+
+              class Reminder(
+                  val id: Long,
+                  val account: Int,
+                  val dialogId: Long,
+                  val messageId: Int,
+                  var text: String,
+                  var time: Long,
+                  var state: Int,
+              )
+
+              private const val PREFS = "softgram_reminders"
+              private var cache: MutableList<Reminder>? = null
+
+              private fun prefs() = ApplicationLoader.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+              @Synchronized
+              fun all(): MutableList<Reminder> = cache ?: load().also { cache = it }
+
+              @Synchronized
+              fun find(id: Long): Reminder? = all().firstOrNull { it.id == id }
+
+              @Synchronized
+              fun add(account: Int, dialogId: Long, messageId: Int, text: String, time: Long): Reminder {
+                  var id = System.currentTimeMillis()
+                  while (all().any { it.id == id }) id++
+                  val reminder = Reminder(id, account, dialogId, messageId, text, time, ACTIVE)
+                  all().add(reminder)
+                  save()
+                  return reminder
+              }
+
+              @Synchronized
+              fun save() {
+                  val array = JSONArray()
+                  for (r in all()) {
+                      array.put(
+                          JSONObject()
+                              .put("id", r.id).put("account", r.account).put("dialog", r.dialogId).put("message", r.messageId)
+                              .put("text", r.text).put("time", r.time).put("state", r.state)
+                      )
+                  }
+                  prefs().edit().putString("items", array.toString()).apply()
+              }
+
+              private fun load(): MutableList<Reminder> {
+                  val result = ArrayList<Reminder>()
+                  val raw = prefs().getString("items", null) ?: return result
+                  try {
+                      val array = JSONArray(raw)
+                      for (i in 0 until array.length()) {
+                          val o = array.getJSONObject(i)
+                          result.add(
+                              Reminder(
+                                  o.getLong("id"), o.getInt("account"), o.getLong("dialog"), o.getInt("message"),
+                                  o.optString("text", ""), o.getLong("time"), o.optInt("state", ACTIVE),
+                              )
+                          )
+                      }
+                  } catch (e: Exception) {
+                      android.util.Log.e("ReminderStore", "bad data", e)
+                  }
+                  return result
+              }
+          }
+          ''')
+
+          wr(P + "ReminderScheduler.kt", r'''package desu.inugram.helpers.academics
+
+          import android.app.AlarmManager
+          import android.app.PendingIntent
+          import android.content.Context
+          import android.content.Intent
+          import android.os.Build
+          import org.telegram.messenger.ApplicationLoader
+
+          // Rings a reminder at its time, even when the app is closed.
+          object ReminderScheduler {
+              const val ACTION_FIRE = "desu.inugram.reminder.FIRE"
+              const val ACTION_DISMISS = "desu.inugram.reminder.DISMISS"
+              const val ACTION_SNOOZE = "desu.inugram.reminder.SNOOZE"
+              const val EXTRA_ID = "reminder_id"
+              const val SNOOZE_MS = 2 * 60 * 1000L
+
+              fun pending(context: Context, id: Long, action: String): PendingIntent {
+                  val intent = Intent(context, ReminderReceiver::class.java).setAction(action).putExtra(EXTRA_ID, id)
+                  return PendingIntent.getBroadcast(context, id.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+              }
+
+              fun schedule(reminder: ReminderStore.Reminder) {
+                  val context = ApplicationLoader.applicationContext
+                  val alarms = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                  val pending = pending(context, reminder.id, ACTION_FIRE)
+                  val exact = Build.VERSION.SDK_INT < 31 || alarms.canScheduleExactAlarms()
+                  try {
+                      if (exact) {
+                          alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, reminder.time, pending)
+                      } else {
+                          alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, reminder.time, pending)
+                      }
+                  } catch (e: SecurityException) {
+                      alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, reminder.time, pending)
+                  }
+              }
+
+              fun cancel(reminder: ReminderStore.Reminder) {
+                  val context = ApplicationLoader.applicationContext
+                  val alarms = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                  alarms.cancel(pending(context, reminder.id, ACTION_FIRE))
+              }
+
+              /** puts every waiting reminder back after a restart of the phone; reminders that passed meanwhile ring now */
+              fun restoreAll(context: Context) {
+                  val now = System.currentTimeMillis()
+                  for (reminder in ReminderStore.all().toList()) {
+                      if (reminder.state != ReminderStore.ACTIVE) continue
+                      if (reminder.time <= now) ReminderNotifier.show(context, reminder) else schedule(reminder)
+                  }
+              }
+          }
+          ''')
+
+          wr(P + "ReminderReceiver.kt", r'''package desu.inugram.helpers.academics
+
+          import android.content.BroadcastReceiver
+          import android.content.Context
+          import android.content.Intent
+
+          // Alarm and the two notification buttons (cross = archive, 2 = ring again in two minutes)
+          class ReminderReceiver : BroadcastReceiver() {
+              override fun onReceive(context: Context, intent: Intent) {
+                  val reminder = ReminderStore.find(intent.getLongExtra(ReminderScheduler.EXTRA_ID, 0L)) ?: return
+                  when (intent.action) {
+                      ReminderScheduler.ACTION_FIRE -> ReminderNotifier.show(context, reminder)
+
+                      ReminderScheduler.ACTION_DISMISS -> {
+                          ReminderNotifier.cancel(context, reminder)
+                          reminder.state = ReminderStore.ARCHIVED
+                          ReminderStore.save()
+                      }
+
+                      ReminderScheduler.ACTION_SNOOZE -> {
+                          ReminderNotifier.cancel(context, reminder)
+                          reminder.time = System.currentTimeMillis() + ReminderScheduler.SNOOZE_MS
+                          reminder.state = ReminderStore.ACTIVE
+                          ReminderStore.save()
+                          ReminderScheduler.schedule(reminder)
+                      }
+                  }
+              }
+          }
+
+          class ReminderBootReceiver : BroadcastReceiver() {
+              override fun onReceive(context: Context, intent: Intent) {
+                  if (intent.action == Intent.ACTION_BOOT_COMPLETED) ReminderScheduler.restoreAll(context)
+              }
+          }
+          ''')
+
+          wr(P + "ReminderNotifier.kt", r'''package desu.inugram.helpers.academics
+
+          import android.app.NotificationChannel
+          import android.app.NotificationManager
+          import android.app.PendingIntent
+          import android.content.Context
+          import android.content.Intent
+          import android.os.Build
+          import android.widget.RemoteViews
+          import androidx.core.app.NotificationCompat
+          import androidx.core.app.NotificationManagerCompat
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.R
+          import org.telegram.ui.LaunchActivity
+
+          // The reminder notification: a bell, the note, and two round buttons on the right
+          object ReminderNotifier {
+              private const val CHANNEL = "softgram_reminders"
+
+              private fun notificationId(reminder: ReminderStore.Reminder) = (reminder.id % Int.MAX_VALUE).toInt()
+
+              private fun ensureChannel(context: Context) {
+                  if (Build.VERSION.SDK_INT < 26) return
+                  val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                  if (manager.getNotificationChannel(CHANNEL) != null) return
+                  val channel = NotificationChannel(CHANNEL, LocaleController.getString(R.string.InuReminderChannel), NotificationManager.IMPORTANCE_HIGH)
+                  channel.enableVibration(true)
+                  manager.createNotificationChannel(channel)
+              }
+
+              private fun openChat(context: Context, reminder: ReminderStore.Reminder): PendingIntent {
+                  val intent = Intent(context, LaunchActivity::class.java)
+                  intent.action = "com.tmessages.openchat" + Math.random() + Integer.MAX_VALUE
+                  intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                  intent.putExtra("currentAccount", reminder.account)
+                  if (reminder.dialogId < 0) intent.putExtra("chatId", -reminder.dialogId) else intent.putExtra("userId", reminder.dialogId)
+                  if (reminder.messageId != 0) intent.putExtra("messageId", reminder.messageId)
+                  return PendingIntent.getActivity(context, notificationId(reminder), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+              }
+
+              fun show(context: Context, reminder: ReminderStore.Reminder) {
+                  ensureChannel(context)
+                  val view = RemoteViews(context.packageName, R.layout.softgram_reminder_notification)
+                  view.setTextViewText(R.id.reminder_title, LocaleController.getString(R.string.InuReminderTitle))
+                  view.setTextViewText(R.id.reminder_text, reminder.text.ifEmpty { LocaleController.getString(R.string.InuReminderNoNote) })
+                  view.setOnClickPendingIntent(R.id.reminder_close, ReminderScheduler.pending(context, reminder.id, ReminderScheduler.ACTION_DISMISS))
+                  view.setOnClickPendingIntent(R.id.reminder_snooze, ReminderScheduler.pending(context, reminder.id, ReminderScheduler.ACTION_SNOOZE))
+                  view.setContentDescription(R.id.reminder_close, LocaleController.getString(R.string.InuReminderDismiss))
+                  view.setContentDescription(R.id.reminder_snooze, LocaleController.getString(R.string.InuReminderSnooze))
+
+                  val notification = NotificationCompat.Builder(context, CHANNEL)
+                      .setSmallIcon(R.drawable.notification)
+                      .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                      .setCustomContentView(view)
+                      .setContentIntent(openChat(context, reminder))
+                      .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                      .setPriority(NotificationCompat.PRIORITY_HIGH)
+                      .setAutoCancel(false)
+                      .setWhen(reminder.time)
+                      .setShowWhen(true)
+                      .build()
+                  reminder.state = ReminderStore.FIRED
+                  ReminderStore.save()
+                  try {
+                      NotificationManagerCompat.from(context).notify(notificationId(reminder), notification)
+                  } catch (e: SecurityException) {
+                      android.util.Log.e("ReminderNotifier", "notifications are not allowed", e)
+                  }
+              }
+
+              fun cancel(context: Context, reminder: ReminderStore.Reminder) {
+                  NotificationManagerCompat.from(context).cancel(notificationId(reminder))
+              }
+          }
+          ''')
+
+          wr(P + "ReminderSheet.kt", r'''package desu.inugram.helpers.academics
+
+          import android.content.Context
+          import android.graphics.drawable.GradientDrawable
+          import android.os.Build
+          import android.text.InputType
+          import android.view.WindowManager
+          import android.widget.EditText
+          import android.widget.Toast
+          import androidx.core.graphics.ColorUtils
+          import org.telegram.messenger.AndroidUtilities
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.MessageObject
+          import org.telegram.messenger.R
+          import org.telegram.messenger.UserConfig
+          import org.telegram.ui.ActionBar.Theme
+          import org.telegram.ui.ChatActivity
+          import org.telegram.ui.Components.AlertsCreator
+          import java.util.Date
+
+          // "Add to calendar": Telegram's own date and time picker (the one used for reminders and scheduled messages),
+          // with a note on top and a translucent, blurred sheet like the message menu.
+          object ReminderSheet {
+              fun show(activity: ChatActivity, message: MessageObject) {
+                  val context = activity.parentActivity ?: return
+                  val provider = activity.resourceProvider
+                  val account = activity.currentAccount
+
+                  val note = EditText(context)
+                  note.setText((message.messageText?.toString() ?: "").trim().take(140))
+                  note.hint = LocaleController.getString(R.string.InuReminderNoteHint)
+                  note.textSize = 16f
+                  note.maxLines = 3
+                  note.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                  note.setTextColor(Theme.getColor(Theme.key_dialogTextBlack, provider))
+                  note.setHintTextColor(Theme.getColor(Theme.key_dialogTextHint, provider))
+                  val shape = GradientDrawable()
+                  shape.cornerRadius = AndroidUtilities.dp(12f).toFloat()
+                  shape.setColor(ColorUtils.setAlphaComponent(Theme.getColor(Theme.key_dialogTextBlack, provider), 0x14))
+                  note.background = shape
+                  note.setPadding(AndroidUtilities.dp(14f), AndroidUtilities.dp(10f), AndroidUtilities.dp(14f), AndroidUtilities.dp(10f))
+                  AlertsCreator.inu_extraView = note
+
+                  val base = AlertsCreator.ScheduleDatePickerColors(provider)
+                  val colors = AlertsCreator.ScheduleDatePickerColors(
+                      base.textColor, ColorUtils.setAlphaComponent(base.backgroundColor, 0xCC), base.iconColor, base.iconSelectorColor,
+                      base.subMenuTextColor, base.subMenuBackgroundColor, base.subMenuSelectorColor,
+                      base.buttonTextColor, base.buttonBackgroundColor, base.buttonBackgroundPressedColor,
+                  )
+                  val selfId = UserConfig.getInstance(account).getClientUserId()
+                  val builder = AlertsCreator.createScheduleDatePickerDialog(
+                      context, selfId, -1L, 0,
+                      AlertsCreator.ScheduleDatePickerDelegate { _, scheduleDate, _ ->
+                          val time = scheduleDate * 1000L
+                          val reminder = ReminderStore.add(account, message.dialogId, message.id, note.text.toString().trim(), time)
+                          ReminderScheduler.schedule(reminder)
+                          val date = Date(time)
+                          val label = android.text.format.DateFormat.getMediumDateFormat(context).format(date) + " " +
+                              android.text.format.DateFormat.getTimeFormat(context).format(date)
+                          Toast.makeText(context, LocaleController.formatString(R.string.InuReminderSet, label), Toast.LENGTH_SHORT).show()
+                      },
+                      null, colors, provider,
+                  ) ?: return
+                  val sheet = builder.create()
+                  activity.showDialog(sheet)
+                  blurBehind(context, sheet)
+              }
+
+              private fun blurBehind(context: Context, sheet: android.app.Dialog) {
+                  if (Build.VERSION.SDK_INT < 31) return
+                  AndroidUtilities.runOnUIThread({
+                      val window = sheet.window ?: return@runOnUIThread
+                      val windows = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                      if (!windows.isCrossWindowBlurEnabled) return@runOnUIThread
+                      window.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
+                      val params = window.attributes
+                      params.blurBehindRadius = AndroidUtilities.dp(24f)
+                      window.attributes = params
+                  }, 60)
+              }
+          }
+          ''')
+
+          # 4. the menu entry sits next to Forward, and uses the existing menu order system
+          H = "src/fork/helpers/chat/ChatHelper.kt"
+          text = rd(H)
+          if "= 541" in text:
+              sys.exit("::error::option id 541 is already used")
+          sub(H, "    const val OPTION_LOCAL_EDIT_RESET = 535\n",
+                 "    const val OPTION_LOCAL_EDIT_RESET = 535\n    const val OPTION_ADD_TO_CALENDAR = 541\n")
+          sub(H, "            options.add(OPTION_SET_REMINDER)\n            icons.add(R.drawable.msg_notifications)\n        }\n",
+                 "            options.add(OPTION_SET_REMINDER)\n            icons.add(R.drawable.msg_notifications)\n        }\n\n"
+                 "        if (isMenuItemEnabled(MessageMenuConfig.Item.ADD_TO_CALENDAR)) {\n"
+                 "            items.add(LocaleController.getString(R.string.InuAddToCalendar))\n"
+                 "            options.add(OPTION_ADD_TO_CALENDAR)\n"
+                 "            icons.add(R.drawable.softgram_academic_calendar)\n"
+                 "        }\n")
+          sub(H, "                setReminder(activity, messages)\n            }\n\n            OPTION_BOOKMARK -> {\n",
+                 "                setReminder(activity, messages)\n            }\n\n"
+                 "            OPTION_ADD_TO_CALENDAR -> desu.inugram.helpers.academics.ReminderSheet.show(activity, selectedObject)\n\n"
+                 "            OPTION_BOOKMARK -> {\n")
+          sub("src/fork/helpers/menu/MenuOrderConfig.kt",
+              '        FORWARD("forward", listOf(ChatActivity.OPTION_FORWARD), R.string.Forward, R.drawable.msg_forward),\n',
+              '        FORWARD("forward", listOf(ChatActivity.OPTION_FORWARD), R.string.Forward, R.drawable.msg_forward),\n'
+              '        ADD_TO_CALENDAR("add_to_calendar", listOf(ChatHelper.OPTION_ADD_TO_CALENDAR), R.string.InuAddToCalendar, R.drawable.softgram_academic_calendar),\n')
+
+          # 5. strings
+          after_line("src/res/values/strings_inu.xml", 'name="InuAcademicNoChats">',
+              '    <string name="InuAddToCalendar">Add to calendar</string>\n'
+              '    <string name="InuReminderNoteHint">Note for the reminder</string>\n'
+              '    <string name="InuReminderSet">Reminder set for %1$s</string>\n'
+              '    <string name="InuReminderTitle">Reminder</string>\n'
+              '    <string name="InuReminderNoNote">Tap to open the message</string>\n'
+              '    <string name="InuReminderChannel">Reminders</string>\n'
+              '    <string name="InuReminderDismiss">Dismiss and archive</string>\n'
+              '    <string name="InuReminderSnooze">Remind again in 2 minutes</string>')
+          after_line("src/res/values-fa/strings_inu.xml", 'name="InuAcademicNoChats"',
+              '    <string name="InuAddToCalendar">افزودن به تقویم</string>\n'
+              '    <string name="InuReminderNoteHint">یادداشت برای یادآور</string>\n'
+              '    <string name="InuReminderSet">یادآور برای %1$s تنظیم شد</string>\n'
+              '    <string name="InuReminderTitle">یادآور</string>\n'
+              '    <string name="InuReminderNoNote">برای باز کردن پیام بزنید</string>\n'
+              '    <string name="InuReminderChannel">یادآورها</string>\n'
+              '    <string name="InuReminderDismiss">بستن و بایگانی</string>\n'
+              '    <string name="InuReminderSnooze">دو دقیقه دیگر یادآوری کن</string>')
+
+          os.makedirs(".softgram", exist_ok=True)
+          wr(MARK, "reminders (add to calendar, picker note, notification buttons) applied\n")
+          print("OK: Soft Design 21 applied")
+
+          PYEOF
+          python3 /tmp/step.py
+
+      - name: Sanity check
+        run: |
+          for f in src/fork/helpers/academics/ReminderStore.kt src/fork/helpers/academics/ReminderSheet.kt src/fork/helpers/academics/ReminderReceiver.kt src/fork/helpers/academics/ReminderNotifier.kt src/res/layout/softgram_reminder_notification.xml patches/softgram/reminder-picker.patch patches/softgram/reminder-manifest.patch; do
+            test -f "$f" || { echo "::error::missing $f"; exit 1; }
+          done
+          grep -q '^softgram/reminder-picker.patch$' series || { echo "::error::picker patch not in series"; exit 1; }
+          grep -q '^softgram/reminder-manifest.patch$' series || { echo "::error::manifest patch not in series"; exit 1; }
+          grep -q 'ADD_TO_CALENDAR' src/fork/helpers/menu/MenuOrderConfig.kt || { echo "::error::menu item missing"; exit 1; }
+          grep -q 'InuReminderSnooze' src/res/values/strings_inu.xml || { echo "::error::strings missing"; exit 1; }
+          echo 'verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 21: Add to calendar reminders (picker note, alarms, notification buttons)"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
