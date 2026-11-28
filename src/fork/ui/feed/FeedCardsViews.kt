@@ -377,10 +377,10 @@ class FeedCardView(context: Context, private val host: FeedCardHost) : LinearLay
             image.scaleX = 1f
             image.scaleY = 1f
         }
-        if (kind == FeedKind.VIDEO) durChip.text = fmt(m.duration)
+        if (kind == FeedKind.VIDEO) durChip.text = fmt(m.duration.toInt())
         if (kind == FeedKind.MUSIC) {
             musicTitle.text = m.musicTitle?.takeIf { s -> s.isNotEmpty() } ?: LocaleController.getString(R.string.InuFeedAudio)
-            musicSub.text = (m.musicAuthor ?: "") + (if (m.duration > 0) " · " + fmt(m.duration) else "")
+            musicSub.text = (m.musicAuthor ?: "") + (if (m.duration > 0) " · " + fmt(m.duration.toInt()) else "")
             musicTitle.setTextColor(palette.text)
             musicSub.setTextColor(palette.sub)
         }
@@ -397,7 +397,7 @@ class FeedCardView(context: Context, private val host: FeedCardHost) : LinearLay
                 })
             }
             voiceBox.removeView(voiceDur)
-            voiceDur.text = fmt(m.duration)
+            voiceDur.text = fmt(m.duration.toInt())
             voiceDur.setTextColor(palette.sub)
             voiceBox.addView(voiceDur)
             voiceDisc.discColor = palette.accent

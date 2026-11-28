@@ -159,7 +159,7 @@ class FeedCardsActivity @JvmOverloads constructor(
         title.setTypeface(Typeface.DEFAULT_BOLD)
         title.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText))
         val titleStart = if (hasMainTabs) 18f else 56f
-        head.addView(title, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT or Gravity.CENTER_VERTICAL, titleStart, 0f, 0f, 0f))
+        head.addView(title, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT.toFloat(), Gravity.LEFT or Gravity.CENTER_VERTICAL, titleStart, 0f, 0f, 0f))
         if (!hasMainTabs) {
             head.addView(iconButton(context, R.drawable.ic_ab_back, LocaleController.getString(R.string.AccDescrGoBack)) { finishFragment() }, LayoutHelper.createFrame(44, 44f, Gravity.LEFT or Gravity.CENTER_VERTICAL, 6f, 0f, 0f, 0f))
         }
@@ -170,7 +170,7 @@ class FeedCardsActivity @JvmOverloads constructor(
         folderButton = iconButton(context, R.drawable.msg_folders, LocaleController.getString(R.string.InuFeedFolder)) { showFolderPicker(folderButton ?: return@iconButton) }
         actions.addView(folderButton, LinearLayout.LayoutParams(AndroidUtilities.dp(42f), AndroidUtilities.dp(42f)))
         actions.addView(iconButton(context, R.drawable.msg_settings, LocaleController.getString(R.string.InuFeedManageChannels)) { presentFragment(FeedExcludedChannelsSettingsActivity()) }, LinearLayout.LayoutParams(AndroidUtilities.dp(42f), AndroidUtilities.dp(42f)))
-        head.addView(actions, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.RIGHT or Gravity.CENTER_VERTICAL, 0f, 0f, 6f, 0f))
+        head.addView(actions, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT.toFloat(), Gravity.RIGHT or Gravity.CENTER_VERTICAL, 0f, 0f, 6f, 0f))
 
         val scroller = HorizontalScrollView(context)
         scroller.isHorizontalScrollBarEnabled = false
