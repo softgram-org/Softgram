@@ -1,0 +1,68 @@
+name: Soft Design 19 - Feed cards compile fix
+
+# Uploading this file applies the fix by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-19-feed-cards-fix.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fix the card feed sources
+        run: |
+          cat > /tmp/fix_feed.py <<'PYEOF2'
+          import sys
+          def edit(p, pairs):
+              s = open(p, encoding="utf-8", newline="").read()
+              for old, new in pairs:
+                  if new in s:
+                      continue
+                  if old not in s:
+                      sys.exit("ERROR: anchor missing in %s: %s" % (p, old[:60]))
+                  s = s.replace(old, new)
+              open(p, "w", encoding="utf-8", newline="").write(s)
+          edit("src/fork/ui/feed/FeedCardsActivity.kt", [
+              ("LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT or Gravity.CENTER_VERTICAL, titleStart",
+               "LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT.toFloat(), Gravity.LEFT or Gravity.CENTER_VERTICAL, titleStart"),
+              ("LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.RIGHT or Gravity.CENTER_VERTICAL, 0f, 0f, 6f, 0f)",
+               "LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT.toFloat(), Gravity.RIGHT or Gravity.CENTER_VERTICAL, 0f, 0f, 6f, 0f)"),
+          ])
+          edit("src/fork/ui/feed/FeedCardsViews.kt", [
+              ("durChip.text = fmt(m.duration)", "durChip.text = fmt(m.duration.toInt())"),
+              ('(if (m.duration > 0) " · " + fmt(m.duration) else "")', '(if (m.duration > 0) " · " + fmt(m.duration.toInt()) else "")'),
+              ("voiceDur.text = fmt(m.duration)", "voiceDur.text = fmt(m.duration.toInt())"),
+          ])
+          print("OK")
+          PYEOF2
+          python3 /tmp/fix_feed.py
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change.'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 19: fix card feed compile errors"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
