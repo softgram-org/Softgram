@@ -114,6 +114,7 @@ class FeedExcludedChannelsSettingsActivity : SettingsPageActivity(), Notificatio
                 return
             }
             items.add(UItem.asCheck(TOGGLE_INCLUDE_ARCHIVED, LocaleController.getString(R.string.InuFeedIncludeArchived)).setChecked(InuConfig.FEED_INCLUDE_ARCHIVED.value))
+            items.add(mkTwoLineCheckItem(TOGGLE_CARDS, R.string.InuFeedCardView, R.string.InuFeedCardViewInfo, InuConfig.FEED_CARDS.value))
             items.add(mkTwoLineCheckItem(TOGGLE_NEWEST_ON_TOP, R.string.InuFeedNewestOnTop, R.string.InuFeedNewestOnTopInfo, InuConfig.FEED_NEWEST_ON_TOP.value))
             items.add(mkTwoLineCheckItem(TOGGLE_MARK_READ_ON_SCROLL, R.string.InuFeedMarkReadOnScroll, R.string.InuFeedMarkReadOnScrollInfo, InuConfig.FEED_MARK_READ_ON_SCROLL.value))
             items.add(UItem.asShadow(null))
@@ -150,6 +151,7 @@ class FeedExcludedChannelsSettingsActivity : SettingsPageActivity(), Notificatio
             item.id == TOGGLE_FEED_ENABLED -> {
                 val new = !FeedHelper.isEnabled()
                 FeedHelper.setEnabled(new)
+                desu.inugram.helpers.dialogs.MainTabsHelper.setEnabled(desu.inugram.helpers.menu.MainTabsMenuConfig.Item.FEED.index, new)
                 (view as? TextCheckCell)?.apply {
                     setChecked(new)
                     setBackgroundColorAnimated(
@@ -164,6 +166,12 @@ class FeedExcludedChannelsSettingsActivity : SettingsPageActivity(), Notificatio
                 InuConfig.FEED_INCLUDE_ARCHIVED.value = !InuConfig.FEED_INCLUDE_ARCHIVED.value
                 FeedChannelSet.invalidate()
                 reloadChannels()
+            }
+            item.id == TOGGLE_CARDS -> {
+                val new = !InuConfig.FEED_CARDS.value
+                InuConfig.FEED_CARDS.value = new
+                (view as? TextCheckCell)?.setChecked(new)
+                showRestartBulletin()
             }
             item.id == TOGGLE_NEWEST_ON_TOP -> {
                 InuConfig.FEED_NEWEST_ON_TOP.value = !InuConfig.FEED_NEWEST_ON_TOP.value
@@ -194,6 +202,7 @@ class FeedExcludedChannelsSettingsActivity : SettingsPageActivity(), Notificatio
         private val TOGGLE_FEED_ENABLED = InuUtils.generateId()
         private val TOGGLE_INCLUDE_ARCHIVED = InuUtils.generateId()
         private val TOGGLE_NEWEST_ON_TOP = InuUtils.generateId()
+        private val TOGGLE_CARDS = InuUtils.generateId()
         private val TOGGLE_MARK_READ_ON_SCROLL = InuUtils.generateId()
 
         @JvmField

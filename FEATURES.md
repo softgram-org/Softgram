@@ -78,6 +78,7 @@ Softgram is built on top of [inugram](https://github.com/teidesu/inugram). for t
 - **pill stack** — interactive status pills in the chats search bar
 - **recent chats** — popup, side panel or full page with tabs, search and a history limit
 - **feed** — all subscribed channels in one chat-style timeline with folder filter, newest on top, off by default
+- **feed cards** — the feed shows channel posts as scrolling cards with a parallax effect; tapping a photo, video or GIF opens it in place, tapping the caption or edge opens the channel; long press to forward or save a message; add public channels you have not joined by username
 - **material 3 music player** — full-screen player with cover-based colors, wavy seek bar, queue, synced lyrics and mini player
 - **online dots** — hide, color-code, or show on sender avatars in groups
 - **clown avatars** — blocked users show 🤡 (or 💩 / 💀). users who blocked you are guessed from a missing photo and last seen, so it can be wrong

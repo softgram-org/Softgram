@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: softgram ci <ci@softgram>
+Date: Sat, 28 Nov 2026 11:27:48 +0000
+Subject: Feed: open the card feed from the tab and the menu.
+
+---
+ .../src/main/java/org/telegram/ui/MainTabsActivity.java         | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java b/TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java
+index 0000000..0000000 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java
+@@ -947,7 +947,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
+             dialogsActivity.setMainTabsActivityController(new MainTabsActivityControllerImpl());
+             return dialogsActivity;
+         } else if (index == inu_INDEX_FEED) {
+-            return prepareTabFragment(new desu.inugram.ui.feed.FeedActivity(desu.inugram.helpers.feed.FeedScope.Global.INSTANCE, true));
++            return prepareTabFragment(desu.inugram.helpers.feed.FeedHelper.createTabFragment());
+         } else if (index == INDEX_PROFILE) {
+             Bundle args = new Bundle();
+             args.putLong("user_id", UserConfig.getInstance(currentAccount).getClientUserId());

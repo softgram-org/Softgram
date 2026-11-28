@@ -2439,4 +2439,20 @@
     <string name="InuSoftJoinLater">Not now</string>
     <string name="InuWelcomeTitle">It\'s easy talking to your friends with Softgram</string>
     <string name="InuWelcomeSubtitle">Chat and call your friends, simply and quickly.</string>
+    <string name="InuFeedAddChannel">Add public channel</string>
+    <string name="InuFeedAddChannelHint">Enter the username of a public channel. Its posts will show in your Feed even if you have not joined it.</string>
+    <string name="InuFeedChannelAdded">%1$s added to Feed</string>
+    <string name="InuFeedChannelNotFound">No public channel found with this username</string>
+    <string name="InuFeedAlreadyAdded">This channel is already in your Feed</string>
+    <string name="InuFeedAlreadyMember">You are already subscribed to this channel</string>
+    <string name="InuFeedRemoveExtra">Remove from Feed</string>
+    <string name="InuFeedOpenPost">Open in channel</string>
+    <string name="InuFeedSaveMessage">Save Message</string>
+    <string name="InuFeedCopyLink">Copy link</string>
+    <string name="InuFeedTextPost">Text post</string>
+    <string name="InuFeedAudio">Audio</string>
+    <string name="InuFeedPoll">Poll</string>
+    <string name="InuFeedAll">All</string>
+    <string name="InuFeedCardView">Card view</string>
+    <string name="InuFeedCardViewInfo">Show posts as cards. Tap a photo, video or GIF to open it right there; tap anywhere else on the card to open the channel.</string>
 </resources>

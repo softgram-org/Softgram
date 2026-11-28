@@ -2422,4 +2422,20 @@
     <string name="InuSoftJoinLater">بعداً</string>
     <string name="InuWelcomeTitle">گفتگو با دوستانت با Softgram آسان است</string>
     <string name="InuWelcomeSubtitle">ساده و سریع با دوستانت چت کن و تماس بگیر.</string>
+    <string name="InuFeedAddChannel">افزودن کانال عمومی</string>
+    <string name="InuFeedAddChannelHint">یوزرنیم یک کانال عمومی را وارد کنید. پست‌های آن در فید نمایش داده می‌شود، حتی اگر عضو آن نباشید.</string>
+    <string name="InuFeedChannelAdded">%1$s به فید اضافه شد</string>
+    <string name="InuFeedChannelNotFound">کانال عمومی‌ای با این یوزرنیم پیدا نشد</string>
+    <string name="InuFeedAlreadyAdded">این کانال از قبل در فید شما هست</string>
+    <string name="InuFeedAlreadyMember">شما از قبل عضو این کانال هستید</string>
+    <string name="InuFeedRemoveExtra">حذف از فید</string>
+    <string name="InuFeedOpenPost">باز کردن در کانال</string>
+    <string name="InuFeedSaveMessage">ذخیره پیام</string>
+    <string name="InuFeedCopyLink">کپی لینک</string>
+    <string name="InuFeedTextPost">پست متنی</string>
+    <string name="InuFeedAudio">صوت</string>
+    <string name="InuFeedPoll">نظرسنجی</string>
+    <string name="InuFeedAll">همه</string>
+    <string name="InuFeedCardView">نمای کارتی</string>
+    <string name="InuFeedCardViewInfo">نمایش پست‌ها به‌صورت کارت. با لمس عکس، ویدیو یا گیف همان‌جا باز می‌شود؛ با لمس هر جای دیگر کارت، کانال باز می‌شود.</string>
 </resources>

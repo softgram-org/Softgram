@@ -703,3 +703,4 @@ softgram/welcome-screen.patch
 softgram/xray-core.patch
 softgram/reminder-picker.patch
 softgram/reminder-manifest.patch
+softgram/feed-cards.patch

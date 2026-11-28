@@ -722,7 +722,7 @@ object DrawerHelper {
             }
 
             ITEM_FEED -> {
-                nav.presentFragment(desu.inugram.ui.feed.FeedActivity())
+                nav.presentFragment(desu.inugram.helpers.feed.FeedHelper.createFragment())
                 close()
             }
 
@@ -846,7 +846,7 @@ object DrawerHelper {
                     showClearCacheOptions(instance)
                 }
                 DialogsMenuConfig.Item.FEED -> io.add(R.drawable.msg_channel, getString(R.string.InuFeed)) {
-                    instance.presentFragment(desu.inugram.ui.feed.FeedActivity())
+                    instance.presentFragment(desu.inugram.helpers.feed.FeedHelper.createFragment())
                 }
                 DialogsMenuConfig.Item.GHOST_MODE -> {
                     val isGhostOn = GhostHelper.isGhostActive()
