@@ -1,0 +1,1541 @@
+name: Soft Design 18 - Feed cards
+
+# Uploading this file applies the change by itself. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-18-feed-cards.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Already applied?
+        id: check
+        run: |
+          if [ -f .softgram/18-feed-cards.done ]; then echo 'done=true' >> "$GITHUB_OUTPUT"; echo 'Already applied.'; else echo 'done=false' >> "$GITHUB_OUTPUT"; fi
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        if: steps.check.outputs.done != 'true'
+        with:
+          bun-version-file: package.json
+
+      - name: Install tooling
+        if: steps.check.outputs.done != 'true'
+        run: |
+          git config --global user.email ci@softgram
+          git config --global user.name 'softgram ci'
+          bun install --frozen-lockfile
+
+      - name: Build the patched source tree (stock Telegram plus every patch)
+        if: steps.check.outputs.done != 'true'
+        run: |
+          bun run setup -- --ci --pluginless --no-submodules
+          git -C worktree-pluginless write-tree > /tmp/feed-base-tree
+          cat /tmp/feed-base-tree
+
+      - name: Write the card feed Kotlin sources
+        if: steps.check.outputs.done != 'true'
+        run: |
+          mkdir -p /tmp/feed-src
+          cat > /tmp/feed-src/FeedCardsViews.kt <<'KTEOF'
+          package desu.inugram.ui.feed
+
+          import android.content.Context
+          import android.graphics.Canvas
+          import android.graphics.Color
+          import android.graphics.Paint
+          import android.graphics.Path
+          import android.graphics.RectF
+          import android.graphics.Typeface
+          import android.graphics.drawable.ColorDrawable
+          import android.graphics.drawable.GradientDrawable
+          import android.text.TextUtils
+          import android.util.TypedValue
+          import android.view.Gravity
+          import android.view.View
+          import android.view.ViewGroup
+          import android.view.ViewOutlineProvider
+          import android.view.animation.OvershootInterpolator
+          import android.widget.FrameLayout
+          import android.widget.LinearLayout
+          import android.widget.TextView
+          import org.telegram.messenger.AndroidUtilities
+          import org.telegram.messenger.FileLoader
+          import org.telegram.messenger.ImageLocation
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.MessageObject
+          import org.telegram.messenger.R
+          import org.telegram.tgnet.TLRPC
+          import org.telegram.ui.Components.BackupImageView
+
+          enum class FeedKind { PHOTO, VIDEO, GIF, TEXT, MUSIC, VOICE, POLL }
+
+          class FeedItem(val message: MessageObject, val extra: Boolean) {
+              val group = ArrayList<MessageObject>().also { it.add(message) }
+              val kind: FeedKind = kindOf(message)
+              var caption: CharSequence? = captionOf(message, kind)
+
+              fun addToGroup(other: MessageObject) {
+                  group.add(other)
+                  if (caption.isNullOrEmpty()) {
+                      caption = captionOf(other, kind)
+                  }
+              }
+
+              companion object {
+                  private fun kindOf(m: MessageObject): FeedKind {
+                      if (m.messageOwner.media is TLRPC.TL_messageMediaPoll) return FeedKind.POLL
+                      if (m.isVoice()) return FeedKind.VOICE
+                      if (m.isMusic()) return FeedKind.MUSIC
+                      if (m.isGif) return FeedKind.GIF
+                      if (m.isVideo || m.isRoundVideo) return FeedKind.VIDEO
+                      if (m.isPhoto) return FeedKind.PHOTO
+                      if (thumbsOf(m) != null) return FeedKind.PHOTO
+                      return FeedKind.TEXT
+                  }
+
+                  private fun captionOf(m: MessageObject, kind: FeedKind): CharSequence? {
+                      val raw = if (kind == FeedKind.TEXT) m.messageText else m.caption
+                      val text = raw?.toString()?.trim()
+                      return if (text.isNullOrEmpty()) null else text
+                  }
+
+                  fun thumbsOf(m: MessageObject): Pair<TLRPC.PhotoSize, Any>? {
+                      val media = m.messageOwner.media
+                      val photo = media?.photo ?: media?.webpage?.photo
+                      if (photo != null) {
+                          val size = FileLoader.getClosestPhotoSizeWithSize(photo.sizes, 800) ?: return null
+                          return Pair(size, photo)
+                      }
+                      val doc = m.document ?: return null
+                      val size = FileLoader.getClosestPhotoSizeWithSize(doc.thumbs, 800) ?: return null
+                      return Pair(size, doc)
+                  }
+              }
+          }
+
+          interface FeedCardHost {
+              fun onOpenChannel(item: FeedItem)
+              fun onOpenMedia(item: FeedItem)
+              fun onTogglePlay(item: FeedItem)
+              fun onMenu(item: FeedItem, anchor: View)
+              fun isPlaying(item: FeedItem): Boolean
+              fun channelTitle(item: FeedItem): String
+          }
+
+          class FeedPalette(
+              val card: Int,
+              val text: Int,
+              val sub: Int,
+              val accent: Int,
+              val soft: Int,
+          )
+
+          class RatioFrame(context: Context) : FrameLayout(context) {
+              var ratio = 1f
+
+              init {
+                  clipToOutline = true
+                  outlineProvider = object : ViewOutlineProvider() {
+                      override fun getOutline(view: View, outline: android.graphics.Outline) {
+                          outline.setRoundRect(0, 0, view.width, view.height, AndroidUtilities.dpf2(17f))
+                      }
+                  }
+              }
+
+              override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+                  val w = MeasureSpec.getSize(widthMeasureSpec)
+                  super.onMeasure(
+                      MeasureSpec.makeMeasureSpec(w, MeasureSpec.EXACTLY),
+                      MeasureSpec.makeMeasureSpec((w * ratio).toInt(), MeasureSpec.EXACTLY),
+                  )
+              }
+          }
+
+          class PlayDisc(context: Context) : View(context) {
+              var playing = false
+                  set(value) {
+                      field = value
+                      invalidate()
+                  }
+              var discColor = Color.BLACK
+              var glyphColor = Color.WHITE
+              private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+              private val path = Path()
+
+              override fun onDraw(canvas: Canvas) {
+                  val cx = width / 2f
+                  val cy = height / 2f
+                  paint.color = discColor
+                  canvas.drawCircle(cx, cy, minOf(cx, cy), paint)
+                  paint.color = glyphColor
+                  val s = minOf(cx, cy) * 0.42f
+                  if (playing) {
+                      canvas.drawRoundRect(cx - s * 0.9f, cy - s, cx - s * 0.2f, cy + s, 3f, 3f, paint)
+                      canvas.drawRoundRect(cx + s * 0.2f, cy - s, cx + s * 0.9f, cy + s, 3f, 3f, paint)
+                  } else {
+                      path.reset()
+                      path.moveTo(cx - s * 0.6f, cy - s)
+                      path.lineTo(cx + s, cy)
+                      path.lineTo(cx - s * 0.6f, cy + s)
+                      path.close()
+                      canvas.drawPath(path, paint)
+                  }
+              }
+          }
+
+          class WaveView(context: Context, private val seed: Int) : View(context) {
+              var barColor = Color.GRAY
+              var active = false
+                  set(value) {
+                      field = value
+                      invalidate()
+                  }
+              private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+              override fun onDraw(canvas: Canvas) {
+                  paint.color = barColor
+                  paint.alpha = if (active) 255 else 110
+                  val count = 32
+                  val gap = width / count.toFloat()
+                  val bar = gap * 0.55f
+                  var x = seed * 7 + 3
+                  for (i in 0 until count) {
+                      x = (x * 37 + 11) % 97
+                      val h = height * (0.22f + (x % 70) / 100f)
+                      val left = i * gap + (gap - bar) / 2f
+                      canvas.drawRoundRect(RectF(left, (height - h) / 2f, left + bar, (height + h) / 2f), bar / 2f, bar / 2f, paint)
+                  }
+              }
+          }
+
+          class TextPlaceholder(context: Context) : View(context) {
+              var tint = Color.GRAY
+              var label = ""
+              private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+              override fun onDraw(canvas: Canvas) {
+                  val w = width.toFloat()
+                  val h = height.toFloat()
+                  paint.style = Paint.Style.FILL
+                  paint.color = tint
+                  paint.alpha = 40
+                  canvas.drawRect(0f, 0f, w, h, paint)
+                  val bw = AndroidUtilities.dpf2(54f)
+                  val bh = AndroidUtilities.dpf2(40f)
+                  val l = (w - bw) / 2f
+                  val t = h / 2f - bh / 2f - AndroidUtilities.dpf2(8f)
+                  paint.alpha = 255
+                  paint.color = tint
+                  paint.style = Paint.Style.STROKE
+                  paint.strokeWidth = AndroidUtilities.dpf2(3f)
+                  paint.strokeCap = Paint.Cap.ROUND
+                  canvas.drawRoundRect(RectF(l, t, l + bw, t + bh), AndroidUtilities.dpf2(9f), AndroidUtilities.dpf2(9f), paint)
+                  val lx = l + AndroidUtilities.dpf2(11f)
+                  canvas.drawLine(lx, t + bh * 0.35f, l + bw - AndroidUtilities.dpf2(11f), t + bh * 0.35f, paint)
+                  canvas.drawLine(lx, t + bh * 0.55f, l + bw - AndroidUtilities.dpf2(11f), t + bh * 0.55f, paint)
+                  canvas.drawLine(lx, t + bh * 0.75f, l + bw * 0.6f, t + bh * 0.75f, paint)
+                  paint.style = Paint.Style.FILL
+                  paint.textSize = AndroidUtilities.dpf2(10.5f)
+                  paint.textAlign = Paint.Align.CENTER
+                  paint.typeface = Typeface.DEFAULT_BOLD
+                  canvas.drawText(label.uppercase(), w / 2f, t + bh + AndroidUtilities.dpf2(20f), paint)
+              }
+          }
+
+          class FeedCardView(context: Context, private val host: FeedCardHost) : LinearLayout(context) {
+              private val media = RatioFrame(context)
+              private val image = BackupImageView(context)
+              private val placeholder = TextPlaceholder(context)
+              private val centerPlay = PlayDisc(context)
+              private val cornerPlay = PlayDisc(context)
+              private val durChip = chip()
+              private val gifChip = chip()
+              private val srcChip = chip()
+              private val musicBox = LinearLayout(context)
+              private val musicTitle = TextView(context)
+              private val musicSub = TextView(context)
+              private val voiceBox = LinearLayout(context)
+              private val voiceDisc = PlayDisc(context)
+              private var wave: WaveView? = null
+              private val voiceDur = TextView(context)
+              private val pollBox = LinearLayout(context)
+              private val captionView = TextView(context)
+              private val metaView = TextView(context)
+              private var item: FeedItem? = null
+              private var maxShift = 0f
+
+              init {
+                  orientation = VERTICAL
+                  val pad = AndroidUtilities.dp(6f)
+                  setPadding(pad, pad, pad, pad)
+
+                  media.addView(image, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+                  media.addView(placeholder, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+                  media.addView(centerPlay, FrameLayout.LayoutParams(AndroidUtilities.dp(46f), AndroidUtilities.dp(46f), Gravity.CENTER))
+                  media.addView(cornerPlay, FrameLayout.LayoutParams(AndroidUtilities.dp(38f), AndroidUtilities.dp(38f), Gravity.RIGHT or Gravity.BOTTOM).also {
+                      it.setMargins(0, 0, AndroidUtilities.dp(8f), AndroidUtilities.dp(8f))
+                  })
+                  media.addView(durChip, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.RIGHT or Gravity.TOP).also {
+                      it.setMargins(0, AndroidUtilities.dp(7f), AndroidUtilities.dp(7f), 0)
+                  })
+                  media.addView(gifChip, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.LEFT or Gravity.TOP).also {
+                      it.setMargins(AndroidUtilities.dp(7f), AndroidUtilities.dp(7f), 0, 0)
+                  })
+                  media.addView(srcChip, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.LEFT or Gravity.BOTTOM).also {
+                      it.setMargins(AndroidUtilities.dp(7f), 0, AndroidUtilities.dp(7f), AndroidUtilities.dp(7f))
+                  })
+                  srcChip.background = pill(0xCCFFFFFF.toInt())
+                  srcChip.setTextColor(0xFF14161A.toInt())
+                  srcChip.maxWidth = AndroidUtilities.dp(130f)
+                  srcChip.setSingleLine(true)
+                  srcChip.ellipsize = TextUtils.TruncateAt.END
+                  addView(media, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+
+                  musicTitle.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13f)
+                  musicTitle.setTypeface(Typeface.DEFAULT_BOLD)
+                  musicTitle.setSingleLine(true)
+                  musicTitle.ellipsize = TextUtils.TruncateAt.END
+                  musicSub.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11f)
+                  musicSub.setSingleLine(true)
+                  musicSub.ellipsize = TextUtils.TruncateAt.END
+                  musicBox.orientation = VERTICAL
+                  musicBox.addView(musicTitle)
+                  musicBox.addView(musicSub)
+                  addView(musicBox, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).also {
+                      it.setMargins(AndroidUtilities.dp(8f), AndroidUtilities.dp(9f), AndroidUtilities.dp(8f), 0)
+                  })
+
+                  voiceBox.orientation = HORIZONTAL
+                  voiceBox.gravity = Gravity.CENTER_VERTICAL
+                  voiceBox.setPadding(AndroidUtilities.dp(10f), AndroidUtilities.dp(10f), AndroidUtilities.dp(10f), AndroidUtilities.dp(10f))
+                  voiceBox.addView(voiceDisc, LayoutParams(AndroidUtilities.dp(34f), AndroidUtilities.dp(34f)))
+                  voiceDur.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10.5f)
+                  addView(voiceBox, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+
+                  pollBox.orientation = VERTICAL
+                  val pp = AndroidUtilities.dp(12f)
+                  pollBox.setPadding(pp, pp, pp, pp)
+                  addView(pollBox, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+
+                  captionView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.5f)
+                  captionView.maxLines = 4
+                  captionView.ellipsize = TextUtils.TruncateAt.END
+                  addView(captionView, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).also {
+                      it.setMargins(AndroidUtilities.dp(8f), AndroidUtilities.dp(8f), AndroidUtilities.dp(8f), 0)
+                  })
+                  metaView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10.5f)
+                  metaView.setSingleLine(true)
+                  metaView.ellipsize = TextUtils.TruncateAt.END
+                  addView(metaView, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).also {
+                      it.setMargins(AndroidUtilities.dp(8f), AndroidUtilities.dp(7f), AndroidUtilities.dp(8f), AndroidUtilities.dp(4f))
+                  })
+
+                  setOnClickListener { item?.let { host.onOpenChannel(it) } }
+                  setOnLongClickListener { item?.let { host.onMenu(it, this) }; true }
+                  media.setOnClickListener { item?.let { host.onOpenMedia(it) } }
+                  media.setOnLongClickListener { item?.let { host.onMenu(it, media) }; true }
+                  voiceBox.setOnClickListener { item?.let { host.onOpenChannel(it) } }
+                  voiceBox.setOnLongClickListener { item?.let { host.onMenu(it, voiceBox) }; true }
+                  voiceDisc.setOnClickListener { item?.let { host.onTogglePlay(it) } }
+                  voiceDisc.setOnLongClickListener { item?.let { host.onMenu(it, voiceBox) }; true }
+                  cornerPlay.setOnClickListener { item?.let { host.onTogglePlay(it) } }
+                  cornerPlay.setOnLongClickListener { item?.let { host.onMenu(it, media) }; true }
+                  pollBox.setOnClickListener { item?.let { host.onOpenChannel(it) } }
+                  pollBox.setOnLongClickListener { item?.let { host.onMenu(it, pollBox) }; true }
+              }
+
+              private fun chip(): TextView = TextView(context).apply {
+                  setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10.5f)
+                  setTypeface(Typeface.DEFAULT_BOLD)
+                  setTextColor(Color.WHITE)
+                  background = pill(0x99000000.toInt())
+                  setPadding(AndroidUtilities.dp(7f), AndroidUtilities.dp(2f), AndroidUtilities.dp(7f), AndroidUtilities.dp(2f))
+              }
+
+              private fun pill(color: Int) = GradientDrawable().apply {
+                  setColor(color)
+                  cornerRadius = AndroidUtilities.dpf2(99f)
+              }
+
+              override fun setPressed(pressed: Boolean) {
+                  super.setPressed(pressed)
+                  animate().cancel()
+                  animate().scaleX(if (pressed) 0.965f else 1f).scaleY(if (pressed) 0.965f else 1f)
+                      .setDuration(if (pressed) 110L else 380L).setInterpolator(OvershootInterpolator(2.2f)).start()
+              }
+
+              fun bind(it: FeedItem, palette: FeedPalette) {
+                  item = it
+                  val m = it.message
+                  background = GradientDrawable().apply {
+                      setColor(palette.card)
+                      cornerRadius = AndroidUtilities.dpf2(22f)
+                  }
+                  val kind = it.kind
+                  val hasFrame = kind == FeedKind.PHOTO || kind == FeedKind.VIDEO || kind == FeedKind.GIF || kind == FeedKind.TEXT || kind == FeedKind.MUSIC
+                  media.visibility = if (hasFrame) VISIBLE else GONE
+                  musicBox.visibility = if (kind == FeedKind.MUSIC) VISIBLE else GONE
+                  voiceBox.visibility = if (kind == FeedKind.VOICE) VISIBLE else GONE
+                  pollBox.visibility = if (kind == FeedKind.POLL) VISIBLE else GONE
+                  placeholder.visibility = if (kind == FeedKind.TEXT) VISIBLE else GONE
+                  image.visibility = if (kind == FeedKind.TEXT) GONE else VISIBLE
+                  centerPlay.visibility = if (kind == FeedKind.VIDEO) VISIBLE else GONE
+                  cornerPlay.visibility = if (kind == FeedKind.MUSIC) VISIBLE else GONE
+                  durChip.visibility = if (kind == FeedKind.VIDEO) VISIBLE else GONE
+                  gifChip.visibility = if (kind == FeedKind.GIF) VISIBLE else GONE
+                  media.isClickable = kind == FeedKind.PHOTO || kind == FeedKind.VIDEO || kind == FeedKind.GIF
+                  media.isLongClickable = true
+                  gifChip.text = "GIF"
+                  srcChip.text = host.channelTitle(it)
+                  srcChip.visibility = if (hasFrame) VISIBLE else GONE
+                  centerPlay.discColor = 0x73000000
+                  cornerPlay.discColor = 0xEBFFFFFF.toInt()
+                  cornerPlay.glyphColor = 0xFF111111.toInt()
+                  val thumb = FeedItem.thumbsOf(m)
+                  if (kind == FeedKind.PHOTO || kind == FeedKind.VIDEO || kind == FeedKind.GIF || kind == FeedKind.MUSIC) {
+                      var ratio = 1f
+                      if (kind == FeedKind.MUSIC) ratio = 1f
+                      else if (thumb != null && thumb.first.w > 0 && thumb.first.h > 0) {
+                          ratio = (thumb.first.h.toFloat() / thumb.first.w).coerceIn(0.8f, 1.35f)
+                      }
+                      media.ratio = ratio
+                      if (thumb != null) {
+                          val location = if (thumb.second is TLRPC.Photo) ImageLocation.getForPhoto(thumb.first, thumb.second as TLRPC.Photo)
+                          else ImageLocation.getForDocument(thumb.first, thumb.second as TLRPC.Document)
+                          image.setImage(location, "600_600", ColorDrawable(palette.soft), m)
+                      } else {
+                          image.imageReceiver.setImageBitmap(ColorDrawable(palette.soft))
+                      }
+                      image.scaleX = 1.16f
+                      image.scaleY = 1.16f
+                  } else if (kind == FeedKind.TEXT) {
+                      media.ratio = 0.62f
+                      placeholder.tint = palette.sub
+                      placeholder.label = LocaleController.getString(R.string.InuFeedTextPost)
+                      placeholder.invalidate()
+                      image.scaleX = 1f
+                      image.scaleY = 1f
+                  }
+                  if (kind == FeedKind.VIDEO) durChip.text = fmt(m.duration)
+                  if (kind == FeedKind.MUSIC) {
+                      musicTitle.text = m.musicTitle?.takeIf { s -> s.isNotEmpty() } ?: LocaleController.getString(R.string.InuFeedAudio)
+                      musicSub.text = (m.musicAuthor ?: "") + (if (m.duration > 0) " · " + fmt(m.duration) else "")
+                      musicTitle.setTextColor(palette.text)
+                      musicSub.setTextColor(palette.sub)
+                  }
+                  if (kind == FeedKind.VOICE) {
+                      voiceBox.background = GradientDrawable().apply {
+                          setColor(palette.soft)
+                          cornerRadius = AndroidUtilities.dpf2(17f)
+                      }
+                      voiceBox.removeView(wave)
+                      wave = WaveView(context, m.id).also { w ->
+                          w.barColor = palette.accent
+                          voiceBox.addView(w, 1, LayoutParams(0, AndroidUtilities.dp(30f), 1f).also { lp ->
+                              lp.setMargins(AndroidUtilities.dp(9f), 0, AndroidUtilities.dp(9f), 0)
+                          })
+                      }
+                      voiceBox.removeView(voiceDur)
+                      voiceDur.text = fmt(m.duration)
+                      voiceDur.setTextColor(palette.sub)
+                      voiceBox.addView(voiceDur)
+                      voiceDisc.discColor = palette.accent
+                      voiceDisc.glyphColor = Color.WHITE
+                  }
+                  if (kind == FeedKind.POLL) bindPoll(m, palette)
+                  refreshPlayState()
+
+                  val cap = it.caption
+                  captionView.visibility = if (cap.isNullOrEmpty()) GONE else VISIBLE
+                  captionView.text = cap
+                  captionView.setTextColor(palette.text)
+                  metaView.text = host.channelTitle(it) + " · " + LocaleController.formatDateChat(m.messageOwner.date.toLong())
+                  metaView.setTextColor(palette.sub)
+              }
+
+              private fun bindPoll(m: MessageObject, palette: FeedPalette) {
+                  pollBox.removeAllViews()
+                  pollBox.background = GradientDrawable().apply {
+                      setColor(palette.soft)
+                      cornerRadius = AndroidUtilities.dpf2(17f)
+                  }
+                  val poll = (m.messageOwner.media as? TLRPC.TL_messageMediaPoll)?.poll ?: return
+                  val q = TextView(context)
+                  q.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13f)
+                  q.setTypeface(Typeface.DEFAULT_BOLD)
+                  q.setTextColor(palette.text)
+                  q.text = poll.question?.text ?: LocaleController.getString(R.string.InuFeedPoll)
+                  pollBox.addView(q)
+                  var shown = 0
+                  for (answer in poll.answers) {
+                      if (shown == 4) break
+                      shown++
+                      val row = TextView(context)
+                      row.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12f)
+                      row.setTextColor(palette.text)
+                      row.setSingleLine(true)
+                      row.ellipsize = TextUtils.TruncateAt.END
+                      row.text = answer.text?.text ?: ""
+                      row.background = GradientDrawable().apply {
+                          setColor(palette.card)
+                          cornerRadius = AndroidUtilities.dpf2(11f)
+                      }
+                      row.setPadding(AndroidUtilities.dp(10f), AndroidUtilities.dp(7f), AndroidUtilities.dp(10f), AndroidUtilities.dp(7f))
+                      pollBox.addView(row, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).also { lp ->
+                          lp.topMargin = AndroidUtilities.dp(7f)
+                      })
+                  }
+              }
+
+              fun refreshPlayState() {
+                  val it = item ?: return
+                  val playing = host.isPlaying(it)
+                  cornerPlay.playing = playing
+                  voiceDisc.playing = playing
+                  wave?.active = playing
+              }
+
+              fun applyParallax(offset: Float) {
+                  val it = item ?: return
+                  if (it.kind == FeedKind.TEXT || media.visibility != VISIBLE) return
+                  maxShift = media.height * 0.075f
+                  image.translationY = -offset.coerceIn(-1f, 1f) * maxShift
+              }
+
+              private fun fmt(seconds: Int): String = String.format("%d:%02d", seconds / 60, seconds % 60)
+          }
+          KTEOF
+          cat > /tmp/feed-src/FeedCardsActivity.kt <<'KTEOF'
+          package desu.inugram.ui.feed
+
+          import android.content.Context
+          import android.graphics.Color
+          import android.graphics.Typeface
+          import android.graphics.PorterDuff
+          import android.graphics.PorterDuffColorFilter
+          import android.graphics.drawable.GradientDrawable
+          import android.os.Bundle
+          import android.text.InputType
+          import android.util.TypedValue
+          import android.view.Gravity
+          import android.view.MotionEvent
+          import android.view.View
+          import android.view.ViewGroup
+          import android.widget.EditText
+          import android.widget.FrameLayout
+          import android.widget.HorizontalScrollView
+          import android.widget.ImageView
+          import android.widget.LinearLayout
+          import android.widget.TextView
+          import androidx.core.graphics.Insets
+          import androidx.core.view.ViewCompat
+          import androidx.core.view.WindowInsetsCompat
+          import androidx.recyclerview.widget.RecyclerView
+          import androidx.recyclerview.widget.StaggeredGridLayoutManager
+          import desu.inugram.InuConfig
+          import desu.inugram.helpers.chat.ChatHelper
+          import desu.inugram.helpers.dialogs.FolderHelper
+          import desu.inugram.helpers.dialogs.MainTabsHelper
+          import desu.inugram.helpers.feed.FeedConfig
+          import desu.inugram.helpers.feed.FeedController
+          import desu.inugram.helpers.feed.FeedMessageUtils
+          import desu.inugram.helpers.feed.FeedScope
+          import desu.inugram.ui.settings.FeedExcludedChannelsSettingsActivity
+          import org.telegram.messenger.AndroidUtilities
+          import org.telegram.messenger.ChatObject
+          import org.telegram.messenger.FileLoader
+          import org.telegram.messenger.LocaleController
+          import org.telegram.messenger.MediaController
+          import org.telegram.messenger.MessageObject
+          import org.telegram.messenger.MessagesController
+          import org.telegram.messenger.NotificationCenter
+          import org.telegram.messenger.R
+          import org.telegram.messenger.SendMessagesHelper
+          import org.telegram.tgnet.ConnectionsManager
+          import org.telegram.tgnet.TLRPC
+          import org.telegram.ui.ActionBar.AlertDialog
+          import org.telegram.ui.ActionBar.BaseFragment
+          import org.telegram.ui.ActionBar.Theme
+          import org.telegram.ui.ChatActivity
+          import org.telegram.ui.Components.BulletinFactory
+          import org.telegram.ui.Components.ItemOptions
+          import org.telegram.ui.Components.LayoutHelper
+          import org.telegram.ui.Components.RecyclerListView
+          import org.telegram.ui.DialogsActivity
+          import org.telegram.ui.MainTabsActivity
+          import org.telegram.ui.PhotoViewer
+          import org.telegram.utils.glass.source.GlassSourceRenderNode
+
+          class FeedCardsActivity @JvmOverloads constructor(
+              @Suppress("UNUSED_PARAMETER") scope: FeedScope = FeedScope.Global,
+              private val hasMainTabs: Boolean = false,
+          ) : BaseFragment(), NotificationCenter.NotificationCenterDelegate, MainTabsActivity.TabFragmentDelegate, FeedCardHost {
+
+              private val classGuid = ConnectionsManager.generateClassGuid()
+              private var list: RecyclerListView? = null
+              private var chipsRow: LinearLayout? = null
+              private var emptyView: TextView? = null
+              private var header: FrameLayout? = null
+              private var titleView: TextView? = null
+              private var lastInsets: WindowInsetsCompat? = null
+              private var tabsGlassCallback: Runnable? = null
+              private var uiActiveHeld = false
+              private var lastGeneration = 0
+              private var filterDialogId = 0L
+              private var animateIn = true
+              private var all = ArrayList<FeedItem>()
+              private var items = ArrayList<FeedItem>()
+              private val adapter = CardAdapter()
+              private val pendingDownloads = HashMap<String, MessageObject>()
+              private val extraCache = HashMap<String, ArrayList<MessageObject>>()
+              private val extraLoading = HashSet<String>()
+              private val reloadNewer = Runnable { FeedController.getInstance(currentAccount).loadNewer(classGuid, 0) }
+
+              override fun onFragmentCreate(): Boolean {
+                  val nc = NotificationCenter.getInstance(currentAccount)
+                  nc.addObserver(this, NotificationCenter.messagesDidLoad)
+                  nc.addObserver(this, NotificationCenter.feedNeedReload)
+                  nc.addObserver(this, NotificationCenter.didReceiveNewMessages)
+                  nc.addObserver(this, NotificationCenter.fileLoaded)
+                  nc.addObserver(this, NotificationCenter.messagePlayingDidStart)
+                  nc.addObserver(this, NotificationCenter.messagePlayingPlayStateChanged)
+                  nc.addObserver(this, NotificationCenter.messagePlayingDidReset)
+                  lastGeneration = FeedConfig.getInstance(currentAccount).generation
+                  return super.onFragmentCreate()
+              }
+
+              override fun onFragmentDestroy() {
+                  AndroidUtilities.cancelRunOnUIThread(reloadNewer)
+                  if (uiActiveHeld) {
+                      uiActiveHeld = false
+                      FeedController.getInstance(currentAccount).setUiActive(false)
+                  }
+                  val nc = NotificationCenter.getInstance(currentAccount)
+                  nc.removeObserver(this, NotificationCenter.messagesDidLoad)
+                  nc.removeObserver(this, NotificationCenter.feedNeedReload)
+                  nc.removeObserver(this, NotificationCenter.didReceiveNewMessages)
+                  nc.removeObserver(this, NotificationCenter.fileLoaded)
+                  nc.removeObserver(this, NotificationCenter.messagePlayingDidStart)
+                  nc.removeObserver(this, NotificationCenter.messagePlayingPlayStateChanged)
+                  nc.removeObserver(this, NotificationCenter.messagePlayingDidReset)
+                  super.onFragmentDestroy()
+              }
+
+              override fun createView(context: Context): View {
+                  actionBar.setAddToContainer(false)
+                  actionBar.visibility = View.GONE
+
+                  val root = FrameLayout(context)
+                  fragmentView = root
+                  root.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray))
+
+                  val recycler = RecyclerListView(context)
+                  list = recycler
+                  recycler.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                  recycler.adapter = adapter
+                  recycler.clipToPadding = false
+                  recycler.setPadding(AndroidUtilities.dp(8f), 0, AndroidUtilities.dp(8f), 0)
+                  recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                      override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
+                          updateParallax()
+                          val lm = rv.layoutManager as? StaggeredGridLayoutManager ?: return
+                          val last = IntArray(2)
+                          lm.findLastVisibleItemPositions(last)
+                          if (dy > 0 && maxOf(last[0], last[1]) >= items.size - 6) {
+                              FeedController.getInstance(currentAccount).loadMore(classGuid, 0)
+                          }
+                      }
+                  })
+                  recycler.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateParallax() }
+                  root.addView(recycler, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.FILL))
+
+                  val empty = TextView(context)
+                  emptyView = empty
+                  empty.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15f)
+                  empty.gravity = Gravity.CENTER
+                  empty.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText))
+                  empty.visibility = View.GONE
+                  root.addView(empty, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER))
+
+                  val head = FrameLayout(context)
+                  header = head
+                  head.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray))
+                  val title = TextView(context)
+                  titleView = title
+                  title.text = LocaleController.getString(R.string.InuFeed)
+                  title.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 26f)
+                  title.setTypeface(Typeface.DEFAULT_BOLD)
+                  title.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText))
+                  val titleStart = if (hasMainTabs) 18f else 56f
+                  head.addView(title, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT or Gravity.CENTER_VERTICAL, titleStart, 0f, 0f, 0f))
+                  if (!hasMainTabs) {
+                      head.addView(iconButton(context, R.drawable.ic_ab_back, LocaleController.getString(R.string.AccDescrGoBack)) { finishFragment() }, LayoutHelper.createFrame(44, 44f, Gravity.LEFT or Gravity.CENTER_VERTICAL, 6f, 0f, 0f, 0f))
+                  }
+                  val actions = LinearLayout(context)
+                  actions.orientation = LinearLayout.HORIZONTAL
+                  actions.addView(iconButton(context, R.drawable.msg_add, LocaleController.getString(R.string.InuFeedAddChannel)) { showAddDialog() }, LinearLayout.LayoutParams(AndroidUtilities.dp(42f), AndroidUtilities.dp(42f)))
+                  var folderButton: View? = null
+                  folderButton = iconButton(context, R.drawable.msg_folders, LocaleController.getString(R.string.InuFeedFolder)) { showFolderPicker(folderButton ?: return@iconButton) }
+                  actions.addView(folderButton, LinearLayout.LayoutParams(AndroidUtilities.dp(42f), AndroidUtilities.dp(42f)))
+                  actions.addView(iconButton(context, R.drawable.msg_settings, LocaleController.getString(R.string.InuFeedManageChannels)) { presentFragment(FeedExcludedChannelsSettingsActivity()) }, LinearLayout.LayoutParams(AndroidUtilities.dp(42f), AndroidUtilities.dp(42f)))
+                  head.addView(actions, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.RIGHT or Gravity.CENTER_VERTICAL, 0f, 0f, 6f, 0f))
+
+                  val scroller = HorizontalScrollView(context)
+                  scroller.isHorizontalScrollBarEnabled = false
+                  val chips = LinearLayout(context)
+                  chipsRow = chips
+                  chips.orientation = LinearLayout.HORIZONTAL
+                  chips.setPadding(AndroidUtilities.dp(14f), 0, AndroidUtilities.dp(14f), 0)
+                  scroller.addView(chips, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+
+                  val top = LinearLayout(context)
+                  top.orientation = LinearLayout.VERTICAL
+                  top.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray))
+                  top.addView(head, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AndroidUtilities.dp(56f)))
+                  top.addView(scroller, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AndroidUtilities.dp(44f)))
+                  root.addView(top, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.TOP))
+                  top.tag = "top"
+
+                  ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
+                      lastInsets = insets
+                      val effective = if (hasMainTabs) extendInsetsByTabsHeight(insets) else insets
+                      val bars = effective.getInsets(WindowInsetsCompat.Type.systemBars())
+                      top.setPadding(0, bars.top, 0, 0)
+                      recycler.setPadding(AndroidUtilities.dp(8f), bars.top + AndroidUtilities.dp(100f), AndroidUtilities.dp(8f), bars.bottom + AndroidUtilities.dp(12f))
+                      effective
+                  }
+                  root.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+                      override fun onViewAttachedToWindow(view: View) {
+                          val insets = lastInsets
+                          if (insets != null) ViewCompat.dispatchApplyWindowInsets(view, insets) else view.requestApplyInsets()
+                      }
+
+                      override fun onViewDetachedFromWindow(view: View) {}
+                  })
+
+                  if (!uiActiveHeld) {
+                      uiActiveHeld = true
+                      FeedController.getInstance(currentAccount).setUiActive(true)
+                  }
+                  FeedController.getInstance(currentAccount).loadInitial(classGuid, 0)
+                  rebuild()
+                  AndroidUtilities.runOnUIThread({ animateIn = false }, 900L)
+                  return root
+              }
+
+              private fun iconButton(context: Context, res: Int, description: String, onClick: () -> Unit): ImageView {
+                  val button = ImageView(context)
+                  button.scaleType = ImageView.ScaleType.CENTER
+                  button.setImageResource(res)
+                  button.colorFilter = PorterDuffColorFilter(getThemedColor(Theme.key_windowBackgroundWhiteBlackText), PorterDuff.Mode.MULTIPLY)
+                  button.background = Theme.createSelectorDrawable(getThemedColor(Theme.key_listSelector), 1)
+                  button.contentDescription = description
+                  button.setOnClickListener { onClick() }
+                  return button
+              }
+
+              private fun extendInsetsByTabsHeight(windowInsets: WindowInsetsCompat): WindowInsetsCompat {
+                  val tabsHeight = if (MainTabsHelper.isHidden) 0 else AndroidUtilities.dp(MainTabsHelper.mainTabsHeightWithMargins.toFloat())
+                  if (tabsHeight == 0) return windowInsets
+                  val types = WindowInsetsCompat.Type.systemBars()
+                  val nav = WindowInsetsCompat.Type.navigationBars()
+                  return WindowInsetsCompat.Builder(windowInsets)
+                      .setInsets(types, extendBottom(windowInsets.getInsets(types), tabsHeight))
+                      .setInsets(nav, extendBottom(windowInsets.getInsets(nav), tabsHeight))
+                      .setInsetsIgnoringVisibility(types, extendBottom(windowInsets.getInsetsIgnoringVisibility(types), tabsHeight))
+                      .setInsetsIgnoringVisibility(nav, extendBottom(windowInsets.getInsetsIgnoringVisibility(nav), tabsHeight))
+                      .build()
+              }
+
+              private fun extendBottom(insets: Insets, extra: Int): Insets =
+                  Insets.of(insets.left, insets.top, insets.right, insets.bottom + extra)
+
+              private fun palette() = FeedPalette(
+                  card = getThemedColor(Theme.key_windowBackgroundWhite),
+                  text = getThemedColor(Theme.key_windowBackgroundWhiteBlackText),
+                  sub = getThemedColor(Theme.key_windowBackgroundWhiteGrayText),
+                  accent = getThemedColor(Theme.key_featuredStickers_addButton),
+                  soft = getThemedColor(Theme.key_windowBackgroundGray),
+              )
+
+              private fun rebuild() {
+                  val controller = FeedController.getInstance(currentAccount)
+                  val feedMessages = ArrayList<MessageObject>(controller.store.getVisibleMessages())
+                  val feedDialogs = HashSet<Long>()
+                  for (m in feedMessages) feedDialogs.add(m.dialogId)
+                  val extras = InuConfig.FEED_EXTRA_CHANNELS.value
+                  val merged = ArrayList<Pair<MessageObject, Boolean>>()
+                  for (m in feedMessages) merged.add(Pair(m, false))
+                  for (username in extras) {
+                      val cached = extraCache[username]
+                      if (cached == null) {
+                          loadExtra(username)
+                          continue
+                      }
+                      for (m in cached) {
+                          if (!feedDialogs.contains(m.dialogId)) merged.add(Pair(m, true))
+                      }
+                  }
+                  merged.sortByDescending { it.first.messageOwner.date }
+                  val result = ArrayList<FeedItem>()
+                  val groups = HashMap<String, FeedItem>()
+                  val seen = HashSet<String>()
+                  for ((m, isExtra) in merged) {
+                      val key = m.dialogId.toString() + ":" + (if (m.realId > 0) m.realId else m.id)
+                      if (!seen.add(key)) continue
+                      if (m.hasValidGroupId()) {
+                          val groupKey = m.dialogId.toString() + "_" + m.messageOwner.grouped_id
+                          val existing = groups[groupKey]
+                          if (existing != null) {
+                              existing.addToGroup(m)
+                              continue
+                          }
+                          val created = FeedItem(m, isExtra)
+                          groups[groupKey] = created
+                          result.add(created)
+                      } else {
+                          result.add(FeedItem(m, isExtra))
+                      }
+                  }
+                  all = result
+                  applyFilter()
+              }
+
+              private fun applyFilter() {
+                  items = if (filterDialogId == 0L) all else ArrayList(all.filter { it.message.dialogId == filterDialogId })
+                  if (filterDialogId != 0L && items.isEmpty()) {
+                      filterDialogId = 0L
+                      items = all
+                  }
+                  adapter.notifyDataSetChanged()
+                  rebuildChips()
+                  val empty = emptyView
+                  if (empty != null) {
+                      empty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+                      empty.text = LocaleController.getString(if (FeedController.getInstance(currentAccount).hasChannels()) R.string.InuFeedEmpty else R.string.InuFeedNoChannels)
+                  }
+                  list?.post { updateParallax() }
+              }
+
+              private fun rebuildChips() {
+                  val row = chipsRow ?: return
+                  row.removeAllViews()
+                  val context = row.context
+                  addChip(context, row, LocaleController.getString(R.string.InuFeedAll), 0L, null)
+                  val seen = LinkedHashMap<Long, FeedItem>()
+                  for (item in all) if (!seen.containsKey(item.message.dialogId)) seen[item.message.dialogId] = item
+                  for ((dialogId, item) in seen) {
+                      val chat = MessagesController.getInstance(currentAccount).getChat(-dialogId) ?: continue
+                      addChip(context, row, (if (item.extra) "@" else "") + chat.title, dialogId, if (item.extra) ChatObject.getPublicUsername(chat) else null)
+                  }
+              }
+
+              private fun addChip(context: Context, row: LinearLayout, text: String, dialogId: Long, extraUsername: String?) {
+                  val selected = filterDialogId == dialogId
+                  val chip = TextView(context)
+                  chip.text = text
+                  chip.maxLines = 1
+                  chip.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13f)
+                  chip.setTypeface(Typeface.DEFAULT_BOLD)
+                  chip.setTextColor(if (selected) getThemedColor(Theme.key_windowBackgroundGray) else getThemedColor(Theme.key_windowBackgroundWhiteGrayText))
+                  chip.background = GradientDrawable().apply {
+                      setColor(if (selected) getThemedColor(Theme.key_windowBackgroundWhiteBlackText) else getThemedColor(Theme.key_windowBackgroundWhite))
+                      cornerRadius = AndroidUtilities.dpf2(99f)
+                  }
+                  chip.setPadding(AndroidUtilities.dp(13f), 0, AndroidUtilities.dp(13f), 0)
+                  chip.gravity = Gravity.CENTER_VERTICAL
+                  chip.setOnClickListener {
+                      filterDialogId = dialogId
+                      applyFilter()
+                      list?.scrollToPosition(0)
+                  }
+                  if (extraUsername != null) {
+                      chip.setOnLongClickListener {
+                          ItemOptions.makeOptions(this, chip)
+                              .add(R.drawable.msg_delete, LocaleController.getString(R.string.InuFeedRemoveExtra)) { removeExtra(extraUsername) }
+                              .show()
+                          true
+                      }
+                  }
+                  row.addView(chip, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, AndroidUtilities.dp(34f)).also {
+                      it.setMargins(AndroidUtilities.dp(3f), AndroidUtilities.dp(5f), AndroidUtilities.dp(3f), AndroidUtilities.dp(5f))
+                  })
+              }
+
+              private fun updateParallax() {
+                  val recycler = list ?: return
+                  val h = recycler.height.toFloat().coerceAtLeast(1f)
+                  for (i in 0 until recycler.childCount) {
+                      val child = recycler.getChildAt(i) as? FeedCardView ?: continue
+                      child.applyParallax(((child.top + child.bottom) / 2f - h / 2f) / h)
+                  }
+              }
+
+              override fun channelTitle(item: FeedItem): String =
+                  MessagesController.getInstance(currentAccount).getChat(-item.message.dialogId)?.title ?: ""
+
+              override fun isPlaying(item: FeedItem): Boolean {
+                  val controller = MediaController.getInstance()
+                  return controller.isPlayingMessage(item.message) && !controller.isMessagePaused
+              }
+
+              private fun messageIdOf(m: MessageObject): Int = if (m.realId > 0) m.realId else m.id
+
+              override fun onOpenChannel(item: FeedItem) {
+                  val args = Bundle()
+                  args.putLong("chat_id", -item.message.dialogId)
+                  args.putInt("message_id", messageIdOf(item.message))
+                  presentFragment(ChatActivity(args))
+              }
+
+              override fun onOpenMedia(item: FeedItem) {
+                  if (item.kind != FeedKind.PHOTO && item.kind != FeedKind.VIDEO && item.kind != FeedKind.GIF) {
+                      onOpenChannel(item)
+                      return
+                  }
+                  val album = ArrayList<MessageObject>()
+                  for (m in item.group) {
+                      if (m.isVideo || m.isGif || m.isPhoto || FeedItem.thumbsOf(m) != null) album.add(m)
+                  }
+                  if (album.isEmpty()) album.add(item.message)
+                  val viewer = PhotoViewer.getInstance()
+                  viewer.setParentActivity(this)
+                  viewer.openPhoto(album, 0, 0L, 0L, 0L, object : PhotoViewer.EmptyPhotoViewerProvider() {})
+              }
+
+              override fun onTogglePlay(item: FeedItem) {
+                  val m = item.message
+                  val controller = MediaController.getInstance()
+                  if (controller.isPlayingMessage(m)) {
+                      if (controller.isMessagePaused) controller.playMessage(m) else controller.pauseMessage(m)
+                      return
+                  }
+                  val doc = m.document
+                  val file = FileLoader.getInstance(currentAccount).getPathToMessage(m.messageOwner)
+                  if (file != null && file.exists()) {
+                      controller.playMessage(m)
+                  } else if (doc != null) {
+                      pendingDownloads[FileLoader.getAttachFileName(doc)] = m
+                      FileLoader.getInstance(currentAccount).loadFile(doc, m, FileLoader.PRIORITY_NORMAL, 0)
+                  }
+              }
+
+              override fun onMenu(item: FeedItem, anchor: View) {
+                  val m = item.message
+                  val options = ItemOptions.makeOptions(this, anchor)
+                  options.setGravity(Gravity.LEFT)
+                  options.add(R.drawable.msg_channel, LocaleController.getString(R.string.InuFeedOpenPost)) { onOpenChannel(item) }
+                  options.add(R.drawable.msg_forward, LocaleController.getString(R.string.Forward)) { forward(item) }
+                  options.add(R.drawable.msg_saved, LocaleController.getString(R.string.InuFeedSaveMessage)) { saveMessage(item) }
+                  val chat = MessagesController.getInstance(currentAccount).getChat(-m.dialogId)
+                  val username = if (chat != null) ChatObject.getPublicUsername(chat) else null
+                  if (!username.isNullOrEmpty()) {
+                      options.add(R.drawable.msg_link, LocaleController.getString(R.string.InuFeedCopyLink)) {
+                          AndroidUtilities.addToClipboard("https://t.me/" + username + "/" + messageIdOf(m))
+                          BulletinFactory.of(this).createCopyLinkBulletin().show()
+                      }
+                  }
+                  options.show()
+              }
+
+              private fun forwardable(item: FeedItem): ArrayList<MessageObject> {
+                  val result = ArrayList<MessageObject>()
+                  for (m in item.group.sortedBy { messageIdOf(it) }) {
+                      val forwarding = FeedMessageUtils.getForwardingMessageObject(currentAccount, !item.extra, m) ?: m
+                      result.add(forwarding)
+                  }
+                  return result
+              }
+
+              private fun saveMessage(item: FeedItem) {
+                  ChatHelper.forwardToSavedMessages(this, forwardable(item))
+              }
+
+              private fun forward(item: FeedItem) {
+                  val args = Bundle().apply {
+                      putBoolean("onlySelect", true)
+                      putInt("dialogsType", DialogsActivity.DIALOGS_TYPE_FORWARD)
+                      putBoolean("canSelectTopics", true)
+                  }
+                  val picker = DialogsActivity(args)
+                  picker.setDelegate { _, dids, _, _, _, _, _, _ ->
+                      val messages = forwardable(item)
+                      for (key in dids) {
+                          SendMessagesHelper.getInstance(currentAccount).sendMessage(messages, key.dialogId, false, false, true, 0, 0L)
+                      }
+                      picker.finishFragment()
+                      true
+                  }
+                  presentFragment(picker)
+              }
+
+              private fun showAddDialog() {
+                  val activity = parentActivity ?: return
+                  val edit = EditText(activity)
+                  edit.hint = "@username"
+                  edit.setSingleLine(true)
+                  edit.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or InputType.TYPE_TEXT_VARIATION_URI
+                  edit.setTextColor(getThemedColor(Theme.key_dialogTextBlack))
+                  edit.setHintTextColor(getThemedColor(Theme.key_dialogTextHint))
+                  val holder = FrameLayout(activity)
+                  holder.setPadding(AndroidUtilities.dp(22f), AndroidUtilities.dp(4f), AndroidUtilities.dp(22f), 0)
+                  holder.addView(edit, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+                  val builder = AlertDialog.Builder(activity, resourceProvider)
+                  builder.setTitle(LocaleController.getString(R.string.InuFeedAddChannel))
+                  builder.setMessage(LocaleController.getString(R.string.InuFeedAddChannelHint))
+                  builder.setView(holder)
+                  builder.setPositiveButton(LocaleController.getString(R.string.Add)) { _, _ -> addChannel(edit.text.toString()) }
+                  builder.setNegativeButton(LocaleController.getString(R.string.Cancel), null)
+                  showDialog(builder.create())
+              }
+
+              private fun addChannel(raw: String) {
+                  val username = raw.trim().lowercase().removePrefix("https://").removePrefix("http://").removePrefix("t.me/").removePrefix("@").substringBefore('/').substringBefore('?')
+                  if (username.length < 4) {
+                      BulletinFactory.of(this).createErrorBulletin(LocaleController.getString(R.string.InuFeedChannelNotFound)).show()
+                      return
+                  }
+                  if (InuConfig.FEED_EXTRA_CHANNELS.value.contains(username)) {
+                      BulletinFactory.of(this).createErrorBulletin(LocaleController.getString(R.string.InuFeedAlreadyAdded)).show()
+                      return
+                  }
+                  val request = TLRPC.TL_contacts_resolveUsername()
+                  request.username = username
+                  ConnectionsManager.getInstance(currentAccount).sendRequest(request) { response, _ ->
+                      AndroidUtilities.runOnUIThread {
+                          val resolved = response as? TLRPC.TL_contacts_resolvedPeer
+                          val chat = resolved?.chats?.firstOrNull { it.broadcast }
+                          if (resolved == null || chat == null) {
+                              BulletinFactory.of(this).createErrorBulletin(LocaleController.getString(R.string.InuFeedChannelNotFound)).show()
+                              return@runOnUIThread
+                          }
+                          val controller = MessagesController.getInstance(currentAccount)
+                          controller.putUsers(resolved.users, false)
+                          controller.putChats(resolved.chats, false)
+                          if (!ChatObject.isNotInChat(chat)) {
+                              BulletinFactory.of(this).createErrorBulletin(LocaleController.getString(R.string.InuFeedAlreadyMember)).show()
+                              return@runOnUIThread
+                          }
+                          val updated = HashSet(InuConfig.FEED_EXTRA_CHANNELS.value)
+                          updated.add(username)
+                          InuConfig.FEED_EXTRA_CHANNELS.value = updated
+                          loadExtra(username)
+                      }
+                  }
+              }
+
+              private fun removeExtra(username: String) {
+                  val updated = HashSet(InuConfig.FEED_EXTRA_CHANNELS.value)
+                  updated.remove(username)
+                  InuConfig.FEED_EXTRA_CHANNELS.value = updated
+                  extraCache.remove(username)
+                  if (filterDialogId != 0L) filterDialogId = 0L
+                  rebuild()
+              }
+
+              private fun loadExtra(username: String) {
+                  if (!extraLoading.add(username)) return
+                  val resolve = TLRPC.TL_contacts_resolveUsername()
+                  resolve.username = username
+                  val connections = ConnectionsManager.getInstance(currentAccount)
+                  connections.sendRequest(resolve) { response, _ ->
+                      AndroidUtilities.runOnUIThread {
+                          val resolved = response as? TLRPC.TL_contacts_resolvedPeer
+                          val chat = resolved?.chats?.firstOrNull { it.broadcast }
+                          if (resolved == null || chat == null) {
+                              extraLoading.remove(username)
+                              extraCache[username] = ArrayList()
+                              return@runOnUIThread
+                          }
+                          val controller = MessagesController.getInstance(currentAccount)
+                          controller.putUsers(resolved.users, false)
+                          controller.putChats(resolved.chats, false)
+                          val history = TLRPC.TL_messages_getHistory()
+                          history.peer = controller.getInputPeer(-chat.id)
+                          history.limit = EXTRA_LIMIT
+                          connections.sendRequest(history) { res, _ ->
+                              AndroidUtilities.runOnUIThread {
+                                  extraLoading.remove(username)
+                                  val data = res as? TLRPC.messages_Messages
+                                  if (data == null) {
+                                      extraCache[username] = ArrayList()
+                                      return@runOnUIThread
+                                  }
+                                  controller.putUsers(data.users, false)
+                                  controller.putChats(data.chats, false)
+                                  val usersMap = HashMap<Long, TLRPC.User>()
+                                  for (user in data.users) usersMap[user.id] = user
+                                  val chatsMap = HashMap<Long, TLRPC.Chat>()
+                                  for (c in data.chats) chatsMap[c.id] = c
+                                  val built = ArrayList<MessageObject>()
+                                  for (message in data.messages) {
+                                      if (message is TLRPC.TL_messageEmpty || message is TLRPC.TL_messageService) continue
+                                      built.add(MessageObject(currentAccount, message, null, usersMap, chatsMap, null, null, true, true, 0L, false, false, false, 0))
+                                  }
+                                  extraCache[username] = built
+                                  if (InuConfig.FEED_EXTRA_CHANNELS.value.contains(username)) {
+                                      rebuild()
+                                      BulletinFactory.of(this).createSimpleBulletin(R.raw.contact_check, LocaleController.formatString(R.string.InuFeedChannelAdded, chat.title)).show()
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+
+              private fun pickableFolders(): List<MessagesController.DialogFilter> =
+                  MessagesController.getInstance(currentAccount).dialogFilters?.filter { !it.isDefault }.orEmpty()
+
+              private fun showFolderPicker(anchor: View) {
+                  val folders = pickableFolders()
+                  if (folders.isEmpty()) {
+                      presentFragment(FeedExcludedChannelsSettingsActivity())
+                      return
+                  }
+                  val current = FeedConfig.getInstance(currentAccount).folderFilterId
+                  val options = ItemOptions.makeOptions(this, anchor)
+                  options.setGravity(Gravity.RIGHT)
+                  if (current != 0) {
+                      options.add(R.drawable.msg_channel, LocaleController.getString(R.string.InuFeedAllChannels)) { selectFolder(0) }
+                  }
+                  for (filter in folders) {
+                      if (filter.id == current) continue
+                      val info = FolderHelper.getTabInfo(filter)
+                      val name = info.first.takeIf { it.isNotEmpty() } ?: continue
+                      options.add(FolderHelper.getTabIcon(info.second), name) { selectFolder(filter.id) }
+                  }
+                  options.show()
+              }
+
+              private fun selectFolder(filterId: Int) {
+                  val config = FeedConfig.getInstance(currentAccount)
+                  config.setFolder(filterId)
+                  lastGeneration = config.generation
+                  filterDialogId = 0L
+                  FeedController.getInstance(currentAccount).applyConfigChange { _ -> rebuild() }
+              }
+
+              override fun didReceivedNotification(id: Int, account: Int, vararg args: Any?) {
+                  when (id) {
+                      NotificationCenter.messagesDidLoad -> {
+                          if (args.size > 10 && args[10] == classGuid) rebuild()
+                      }
+                      NotificationCenter.feedNeedReload -> {
+                          FeedController.getInstance(currentAccount).loadInitial(classGuid, 0)
+                          rebuild()
+                      }
+                      NotificationCenter.didReceiveNewMessages -> {
+                          val scheduled = args[2] as Boolean
+                          if (scheduled || !FeedController.getInstance(currentAccount).isIncludedChannelPost(args[0] as Long)) return
+                          AndroidUtilities.cancelRunOnUIThread(reloadNewer)
+                          AndroidUtilities.runOnUIThread(reloadNewer, 1000L)
+                      }
+                      NotificationCenter.fileLoaded -> {
+                          val name = args[0] as? String ?: return
+                          val pending = pendingDownloads.remove(name) ?: return
+                          MediaController.getInstance().playMessage(pending)
+                      }
+                      NotificationCenter.messagePlayingDidStart,
+                      NotificationCenter.messagePlayingPlayStateChanged,
+                      NotificationCenter.messagePlayingDidReset -> refreshPlayStates()
+                  }
+              }
+
+              private fun refreshPlayStates() {
+                  val recycler = list ?: return
+                  for (i in 0 until recycler.childCount) (recycler.getChildAt(i) as? FeedCardView)?.refreshPlayState()
+              }
+
+              override fun onResume() {
+                  super.onResume()
+                  fragmentView?.let {
+                      val insets = lastInsets
+                      if (insets != null) ViewCompat.dispatchApplyWindowInsets(it, insets) else it.requestApplyInsets()
+                  }
+                  val generation = FeedConfig.getInstance(currentAccount).generation
+                  if (generation != lastGeneration) {
+                      lastGeneration = generation
+                      FeedController.getInstance(currentAccount).applyConfigChange { _ -> rebuild() }
+                  } else {
+                      rebuild()
+                  }
+              }
+
+              override fun isLightStatusBar(): Boolean = !Theme.isCurrentThemeDark()
+
+              override fun isSupportEdgeToEdge(): Boolean = true
+
+              override fun drawEdgeNavigationBar(): Boolean = false
+
+              override fun canParentTabsSlide(ev: MotionEvent, forward: Boolean): Boolean = true
+
+              override fun onParentScrollToTop() {
+                  list?.smoothScrollToPosition(0)
+              }
+
+              override fun getGlassSource(): GlassSourceRenderNode? = null
+
+              override fun getFrostedGlassSource(): GlassSourceRenderNode? = null
+
+              override fun onParentBecomeFullyVisible() {
+                  updateParallax()
+              }
+
+              override fun setParentTabsGlassInvalidationCallback(callback: Runnable?) {
+                  tabsGlassCallback = callback
+              }
+
+              private inner class CardAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+                  override fun getItemCount(): Int = items.size
+
+                  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+                      val card = FeedCardView(parent.context, this@FeedCardsActivity)
+                      card.layoutParams = StaggeredGridLayoutManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).also {
+                          it.setMargins(AndroidUtilities.dp(4f), AndroidUtilities.dp(4f), AndroidUtilities.dp(4f), AndroidUtilities.dp(4f))
+                      }
+                      return object : RecyclerView.ViewHolder(card) {}
+                  }
+
+                  override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+                      val card = holder.itemView as FeedCardView
+                      card.bind(items[position], palette())
+                      if (animateIn && position < 10) {
+                          card.alpha = 0f
+                          card.translationY = AndroidUtilities.dp(16f).toFloat()
+                          card.animate().alpha(1f).translationY(0f).setStartDelay(position * 45L).setDuration(420L).start()
+                      } else {
+                          card.alpha = 1f
+                          card.translationY = 0f
+                      }
+                      card.post { updateParallax() }
+                  }
+
+                  override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
+                      val position = holder.adapterPosition
+                      if (position < 0 || position >= items.size) return
+                      val item = items[position]
+                      if (!item.extra && InuConfig.FEED_MARK_READ_ON_SCROLL.value) {
+                          FeedController.getInstance(currentAccount).onPostSeen(item.message.dialogId, item.message.realId)
+                      }
+                  }
+              }
+
+              private companion object {
+                  const val EXTRA_LIMIT = 12
+              }
+          }
+          KTEOF
+
+      - name: Apply the card feed
+        if: steps.check.outputs.done != 'true'
+        run: |
+          cat > /tmp/apply_feed.py <<'PYEOF'
+          import os, re, sys
+          WT = os.environ.get("SG_WT", "worktree-pluginless")
+          SRC = "/tmp/feed-src"
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def die(msg):
+              print("ERROR: " + msg)
+              sys.exit(1)
+
+          def edit(path, old, new, label, count=1):
+              s = rd(path)
+              if new in s:
+                  return
+              if s.count(old) != count:
+                  print("--- anchor diagnostics in " + path)
+                  for i, line in enumerate(s.split("\n")):
+                      if old.strip().split("\n")[0].strip()[:25] in line:
+                          print("%6d: %s" % (i + 1, line.rstrip()))
+                  die("%s: anchor found %d times (expected %d)" % (label, s.count(old), count))
+              wr(path, s.replace(old, new))
+
+          if not os.path.isdir("src/res") or not os.path.isfile("series"):
+              die("run from the repository root")
+          if not os.path.isdir(WT):
+              die("worktree %s missing" % WT)
+
+          # ---- new Kotlin files
+          os.makedirs("src/fork/ui/feed", exist_ok=True)
+          wr("src/fork/ui/feed/FeedCardsViews.kt", rd(SRC + "/FeedCardsViews.kt"))
+          wr("src/fork/ui/feed/FeedCardsActivity.kt", rd(SRC + "/FeedCardsActivity.kt"))
+
+          # ---- config
+          cfg = "src/fork/InuConfig.kt"
+          edit(cfg,
+               '    @JvmField\n    val FEED_MARK_READ_ON_SCROLL = BoolItem("feed_mark_read_on_scroll", true)\n',
+               '    @JvmField\n    val FEED_MARK_READ_ON_SCROLL = BoolItem("feed_mark_read_on_scroll", true)\n\n'
+               '    @JvmField\n    val FEED_CARDS = BoolItem("feed_cards", true)\n\n'
+               '    @JvmField\n    val FEED_EXTRA_CHANNELS = StringSetItem("feed_extra_channels", emptySet())\n',
+               "InuConfig")
+
+          # ---- FeedHelper factories
+          fh = "src/fork/helpers/feed/FeedHelper.kt"
+          s = rd(fh)
+          if "createTabFragment" not in s:
+              s = s.replace("import desu.inugram.InuConfig\n",
+                            "import desu.inugram.InuConfig\nimport desu.inugram.ui.feed.FeedActivity\nimport desu.inugram.ui.feed.FeedCardsActivity\nimport org.telegram.ui.ActionBar.BaseFragment\n", 1)
+              idx = s.rstrip().rfind("}")
+              s = s[:idx] + """
+              @JvmStatic
+              fun createFragment(): BaseFragment =
+                  if (InuConfig.FEED_CARDS.value) FeedCardsActivity() else FeedActivity()
+
+              @JvmStatic
+              fun createTabFragment(): BaseFragment =
+                  if (InuConfig.FEED_CARDS.value) FeedCardsActivity(FeedScope.Global, true) else FeedActivity(FeedScope.Global, true)
+          }
+          """
+              wr(fh, s)
+
+          # ---- drawer entries (kotlin)
+          dh = "src/fork/helpers/dialogs/DrawerHelper.kt"
+          s = rd(dh)
+          n = s.count("desu.inugram.ui.feed.FeedActivity()")
+          if n:
+              wr(dh, s.replace("desu.inugram.ui.feed.FeedActivity()", "desu.inugram.helpers.feed.FeedHelper.createFragment()"))
+          print("DrawerHelper entries switched: %d" % n)
+
+          # ---- settings: cards toggle, and the tab shown when the feed is enabled
+          st = "src/fork/ui/settings/FeedExcludedChannelsSettingsActivity.kt"
+          edit(st,
+               "            items.add(mkTwoLineCheckItem(TOGGLE_NEWEST_ON_TOP,",
+               "            items.add(mkTwoLineCheckItem(TOGGLE_CARDS, R.string.InuFeedCardView, R.string.InuFeedCardViewInfo, InuConfig.FEED_CARDS.value))\n"
+               "            items.add(mkTwoLineCheckItem(TOGGLE_NEWEST_ON_TOP,",
+               "settings items")
+          edit(st,
+               "            item.id == TOGGLE_NEWEST_ON_TOP -> {",
+               "            item.id == TOGGLE_CARDS -> {\n"
+               "                val new = !InuConfig.FEED_CARDS.value\n"
+               "                InuConfig.FEED_CARDS.value = new\n"
+               "                (view as? TextCheckCell)?.setChecked(new)\n"
+               "                showRestartBulletin()\n"
+               "            }\n"
+               "            item.id == TOGGLE_NEWEST_ON_TOP -> {",
+               "settings click")
+          edit(st,
+               "                FeedHelper.setEnabled(new)\n",
+               "                FeedHelper.setEnabled(new)\n"
+               "                desu.inugram.helpers.dialogs.MainTabsHelper.setEnabled(desu.inugram.helpers.menu.MainTabsMenuConfig.Item.FEED.index, new)\n",
+               "tab enable")
+          edit(st,
+               "        private val TOGGLE_NEWEST_ON_TOP = InuUtils.generateId()\n",
+               "        private val TOGGLE_NEWEST_ON_TOP = InuUtils.generateId()\n        private val TOGGLE_CARDS = InuUtils.generateId()\n",
+               "settings id")
+
+          # ---- strings
+          STR = {
+           "values": {
+            "InuFeedAddChannel": "Add public channel",
+            "InuFeedAddChannelHint": "Enter the username of a public channel. Its posts will show in your Feed even if you have not joined it.",
+            "InuFeedChannelAdded": "%1$s added to Feed",
+            "InuFeedChannelNotFound": "No public channel found with this username",
+            "InuFeedAlreadyAdded": "This channel is already in your Feed",
+            "InuFeedAlreadyMember": "You are already subscribed to this channel",
+            "InuFeedRemoveExtra": "Remove from Feed",
+            "InuFeedOpenPost": "Open in channel",
+            "InuFeedSaveMessage": "Save Message",
+            "InuFeedCopyLink": "Copy link",
+            "InuFeedTextPost": "Text post",
+            "InuFeedAudio": "Audio",
+            "InuFeedPoll": "Poll",
+            "InuFeedAll": "All",
+            "InuFeedCardView": "Card view",
+            "InuFeedCardViewInfo": "Show posts as cards. Tap a photo, video or GIF to open it right there; tap anywhere else on the card to open the channel.",
+           },
+           "values-fa": {
+            "InuFeedAddChannel": "افزودن کانال عمومی",
+            "InuFeedAddChannelHint": "یوزرنیم یک کانال عمومی را وارد کنید. پست‌های آن در فید نمایش داده می‌شود، حتی اگر عضو آن نباشید.",
+            "InuFeedChannelAdded": "%1$s به فید اضافه شد",
+            "InuFeedChannelNotFound": "کانال عمومی‌ای با این یوزرنیم پیدا نشد",
+            "InuFeedAlreadyAdded": "این کانال از قبل در فید شما هست",
+            "InuFeedAlreadyMember": "شما از قبل عضو این کانال هستید",
+            "InuFeedRemoveExtra": "حذف از فید",
+            "InuFeedOpenPost": "باز کردن در کانال",
+            "InuFeedSaveMessage": "ذخیره پیام",
+            "InuFeedCopyLink": "کپی لینک",
+            "InuFeedTextPost": "پست متنی",
+            "InuFeedAudio": "صوت",
+            "InuFeedPoll": "نظرسنجی",
+            "InuFeedAll": "همه",
+            "InuFeedCardView": "نمای کارتی",
+            "InuFeedCardViewInfo": "نمایش پست‌ها به‌صورت کارت. با لمس عکس، ویدیو یا گیف همان‌جا باز می‌شود؛ با لمس هر جای دیگر کارت، کانال باز می‌شود.",
+           },
+          }
+          for d, table in STR.items():
+              p = "src/res/%s/strings_inu.xml" % d
+              if not os.path.isfile(p):
+                  print("skip " + p)
+                  continue
+              s = rd(p)
+              if s.count("</resources>") != 1:
+                  die(p + ": </resources> not found once")
+              add = ""
+              for k, v in table.items():
+                  if ('name="%s"' % k) in s:
+                      continue
+                  add += '    <string name="%s">%s</string>\n' % (k, v.replace("'", "\\'"))
+              if add:
+                  wr(p, s.replace("</resources>", add + "</resources>"))
+
+          # ---- feature list
+          p = "FEATURES.md"
+          s = rd(p)
+          if "**feed cards**" not in s:
+              m = re.search(r"^- \*\*feed\*\*.*\n", s, re.M | re.I)
+              line = ("- **feed cards** — the feed shows channel posts as scrolling cards with a parallax effect; tapping a photo, video or GIF opens it in place, tapping the caption or edge opens the channel; "
+                      "long press to forward or save a message; add public channels you have not joined by username\n")
+              if m:
+                  wr(p, s[:m.end()] + line + s[m.end():])
+              else:
+                  wr(p, s.rstrip("\n") + "\n" + line)
+
+          # ---- stock hooks (worktree)
+          tab_old = "new desu.inugram.ui.feed.FeedActivity(desu.inugram.helpers.feed.FeedScope.Global.INSTANCE, true)"
+          tab_new = "desu.inugram.helpers.feed.FeedHelper.createTabFragment()"
+          menu_old = "new desu.inugram.ui.feed.FeedActivity()"
+          menu_new = "desu.inugram.helpers.feed.FeedHelper.createFragment()"
+          hits = {"tab": 0, "menu": 0}
+          for d, _, files in os.walk(os.path.join(WT, "TMessagesProj/src/main/java")):
+              for f in files:
+                  if not f.endswith(".java"):
+                      continue
+                  p = os.path.join(d, f)
+                  s = rd(p)
+                  if "ui.feed.FeedActivity" not in s:
+                      continue
+                  t = s.count(tab_old)
+                  m = s.count(menu_old)
+                  if t or m:
+                      s = s.replace(tab_old, tab_new).replace(menu_old, menu_new)
+                      wr(p, s)
+                      hits["tab"] += t
+                      hits["menu"] += m
+                      print("hooked %s (tab %d, menu %d)" % (f, t, m))
+          if hits["tab"] < 1:
+              already = False
+              for d, _, files in os.walk(os.path.join(WT, "TMessagesProj/src/main/java")):
+                  for f in files:
+                      if f.endswith(".java") and tab_new in rd(os.path.join(d, f)):
+                          already = True
+              if not already:
+                  die("no tab hook found in the worktree")
+          print("hooks: %r" % hits)
+
+          os.makedirs(".softgram", exist_ok=True)
+          wr(".softgram/18-feed-cards.done", "feed cards applied\n")
+          print("OK: feed cards applied")
+          PYEOF
+          python3 /tmp/apply_feed.py
+
+      - name: Export the stock hooks as a patch
+        if: steps.check.outputs.done != 'true'
+        run: |
+          cat > /tmp/export_feed.py <<'PYEOF'
+          import os, re, subprocess, sys, tempfile
+          WT = "worktree-pluginless"
+          def run(*a, env=None, check=True, cwd=None):
+              e = dict(os.environ)
+              if env: e.update(env)
+              r = subprocess.run(a, cwd=cwd or WT, env=e, capture_output=True, text=True)
+              if check and r.returncode != 0:
+                  print(r.stdout + r.stderr)
+                  sys.exit("command failed: " + " ".join(a))
+              return r.stdout.strip()
+          ident = {"GIT_AUTHOR_NAME": "softgram ci", "GIT_AUTHOR_EMAIL": "ci@softgram",
+                   "GIT_COMMITTER_NAME": "softgram ci", "GIT_COMMITTER_EMAIL": "ci@softgram"}
+          base_tree = open("/tmp/feed-base-tree").read().strip()
+          run("git", "add", "-u")
+          new_tree = run("git", "write-tree")
+          if new_tree == base_tree:
+              sys.exit("no stock changes were produced")
+          head = run("git", "rev-parse", "HEAD")
+          base = run("git", "commit-tree", base_tree, "-p", head, "-m", "base", env=ident)
+          new = run("git", "commit-tree", new_tree, "-p", base, "-m", "Feed: open the card feed from the tab and the menu.", env=ident)
+          out = tempfile.mkdtemp()
+          run("git", "format-patch", "--ignore-submodules=none", "--zero-commit", "--no-signature", "--subject-prefix=", "-1", new, "-o", out)
+          name = os.listdir(out)[0]
+          text = open(os.path.join(out, name), encoding="utf-8").read()
+          blocks = re.split(r"(?=^diff --git )", text, flags=re.M)
+          clean = "".join(b if "\nGIT binary patch" in b else re.sub(r"^index [0-9a-f]+\.\.[0-9a-f]+( \d+)?$", r"index 0000000..0000000\1", b, count=1, flags=re.M) for b in blocks)
+          if clean.count("diff --git") < 1 or "FeedHelper" not in clean:
+              print(clean)
+              sys.exit("unexpected patch content")
+          os.makedirs("patches/softgram", exist_ok=True)
+          target = "patches/softgram/feed-cards.patch"
+          with open(target, "w", encoding="utf-8", newline="") as f:
+              f.write(clean)
+          idx = "/tmp/feed-check-index"
+          if os.path.exists(idx): os.remove(idx)
+          chk = {"GIT_INDEX_FILE": idx}
+          run("git", "read-tree", base_tree, env=chk)
+          run("git", "apply", "--cached", "--check", os.path.abspath(target), env=chk)
+          series = [l for l in open("series", encoding="utf-8").read().split("\n") if l.strip()]
+          if "softgram/feed-cards.patch" not in series:
+              series.append("softgram/feed-cards.patch")
+          open("series", "w", encoding="utf-8").write("\n".join(series) + "\n")
+          print("OK: exported " + target)
+          PYEOF
+          python3 /tmp/export_feed.py
+          grep '^diff --git' patches/softgram/feed-cards.patch
+          grep '^[+-][^+-]' patches/softgram/feed-cards.patch
+
+      - name: Sanity check
+        if: steps.check.outputs.done != 'true'
+        run: |
+          for f in src/fork/ui/feed/FeedCardsActivity.kt src/fork/ui/feed/FeedCardsViews.kt patches/softgram/feed-cards.patch; do
+            [ -s "$f" ] || { echo "::error::missing $f"; exit 1; }
+          done
+          grep -q '^softgram/feed-cards.patch$' series || { echo "::error::series entry missing"; exit 1; }
+          grep -q 'InuFeedAddChannel' src/res/values/strings_inu.xml || { echo "::error::strings missing"; exit 1; }
+          grep -q 'FEED_CARDS' src/fork/InuConfig.kt || { echo "::error::config missing"; exit 1; }
+          grep -q 'createTabFragment' patches/softgram/feed-cards.patch || { echo "::error::tab hook missing"; exit 1; }
+          grep -q 'MainTabsHelper.setEnabled' src/fork/ui/settings/FeedExcludedChannelsSettingsActivity.kt || { echo "::error::tab fix missing"; exit 1; }
+          echo 'verified'
+
+      - name: Translation check (informational)
+        if: steps.check.outputs.done != 'true'
+        continue-on-error: true
+        run: bun run check-translations fa ru uk ar es it tr ja zh-rCN
+
+      - name: Commit and push
+        if: steps.check.outputs.done != 'true'
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 18: card feed with parallax, in-place media, forward and save, public channels"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
