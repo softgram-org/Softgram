@@ -1,0 +1,284 @@
+name: Soft Design 23 - Xray fix and self-test
+
+# Fixes the cases where an imported Xray config stays "Unavailable":
+#  - keeps the Xray core classes safe from R8 shrinking and renaming (release builds)
+#  - after an import, shows what works: the core itself, the server, and the local socks door Telegram uses
+# Includes everything from Soft Design 22, so 22 is not needed first. Afterwards run: Build APK.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/soft-design-23-xray-fix.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: soft-design
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Soft Design 22 part (skipped when already applied)
+        run: |
+          cat > /tmp/step22.py <<'PYEOF'
+          import os, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              os.makedirs(os.path.dirname(p) or ".", exist_ok=True)
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def fix(path, old, new):
+              s = rd(path)
+              c = s.count(old)
+              if c != 1:
+                  sys.exit("::error::found %d times (expected 1) in %s: %s" % (c, path, old[:100]))
+              wr(path, s.replace(old, new))
+
+          MARK = ".softgram/22-xray-diag.done"
+          P = "src/fork/helpers/proxy/xray/XrayManager.kt"
+          if not os.path.exists(P):
+              sys.exit("::error::XrayManager.kt not found, apply Soft Design 21 first")
+
+          if os.path.exists(MARK):
+              print("diagnostics already applied")
+          else:
+              fix(P, "    private var observing = false\n",
+                     "    private var observing = false\n    @Volatile private var announce = false\n")
+
+              fix(P, "        if (XrayLink.toOutbound(link) == null) return null\n        ensureObserver()\n",
+                     "        if (XrayLink.toOutbound(link) == null) return null\n        ensureObserver()\n        announce = true\n")
+
+              fix(P, "                val config = buildConfig(list) ?: return\n",
+                     "                val config = buildConfig(list)\n"
+                     "                if (config == null) {\n"
+                     "                    toast(\"Xray: no usable config\")\n"
+                     "                    return\n"
+                     "                }\n")
+
+              fix(P, "                c.startLoop(config, 0)\n                controller = c\n                runningKey = key\n            } catch (t: Throwable) {\n                FileLog.e(t)\n                controller = null\n                runningKey = \"\"\n            }\n",
+                     "                c.startLoop(config, 0)\n                controller = c\n                runningKey = key\n"
+                     "                if (announce) {\n"
+                     "                    announce = false\n"
+                     "                    toast(\"Xray core is running (\" + list.size + \" configs). \" + Libv2ray.checkVersionX())\n"
+                     "                }\n"
+                     "            } catch (t: Throwable) {\n                FileLog.e(t)\n                controller = null\n                runningKey = \"\"\n"
+                     "                announce = false\n"
+                     "                toast(\"Xray core failed: \" + t.javaClass.simpleName + \": \" + t.message)\n"
+                     "            }\n")
+
+              fix(P, "    private fun stopLocked() {\n",
+                     "    // entiny: short status messages while the xray integration is being tested\n"
+                     "    private fun toast(msg: String) {\n"
+                     "        AndroidUtilities.runOnUIThread {\n"
+                     "            android.widget.Toast.makeText(ApplicationLoader.applicationContext, msg, android.widget.Toast.LENGTH_LONG).show()\n"
+                     "        }\n"
+                     "    }\n\n"
+                     "    private fun stopLocked() {\n")
+
+              os.makedirs(".softgram", exist_ok=True)
+              wr(MARK, "xray diagnostics applied\n")
+              print("OK: Soft Design 22 applied")
+
+          # parser fixes found while testing real-world links: vmess links that carry a #name suffix, and JSON null fields
+          MARK2 = ".softgram/22b-vmess-fix.done"
+          L = "src/fork/helpers/proxy/xray/XrayLink.kt"
+          if os.path.exists(MARK2):
+              print("parser fix already applied")
+          else:
+              s = rd(L)
+              if s.count("j.optString(") < 5 or "private fun JSONObject.str" in s:
+                  sys.exit("::error::XrayLink.kt is not the expected version")
+              s = s.replace("j.optString(", "j.str(")
+              s = s.replace("JSONObject(b64(link.substring(8))).optString(\"ps\")", "JSONObject(b64(link.substring(8))).str(\"ps\")")
+              s = s.replace("    fun isXrayLink(line: String)", "    private fun JSONObject.str(k: String): String = if (isNull(k)) \"\" else optString(k)\n\n    fun isXrayLink(line: String)", 1)
+              s = s.replace("        var s = input.trim().replace('-', '+').replace('_', '/')\n", "        var s = input.substringBefore('#').trim().replace('-', '+').replace('_', '/')\n", 1)
+              if "optString(" in s.replace("else optString(k)", ""):
+                  sys.exit("::error::leftover optString call")
+              wr(L, s)
+              os.makedirs(".softgram", exist_ok=True)
+              wr(MARK2, "xray vmess parser fix applied\n")
+              print("parser fix applied")
+          PYEOF
+          python3 /tmp/step22.py
+
+      - name: Apply Soft Design 23
+        run: |
+          cat > /tmp/step23.py <<'PYEOF'
+          import os, sys
+
+          def rd(p):
+              with open(p, encoding="utf-8", newline="") as f:
+                  return f.read()
+
+          def wr(p, s):
+              os.makedirs(os.path.dirname(p) or ".", exist_ok=True)
+              with open(p, "w", encoding="utf-8", newline="") as f:
+                  f.write(s)
+
+          def fix(path, old, new):
+              s = rd(path)
+              c = s.count(old)
+              if c != 1:
+                  sys.exit("::error::found %d times (expected 1) in %s: %s" % (c, path, old[:100]))
+              wr(path, s.replace(old, new))
+
+          MARK = ".softgram/23-xray-fix.done"
+          if os.path.exists(MARK):
+              print("Already applied.")
+              sys.exit(0)
+
+          P = "src/fork/helpers/proxy/xray/XrayManager.kt"
+          for m in (".softgram/22-xray-diag.done", ".softgram/22b-vmess-fix.done"):
+              if not os.path.exists(m):
+                  sys.exit("::error::Soft Design 22 step did not run (" + m + ")")
+
+          SELFTEST = r'''    // entiny: one-time checks after an import, shows which part fails: the server, the local socks door, or the core itself
+              private fun selfTest(list: List<Entry>) {
+                  val e = list.firstOrNull() ?: return
+                  val t = Thread({
+                      val sb = StringBuilder()
+                      try {
+                          Thread.sleep(1500)
+                          val outbound = XrayLink.toOutbound(e.link)
+                          if (outbound != null) {
+                              outbound.put("tag", "proxy")
+                              val cfg = JSONObject()
+                                  .put("log", JSONObject().put("loglevel", "none"))
+                                  .put("outbounds", JSONArray().put(outbound))
+                                  .toString()
+                              val res = try {
+                                  Libv2ray.measureOutboundDelay(cfg, "https://cp.cloudflare.com/generate_204").toString() + " ms"
+                              } catch (t: Throwable) {
+                                  "failed: " + t.message
+                              }
+                              sb.append("Server test: ").append(res)
+                          }
+                      } catch (t: Throwable) {
+                          sb.append("Server test error: ").append(t.javaClass.simpleName)
+                      }
+                      sb.append("\n").append(localSocksTest(e))
+                      toast(sb.toString())
+                  }, "xray-selftest")
+                  t.isDaemon = true
+                  t.start()
+              }
+
+              // same steps Telegram does: socks5 with login, then a connect to a Telegram data center
+              private fun localSocksTest(e: Entry): String {
+                  return try {
+                      val started = System.nanoTime()
+                      Socket().use { s ->
+                          s.soTimeout = 15000
+                          s.connect(InetSocketAddress(LOCAL_HOST, e.port), 3000)
+                          val out = s.getOutputStream()
+                          val inp = s.getInputStream()
+                          out.write(byteArrayOf(5, 2, 0, 2))
+                          out.flush()
+                          val m = ByteArray(2)
+                          readFully(inp, m)
+                          if (m[0].toInt() != 5 || m[1].toInt() != 2) return "Local socks: unexpected method reply"
+                          val u = e.user.toByteArray()
+                          val p = e.pass.toByteArray()
+                          out.write(byteArrayOf(1, u.size.toByte()) + u + byteArrayOf(p.size.toByte()) + p)
+                          out.flush()
+                          val a = ByteArray(2)
+                          readFully(inp, a)
+                          if (a[1].toInt() != 0) return "Local socks: login rejected"
+                          out.write(byteArrayOf(5, 1, 0, 1, 149.toByte(), 154.toByte(), 167.toByte(), 51, 1, 187.toByte()))
+                          out.flush()
+                          val r = ByteArray(10)
+                          readFully(inp, r)
+                          if (r[1].toInt() != 0) "Local socks: connect refused (code " + r[1] + ")"
+                          else "Local socks: OK " + ((System.nanoTime() - started) / 1_000_000) + " ms"
+                      }
+                  } catch (t: Throwable) {
+                      "Local socks failed: " + t.javaClass.simpleName + " " + t.message
+                  }
+              }
+
+              private fun readFully(input: java.io.InputStream, b: ByteArray) {
+                  var n = 0
+                  while (n < b.size) {
+                      val r = input.read(b, n, b.size - n)
+                      if (r < 0) throw java.io.EOFException()
+                      n += r
+                  }
+              }
+
+          '''
+
+          fix(P, "import java.net.ServerSocket\n",
+                 "import java.net.InetSocketAddress\nimport java.net.ServerSocket\nimport java.net.Socket\n")
+          fix(P, "                    toast(\"Xray core is running (\" + list.size + \" configs). \" + Libv2ray.checkVersionX())\n",
+                 "                    toast(\"Xray core is running (\" + list.size + \" configs). \" + Libv2ray.checkVersionX())\n                    selfTest(list)\n")
+          fix(P, "    // entiny: short status messages while the xray integration is being tested\n",
+                 SELFTEST + "    // entiny: short status messages while the xray integration is being tested\n")
+
+          PATCH = r'''diff --git a/TMessagesProj/proguard-rules.pro b/TMessagesProj/proguard-rules.pro
+          index b6f14da..28f3404 100644
+          --- a/TMessagesProj/proguard-rules.pro
+          +++ b/TMessagesProj/proguard-rules.pro
+          @@ -113,4 +113,10 @@
+ 
+           # Use -keep to explicitly keep any other classes shrinking would remove
+           #-dontoptimize
+          -#-dontobfuscate
+          \ No newline at end of file
+          +#-dontobfuscate
+          +
+          +# entiny: xray core (gomobile) is called back from native code, names must stay as they are
+          +-keep class go.** { *; }
+          +-keep class libv2ray.** { *; }
+          +-dontwarn go.**
+          +-dontwarn libv2ray.**
+          '''
+          wr("patches/softgram/xray-proguard.patch", PATCH)
+          series = rd("series")
+          if "softgram/xray-proguard.patch" not in series.split("\n"):
+              if not series.endswith("\n"):
+                  series += "\n"
+              wr("series", series + "softgram/xray-proguard.patch\n")
+
+          os.makedirs(".softgram", exist_ok=True)
+          wr(MARK, "xray fix applied\n")
+          print("OK: Soft Design 23 applied")
+          PYEOF
+          python3 /tmp/step23.py
+
+      - name: Sanity check
+        run: |
+          grep -q 'Xray core is running' src/fork/helpers/proxy/xray/XrayManager.kt || { echo "::error::status message missing"; exit 1; }
+          grep -q 'fun selfTest' src/fork/helpers/proxy/xray/XrayManager.kt || { echo "::error::self-test missing"; exit 1; }
+          grep -q 'private fun JSONObject.str' src/fork/helpers/proxy/xray/XrayLink.kt || { echo "::error::parser fix missing"; exit 1; }
+          test -s patches/softgram/xray-proguard.patch || { echo "::error::proguard patch missing"; exit 1; }
+          grep -q '^softgram/xray-proguard.patch$' series || { echo "::error::series entry missing"; exit 1; }
+          echo 'verified'
+
+      - name: Commit and push
+        run: |
+          git config user.name  'softgram ci'
+          git config user.email 'ci@softgram'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to change (already applied).'
+            exit 0
+          fi
+          git commit -q -m "Soft Design 23: xray keep rules and self-test"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo 'Pushed. Now run: Build APK'
