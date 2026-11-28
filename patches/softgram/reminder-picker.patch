@@ -1,0 +1,29 @@
+diff --git a/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java b/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java
+index b20f86e..3e5d4f1 100644
+--- a/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java
++++ b/TMessagesProj/src/main/java/org/telegram/ui/Components/AlertsCreator.java
+@@ -4308,4 +4308,7 @@ public class AlertsCreator {
+     }
+ 
++    // softgram: an extra view (the reminder note) shown under the title of the schedule picker
++    public static View inu_extraView;
++
+     public static class ScheduleDatePickerColors {
+ 
+@@ -4403,5 +4406,5 @@ public class AlertsCreator {
+         long selfUserId = UserConfig.getInstance(UserConfig.selectedAccount).getClientUserId();
+ 
+-        BottomSheet.Builder builder = new BottomSheet.Builder(context, false, resourcesProvider);
++        BottomSheet.Builder builder = new BottomSheet.Builder(context, inu_extraView != null, resourcesProvider);
+         builder.setApplyBottomPadding(false);
+ 
+@@ -4491,4 +4494,9 @@ public class AlertsCreator {
+         titleView.setOnTouchListener((v, event) -> true);
+ 
++        if (inu_extraView != null) {
++            container.addView(inu_extraView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 22, 2, 22, 6));
++            inu_extraView = null;
++        }
++
+         final boolean[] notify = new boolean[] { true };
+         ActionBarMenuItem optionsButton = null;

@@ -701,3 +701,5 @@ softgram/soft-input-bar-icons.patch
 softgram/academic-panel.patch
 softgram/welcome-screen.patch
 softgram/xray-core.patch
+softgram/reminder-picker.patch
+softgram/reminder-manifest.patch

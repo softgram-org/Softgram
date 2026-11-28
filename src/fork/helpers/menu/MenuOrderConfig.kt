@@ -458,6 +458,7 @@ class MessageMenuConfig(key: String) : MenuOrderConfig<MessageMenuConfig.Item>(k
             R.drawable.msg_download
         ),
         FORWARD("forward", listOf(ChatActivity.OPTION_FORWARD), R.string.Forward, R.drawable.msg_forward),
+        ADD_TO_CALENDAR("add_to_calendar", listOf(ChatHelper.OPTION_ADD_TO_CALENDAR), R.string.InuAddToCalendar, R.drawable.softgram_academic_calendar),
         FORWARD_NO_QUOTE("forward_no_quote", listOf(ChatHelper.OPTION_FORWARD_NO_QUOTE), R.string.InuForwardNoQuote, R.drawable.msg_forward_noquote),
         FORWARD_PRO("forward_pro", listOf(ChatHelper.OPTION_FORWARD_PRO), R.string.InuForwardPro, R.drawable.msg_forward),
         REPEAT("repeat", listOf(ChatHelper.OPTION_REPEAT), R.string.InuRepeat, R.drawable.msg_retry),

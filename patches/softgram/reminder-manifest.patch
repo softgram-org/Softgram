@@ -1,0 +1,22 @@
+diff --git a/TMessagesProj/src/main/AndroidManifest.xml b/TMessagesProj/src/main/AndroidManifest.xml
+index 172ced1..27d5af7 100644
+--- a/TMessagesProj/src/main/AndroidManifest.xml
++++ b/TMessagesProj/src/main/AndroidManifest.xml
+@@ -53,4 +53,6 @@
+     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
++    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
++    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
+     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+@@ -627,4 +629,10 @@
+ 
+         <receiver android:name=".NotificationDismissReceiver" android:exported="false"/>
++        <receiver android:name="desu.inugram.helpers.academics.ReminderReceiver" android:exported="false"/>
++        <receiver android:name="desu.inugram.helpers.academics.ReminderBootReceiver" android:exported="true">
++            <intent-filter>
++                <action android:name="android.intent.action.BOOT_COMPLETED" />
++            </intent-filter>
++        </receiver>
+ 
+         <receiver android:name="desu.inugram.helpers.update.ApkInstaller$UpdateReceiver" android:exported="false">

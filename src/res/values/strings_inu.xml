@@ -2111,6 +2111,14 @@
     <string name="InuAcademicResetName">Reset name</string>
     <string name="InuAcademicRemoveFromFolder">Remove from folder</string>
     <string name="InuAcademicNoChats">No groups or channels found.</string>
+    <string name="InuAddToCalendar">Add to calendar</string>
+    <string name="InuReminderNoteHint">Note for the reminder</string>
+    <string name="InuReminderSet">Reminder set for %1$s</string>
+    <string name="InuReminderTitle">Reminder</string>
+    <string name="InuReminderNoNote">Tap to open the message</string>
+    <string name="InuReminderChannel">Reminders</string>
+    <string name="InuReminderDismiss">Dismiss and archive</string>
+    <string name="InuReminderSnooze">Remind again in 2 minutes</string>
     <string name="InuTabGroups" translatable="false">Groups</string>
     <string name="InuTabChannels" translatable="false">Channels</string>
     <string name="InuTabFiles" translatable="false">Files</string>

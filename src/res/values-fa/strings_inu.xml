@@ -1086,6 +1086,14 @@
     <string name="InuAcademicResetName">بازگرداندن نام</string>
     <string name="InuAcademicRemoveFromFolder">حذف از فولدر</string>
     <string name="InuAcademicNoChats">گروه یا کانالی پیدا نشد.</string>
+    <string name="InuAddToCalendar">افزودن به تقویم</string>
+    <string name="InuReminderNoteHint">یادداشت برای یادآور</string>
+    <string name="InuReminderSet">یادآور برای %1$s تنظیم شد</string>
+    <string name="InuReminderTitle">یادآور</string>
+    <string name="InuReminderNoNote">برای باز کردن پیام بزنید</string>
+    <string name="InuReminderChannel">یادآورها</string>
+    <string name="InuReminderDismiss">بستن و بایگانی</string>
+    <string name="InuReminderSnooze">دو دقیقه دیگر یادآوری کن</string>
     <string name="InuFmtOther">سایر</string>
     <string name="InuAcademicLoading">در حال بارگذاری…</string>
     <string name="InuAcademicEmpty">هنوز چیزی اینجا نیست.</string>

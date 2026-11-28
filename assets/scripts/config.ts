@@ -129,6 +129,7 @@ export const forkSyncFiles: ForkSyncFile[] = [
   res('drawable-xxhdpi/*', 'drawable-xxhdpi'),
   res('drawable/solar/*', 'drawable'),
   res('drawable/*.xml', 'drawable'),
+  res('layout/*.xml', 'layout'),
   // assets
   { source: 'src/res/assets/icon_packs', target: 'TMessagesProj/src/main/assets/icon_packs', directory: true },
   { source: 'src/res/assets/*', target: 'TMessagesProj/src/main/assets' },

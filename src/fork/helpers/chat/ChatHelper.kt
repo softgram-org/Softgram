@@ -189,6 +189,7 @@ object ChatHelper {
     const val OPTION_PLUGIN_ACTIONS = 533
     const val OPTION_LOCAL_EDIT = 534
     const val OPTION_LOCAL_EDIT_RESET = 535
+    const val OPTION_ADD_TO_CALENDAR = 541
     const val OPTION_SAVE_VOICE_TO_DOWNLOADS = 536
     const val OPTION_BOOKMARK = 537
 
@@ -556,6 +557,12 @@ object ChatHelper {
             items.add(LocaleController.getString(R.string.InuSetReminder))
             options.add(OPTION_SET_REMINDER)
             icons.add(R.drawable.msg_notifications)
+        }
+
+        if (isMenuItemEnabled(MessageMenuConfig.Item.ADD_TO_CALENDAR)) {
+            items.add(LocaleController.getString(R.string.InuAddToCalendar))
+            options.add(OPTION_ADD_TO_CALENDAR)
+            icons.add(R.drawable.softgram_academic_calendar)
         }
 
         if (isMenuItemEnabled(MessageMenuConfig.Item.BOOKMARK) && selectedObject.id > 0) {
@@ -1132,6 +1139,8 @@ object ChatHelper {
                 if (selectedObjectGroup != null) messages.addAll(selectedObjectGroup.messages) else messages.add(selectedObject)
                 setReminder(activity, messages)
             }
+
+            OPTION_ADD_TO_CALENDAR -> desu.inugram.helpers.academics.ReminderSheet.show(activity, selectedObject)
 
             OPTION_BOOKMARK -> {
                 val messages = selectedObjectGroup?.messages ?: listOf(selectedObject)
